@@ -1,0 +1,27 @@
+# SAMPLE CONFIGURATION
+# assumes in order
+
+#constant value
+_:
+    1 #size
+    < #value
+
+ACCELXMEAS: #measurement name
+    4 #size
+    double #type
+
+ACCELYMEAS:
+    4
+    double
+
+ACCELZMEAS:
+    4
+    double
+
+# checksum
+checksum:
+    2 # size of checksum
+
+_:
+    1
+    >
