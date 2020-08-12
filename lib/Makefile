@@ -1,9 +1,9 @@
 ### Make libraries in subdirs ###
 
 all:
-	$(MAKE) -C mkshm all
-	$(MAKE) -C loadconfig all
+	$(MAKE) -C ldms all
+	$(MAKE) -C vcm all
 
 clean:
-	$(MAKE) -C mkshm clean
-	$(MAKE) -C loadconfig clean
+	$(MAKE) -C ldms clean
+	$(MAKE) -C vcm clean
