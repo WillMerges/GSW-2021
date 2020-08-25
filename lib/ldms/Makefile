@@ -5,20 +5,20 @@ TARGET = libldm.so
 CXX = g++
 CC = g++
 
-OPTIONS += 
+OPTIONS +=
 
-CFLAGS = -I./include -Wall -Wextra -Wpedantic -fpic
-CPPFLAGS = -I./include -Wall -Wextra -Wpedantic -fpic
+CFLAGS = -I../../common -I./include -Wall -Wextra -Wpedantic -fpic
+CPPFLAGS = -I../../common -I./include -Wall -Wextra -Wpedantic -fpic
 LDFLAGS = -shared
 
-LIBS = 
+LIBS =
 
 CPP_FILES := $(wildcard src/*.cpp)
 C_FILES := $(wildcard src/*.c)
 
 OBJS := $(CPP_FILES:.cpp=.o) $(C_FILES:.c=.o)
 
-.PHONY: all clean 
+.PHONY: all clean
 
 all: $(TARGET)
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS)

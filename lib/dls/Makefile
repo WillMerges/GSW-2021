@@ -7,8 +7,8 @@ CC = g++
 
 OPTIONS += 
 
-CFLAGS = -I./include -Wall -Wextra -Wpedantic -fpic
-CPPFLAGS = -I./include -Wall -Wextra -Wpedantic -fpic
+CFLAGS = -I../../common -I./include -Wall -Wextra -Wpedantic -fpic -lrt
+CPPFLAGS = -I../../common -I./include -Wall -Wextra -Wpedantic -fpic -lrt
 LDFLAGS = -shared
 
 LIBS = 
