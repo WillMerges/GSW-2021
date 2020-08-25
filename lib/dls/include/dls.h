@@ -8,7 +8,7 @@ namespace dls {
 
     static const char* MQUEUE_NAME = "/log_queue"; // TODO change to some tmp location later
 
-    class DLS {
+    class MsgLogger {
     public:
         DLS(std::string class_name, std::string func_name);
         DLS(std::string func_name);
