@@ -10,9 +10,9 @@ namespace dls {
 
     class MsgLogger {
     public:
-        DLS(std::string class_name, std::string func_name);
-        DLS(std::string func_name);
-        DLS();
+        MsgLogger(std::string class_name, std::string func_name);
+        MsgLogger(std::string func_name);
+        MsgLogger();
         RetType log_message(std::string msg);
     private:
         std::string class_name;

@@ -3,18 +3,18 @@
 
 using namespace dls;
 
-MsgLogger::DLS(): class_name(""), func_name(""){}
+MsgLogger::MsgLogger(): class_name(""), func_name(""){}
 
-MsgLogger::DLS(std::string class_name, std::string func_name) {
+MsgLogger::MsgLogger(std::string class_name, std::string func_name) {
     this->class_name = class_name;
     this->func_name = func_name;
 }
 
-MsgLogger::DLS(std::string func_name): class_name("") {
+MsgLogger::MsgLogger(std::string func_name): class_name("") {
     this->func_name = func_name;
 }
 
-RetType MsgLogger::log_message(std::string msg) {
+RetType MsgLogger::log_message(std::string msg) { //TODO maybe remove this from the class and make it a normal function so the telemtry data logger can use it
     // TODO add timestamp? (maybe let the writing process do this)
     std::string new_msg = class_name + ", " + func_name + ": " + msg;
 
