@@ -5,8 +5,8 @@ CC = g++
 
 OPTIONS += 
 
-CFLAGS = -I./include -Wall -Wextra -Wpedantic
-CPPFLAGS = -I./include -Wall -Wextra -Wpedantic
+CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
+CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
 LDFLAGS =
 
 LIBS = 

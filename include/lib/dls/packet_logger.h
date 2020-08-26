@@ -7,8 +7,8 @@
 #ifndef PACKET_LOGGER_H
 #define PACKET_LOGGER_H
 
-#include "types.h"
-#include "logger.h"
+#include "common/types.h"
+#include "lib/dls/logger.h"
 #include <string>
 
 namespace dls {

@@ -7,8 +7,8 @@ CC = g++
 
 OPTIONS += 
 
-CFLAGS = -I../../../lib -Wall -Wextra -Wpedantic
-CPPFLAGS = -I../../../lib -Wall -Wextra -Wpedantic
+CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
+CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
 LDFLAGS =
 
 LIBS = 
@@ -27,5 +27,4 @@ $(TARGET): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS)
 
 clean:
-	rm src/*.o $(TARGET)
-	rm $TARGET
+	rm *.o $(TARGET)

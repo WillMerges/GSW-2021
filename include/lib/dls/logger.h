@@ -5,7 +5,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include "types.h"
+#include "common/types.h"
 #include <string>
 #include <mqueue.h>
 

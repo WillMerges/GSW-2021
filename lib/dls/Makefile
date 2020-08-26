@@ -5,20 +5,20 @@ TARGET = libdls.so
 CXX = g++
 CC = g++
 
-OPTIONS += 
+OPTIONS +=
 
-CFLAGS = -I../../common -I./include -Wall -Wextra -Wpedantic -fpic -lrt
-CPPFLAGS = -I../../common -I./include -Wall -Wextra -Wpedantic -fpic -lrt
+CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -fpic -lrt
+CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -fpic -lrt
 LDFLAGS = -shared
 
-LIBS = 
+LIBS =
 
 CPP_FILES := $(wildcard src/*.cpp)
 C_FILES := $(wildcard src/*.c)
 
 OBJS := $(CPP_FILES:.cpp=.o) $(C_FILES:.c=.o)
 
-.PHONY: all clean 
+.PHONY: all clean
 
 all: $(TARGET)
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS)
