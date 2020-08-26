@@ -1,0 +1,15 @@
+#!/bin/bash
+
+# ignore failed commands
+set +e
+
+# TODO let operator select this (make a tool to change eventually)
+ln -s ../data/blackout/config ../data/config
+
+chmod +x ../startup/start_*
+chmod +x ../startup/mkshm
+
+mkdir ../log
+
+chmod +x getdir.py
+. setenv
