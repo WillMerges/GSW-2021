@@ -1,4 +1,4 @@
-# builds Launch Data Measurement System library
+# builds shared memory tools library
 
 TARGET = libldm.so
 

@@ -4,4 +4,6 @@
 ln -s ../data/blackout/config ../data/config
 
 chmod +x ../startup/start_*
+chmod +x ../startup/mkshm
+
 mkdir ../log

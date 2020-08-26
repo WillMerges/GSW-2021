@@ -1,3 +1,7 @@
-maybe move mkshm to startup
-create an access shm lib
-rename lib/loadconfig to something better
+DONE - created mkshm script in startup - maybe move mkshm to startup
+DONE - ldms/shm - create an access shm lib
+DONE - lib/shm -rename lib/loadconfig to something better
+
+add in Makefile to copy .so libraries to lib/bin so they can be easier linked with processes in proc
+create a mkshm tool in proc
+make includes easier to manage (move to includes dir instead of next to src)
