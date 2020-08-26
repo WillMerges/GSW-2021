@@ -3,29 +3,27 @@
 TARGET = dlp
 
 CXX = g++
-CC = g++
+CC = gcc
 
-OPTIONS += 
+OPTIONS +=
 
 CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
 CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
-LDFLAGS =
+LDFLAGS = -L$(GSW_HOME)/lib/dls/ -Wl,-rpath=$(GSW_HOME)/lib/dls/
 
-LIBS = 
+LIBS = -ldls -lrt
 
 CPP_FILES := $(wildcard src/*.cpp)
 C_FILES := $(wildcard src/*.c)
 
 OBJS := $(CPP_FILES:.cpp=.o) $(C_FILES:.c=.o)
 
-.PHONY: all clean 
+.PHONY: all clean
 
 all: $(TARGET)
-	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS)
 
 $(TARGET): $(OBJS)
-	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS)
+	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LIBS)
 
 clean:
-	rm src/*.o $(TARGET)
-	rm $TARGET
+	-rm src/*.o $(TARGET)

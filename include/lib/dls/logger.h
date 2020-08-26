@@ -10,6 +10,9 @@
 #include <mqueue.h>
 
 namespace dls {
+
+    static const size_t MAX_Q_SIZE = 2048;
+
     class Logger {
     public:
         Logger(std::string queue_name);

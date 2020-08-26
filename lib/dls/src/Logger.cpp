@@ -33,6 +33,10 @@ RetType Logger::Close() {
 }
 
 RetType Logger::queue_msg(const char* buffer, size_t size) {
+    if(size > MAX_Q_SIZE) {
+        return FAILURE;
+    }
+
     if(0 > mq_send(mq, buffer, size, 0)) {
         // no sense in logging this because it is the logger!
         return FAILURE;
