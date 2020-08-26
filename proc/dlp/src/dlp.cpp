@@ -7,6 +7,15 @@
 
 using namespace dls;
 
+#define CHECK(x) \
+    do { \
+        if (!(x)) { \
+            fprintf(stderr, "%s:%d: ", __func__, __LINE__); \
+            perror(#x); \
+            exit(-1); \
+        } \
+    } while (0) \
+
 void read_queue(const char* queue_name) {
     mqd_t mq;
     struct mq_attr attr;
@@ -18,14 +27,16 @@ void read_queue(const char* queue_name) {
     attr.mq_curmsgs = 0;
 
     mq = mq_open(queue_name, O_CREAT | O_RDONLY, 0644, &attr);
+    CHECK((mqd_t)-1 != mq);
     while(1) {
         ssize_t read;
         read = mq_receive(mq, buffer, MAX_Q_SIZE, NULL);
+        printf("read: %zu\n", read);
         buffer[read] = '\0';
         printf("%s\n", buffer);
     }
 }
 
 int main(int argc, char* argv[]) {
-    read_queue("/home/will/test_q");
+    read_queue(MESSAGE_MQUEUE_NAME);
 }

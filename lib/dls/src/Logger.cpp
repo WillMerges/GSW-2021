@@ -37,6 +37,10 @@ RetType Logger::queue_msg(const char* buffer, size_t size) {
         return FAILURE;
     }
 
+    if(!open) {
+        return FAILURE;
+    }
+
     if(0 > mq_send(mq, buffer, size, 0)) {
         // no sense in logging this because it is the logger!
         return FAILURE;
