@@ -1,5 +1,5 @@
 /**
-*   Queues messages to the telemetry packet queue.
+*   Queues messages to the telemetry packet queue. Queues are POSIX mqueues.
 *   The message writer process will read the queue and write the packets to
 *   the correcty log files atomically.
 **/
@@ -13,7 +13,7 @@
 
 namespace dls {
 
-    static const char* TELEMETRY_MQUEUE_NAME = "/telemetry_queue";
+    static const char* TELEMETRY_MQUEUE_NAME = "/telemetry_queue"; // TODO maybe move this to the message writer process header
 
     class PacketLogger : public Logger {
     public:
