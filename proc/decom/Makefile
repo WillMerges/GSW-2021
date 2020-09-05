@@ -19,7 +19,7 @@ OBJS := $(CPP_FILES:.cpp=.o) $(C_FILES:.c=.o)
 .PHONY: all clean 
 
 all: $(TARGET)
-	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS)
+	chmod +x launch 
 
 $(TARGET): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS)

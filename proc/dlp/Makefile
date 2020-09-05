@@ -11,7 +11,7 @@ CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
 CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
 LDFLAGS = -L$(GSW_HOME)/lib/dls/ -Wl,-rpath=$(GSW_HOME)/lib/dls/
 
-LIBS = -ldls -lrt
+LIBS = -pthread -ldls -lrt
 
 CPP_FILES := $(wildcard src/*.cpp)
 C_FILES := $(wildcard src/*.c)

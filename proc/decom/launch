@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# TODO figure out niceness
+nice -n18 ./decom
