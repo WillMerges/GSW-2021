@@ -31,7 +31,7 @@ namespace ldms {
         // TODO
     }
 
-    RetType detroy_shm() {
+    RetType destroy_shm() {
         // TODO
     }
 
