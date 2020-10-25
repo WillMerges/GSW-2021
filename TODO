@@ -9,7 +9,7 @@ add in Makefile to copy .so libraries to lib/bin so they can be easier linked wi
 
 create a mkshm tool in proc
 
-make includes easier to manage (move to includes dir instead of next to src)
+DONE make includes easier to manage (move to includes dir instead of next to src)
 
 make build shell script so bash variables can be set (base directory, for where to put bin, queues, and other temp data)
 

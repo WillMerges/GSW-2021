@@ -48,6 +48,7 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
 
     mq = mq_open(queue_name, O_CREAT | O_RDONLY, 0644, &attr);
     CHECK((mqd_t)-1 != mq);
+
     while(1) {
         ssize_t read;
         read = mq_receive(mq, buffer, MAX_Q_SIZE, NULL);
@@ -58,18 +59,22 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
         if(verbose) {
             printf("logging message: %s\n", buffer);
         }
+
         if(binary) {
             file << buffer;
         } else {
             file << buffer << '\n';
         }
+
+        fflush(stdout);
+        file.flush();
     }
 }
 
-// thread this
 int main(int argc, char* argv[]) {
     if(argc > 1) {
-        if(strcmp(argv[1], "-v") != 0) {
+        if(!strcmp(argv[1], "-v")) {
+            printf("Running in verbose mode.\n\n");
             verbose = true;
         }
     }
@@ -84,11 +89,14 @@ int main(int argc, char* argv[]) {
         gsw_home.assign(env, size);
     }
 
-    std::string msg_file = gsw_home + "log/system.log";
-    std::string tel_file = gsw_home + "log/telemetry.log";
+    std::string msg_file = gsw_home + "/log/system.log";
+    std::string tel_file = gsw_home + "/log/telemetry.log";
 
     std::thread m_thread(read_queue, MESSAGE_MQUEUE_NAME, msg_file.c_str(), false);
     std::thread t_thread(read_queue, TELEMETRY_MQUEUE_NAME, tel_file.c_str(), true);
-    //read_queue(MESSAGE_MQUEUE_NAME, msg_file.c_str());
+    //read_queue(MESSAGE_MQUEUE_NAME, msg_file.c_str(), false);
     //read_queue(TELEMETRY_MQUEUE_NAME, tel_file.c_str());
+
+    m_thread.join();
+    t_thread.join();
 }
