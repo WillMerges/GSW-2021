@@ -9,7 +9,7 @@ OPTIONS +=
 
 CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
 CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
-LDFLAGS = -L$(GSW_HOME)/lib/dls/ -Wl,-rpath=$(GSW_HOME)/lib/dls/
+LDFLAGS = -L$(GSW_HOME)/lib/bin/ -Wl,-rpath=$(GSW_HOME)/lib/bin/
 
 LIBS = -pthread -ldls -lrt
 

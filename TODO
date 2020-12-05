@@ -4,13 +4,12 @@ DONE - ldms/shm - create an access shm lib
 
 DONE - lib/shm -rename lib/loadconfig to something better
 
-
-add in Makefile to copy .so libraries to lib/bin so they can be easier linked with processes in proc
+DONE add in Makefile to copy .so libraries to lib/bin so they can be easier linked with processes in proc
 
 create a mkshm tool in proc
 
 DONE make includes easier to manage (move to includes dir instead of next to src)
 
-make build shell script so bash variables can be set (base directory, for where to put bin, queues, and other temp data)
+DONE - install/setenv.sh - make build shell script so bash variables can be set (base directory, for where to put bin, queues, and other temp data)
 
-update documentation on confluence for new mqueue system logging
+DONE update documentation on confluence for new mqueue system logging

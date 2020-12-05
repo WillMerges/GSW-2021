@@ -1,13 +1,20 @@
 ### Make libraries in subdirs ###
 
-### TODO copy libraries to bin folder
+all: build copy
 
-all:
+build:
 	-$(MAKE) -C ldms all
 	-$(MAKE) -C vcm all
 	-$(MAKE) -C dls all
+
+copy:
+	rm -rf bin || true #throw out the error
+	mkdir bin
+	-cp */*.so bin/
+
 
 clean:
 	-$(MAKE) -C ldms clean
 	-$(MAKE) -C vcm clean
 	-$(MAKE) -C dls clean
+	rm -r bin
