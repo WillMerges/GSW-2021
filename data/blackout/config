@@ -5,7 +5,7 @@
 
 # these need to be set at some point!
 protocol = udp
-#src = 127.0.0.1
+src = 127.0.0.1
 port = 1234
 
 # measurements look like [measurement name] [size in bytes]
