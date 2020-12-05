@@ -1,5 +1,5 @@
 /********************************************************************
-*  Name: shm.c
+*  Name: shm.h
 *
 *  Purpose: Header for utility functions for creating/modifying
 *           shared memory.
