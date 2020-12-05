@@ -13,7 +13,7 @@
 
 namespace dls {
 
-    static const char* TELEMETRY_MQUEUE_NAME = "/telemetry_queue"; // TODO maybe move this to the message writer process header
+    static const char* const TELEMETRY_MQUEUE_NAME = "/telemetry_queue";
 
     class PacketLogger : public Logger {
     public:

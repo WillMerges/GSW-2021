@@ -1,5 +1,6 @@
 #include "lib/dls/packet_logger.h"
 #include <string.h>
+#include <string>
 
 using namespace dls;
 
@@ -9,12 +10,14 @@ PacketLogger::PacketLogger(std::string device_name):
 }
 
 RetType PacketLogger::log_packet(unsigned char* buffer, size_t size) {
-    // TODO add timestamp? (maybe let the writing process do this)
-    std::string preamble = device_name + ">";
-    size_t out_size = size + preamble.size();
+    std::string preamble = device_name + "<";
+
+    size_t out_size = size + preamble.size() + 1;
     char* out_buff = new char[out_size];
-    memcpy(out_buff, buffer, size);
-    memcpy(out_buff+size, preamble.c_str(), preamble.size());
+
+    memcpy(out_buff, preamble.c_str(), preamble.size());
+    memcpy(out_buff+preamble.size(), buffer, size);
+    out_buff[out_size - 1] = '>';
 
     return queue_msg(out_buff, out_size);
 }

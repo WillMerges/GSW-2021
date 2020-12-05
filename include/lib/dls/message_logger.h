@@ -12,7 +12,7 @@
 
 namespace dls {
 
-    static const char* MESSAGE_MQUEUE_NAME = "/log_queue"; // TODO maybe move this to the message writer process header
+    static const char* const MESSAGE_MQUEUE_NAME = "/log_queue";
 
     class MsgLogger : public Logger {
     public:

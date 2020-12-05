@@ -1,4 +1,5 @@
 #include "lib/dls/message_logger.h"
+#include <string>
 
 using namespace dls;
 
@@ -17,8 +18,21 @@ MsgLogger::MsgLogger(std::string func_name): Logger(MESSAGE_MQUEUE_NAME),
 }
 
 RetType MsgLogger::log_message(std::string msg) {
-    // TODO add timestamp? (maybe let the writing process do this)
-    std::string new_msg = class_name + ", " + func_name + ": " + msg;
+    std::string new_msg = "";
+    if(class_name != "") {
+        new_msg += "("+class_name;
+    }
+    if(func_name != "") {
+        if(new_msg != "") {
+            new_msg += ", ";
+        }
+        new_msg += func_name;
+    }
+    if(new_msg != "") {
+        new_msg += ")";
+    }
 
-    return queue_msg(msg.c_str(), msg.size());
+    new_msg += msg;
+
+    return queue_msg(new_msg.c_str(), new_msg.size());
 }

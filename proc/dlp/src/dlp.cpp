@@ -9,10 +9,12 @@
 #include <thread>
 #include <iostream>
 #include <fstream>
+#include <sys/time.h>
 
 using namespace dls;
 
 bool verbose = false;
+struct timeval curr_time;
 
 // from stack overflow https://stackoverflow.com/questions/3056307/how-do-i-use-mqueue-in-a-c-program-on-a-linux-based-system
 #define CHECK(x) \
@@ -49,8 +51,11 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
     mq = mq_open(queue_name, O_CREAT | O_RDONLY, 0644, &attr);
     CHECK((mqd_t)-1 != mq);
 
+    ssize_t read = -1;
     while(1) {
-        ssize_t read;
+        gettimeofday(&curr_time, NULL);
+        std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
+
         read = mq_receive(mq, buffer, MAX_Q_SIZE, NULL);
         if(read == -1) {
             printf("Read failed from MQueue: %s\n", queue_name);
@@ -61,9 +66,9 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
         }
 
         if(binary) {
-            file << buffer;
+            file << timestamp << buffer;
         } else {
-            file << buffer << '\n';
+            file << timestamp << " " << buffer << '\n';
         }
 
         fflush(stdout);
@@ -81,7 +86,7 @@ int main(int argc, char* argv[]) {
     char* env = getenv("GSW_HOME");
     std::string gsw_home;
     if(env == NULL) {
-        printf("Could not find GSW_HOME environment variable!\ns \
+        printf("Could not find GSW_HOME environment variable!\n \
                 Did you run '. setenv'?\n");
         exit(-1);
     } else {

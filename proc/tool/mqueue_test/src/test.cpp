@@ -14,5 +14,7 @@ int main(int argc, char* argv[]) {
         printf("err opening\n");
         exit(-1);
     }
-    logger.log_message("test");
+    while(1) {
+        logger.log_message("test");
+    }
 }
