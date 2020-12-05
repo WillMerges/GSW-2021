@@ -8,7 +8,7 @@ build:
 	-$(MAKE) -C dls all
 
 copy:
-	rm -rf bin || true #throw out the error
+	rm -rf bin || true
 	mkdir bin
 	-cp */*.so bin/
 

@@ -7,13 +7,8 @@
 
 using namespace dls;
 
-int main(int argc, char* argv[]) {
+int main() {
     MsgLogger logger;
-    RetType ret = logger.Open();
-    if(ret != SUCCESS) {
-        printf("err opening\n");
-        exit(-1);
-    }
     while(1) {
         logger.log_message("test");
     }

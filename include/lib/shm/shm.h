@@ -21,7 +21,7 @@ RetType attach_to_shm();
 RetType detach_from_shm();
 
 // destroy the current shared memory
-RetType detroy_shm();
+RetType destroy_shm();
 
 // return pointer to shared memory block
 uint8_t* get_shm_block();

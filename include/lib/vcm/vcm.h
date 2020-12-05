@@ -13,9 +13,12 @@
 #include <string>
 #include <stdint.h>
 #include <unordered_map>
+#include "common/types.h"
 
+#define DEFAULT_CONFIG_FILE "data/config"
 
-// responsible for setting up telemetry shared mem and providing accessor functions to telemetry data
+// responsible for translating config file into addresses in shared mem
+// address 0x00 is the first byte in shared mem
 // currently gives addr and size of data in shared mem (after attaching itself in constructor)
 // data needs to be sent into shm through this lib as well
 namespace vcm {
@@ -25,19 +28,27 @@ namespace vcm {
         size_t size;
     } measurement_info_t;
 
+    typedef enum {
+        UDP, PROTOCOL_NOT_SET
+    } protocol_t;
+
     class VCM {
     public:
-        LDMS(); // uses default config file
-        LDMS(std::string config_file);
+        VCM(); // uses default config file
+        VCM(std::string config_file);
+        ~VCM();
         measurement_info_t get_info(std::string measurement); // get the info of a measurement
+        size_t packet_size;
+        int addr; // UDP address and port
+        int port;
+        protocol_t protocol;
     private:
         // local vars
         std::string config_file;
-        std::unordered_map<std::string, void*> addr_map;
+        std::unordered_map<std::string, measurement_info_t*> addr_map;
 
-        // helper methods
-        RetType parse_config_file();
-        RetType setup_mem_map();
+        // helper method(s)
+        RetType init();
     };
 }
 

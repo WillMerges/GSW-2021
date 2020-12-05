@@ -19,5 +19,7 @@ RetType PacketLogger::log_packet(unsigned char* buffer, size_t size) {
     memcpy(out_buff+preamble.size(), buffer, size);
     out_buff[out_size - 1] = '>';
 
-    return queue_msg(out_buff, out_size);
+    RetType ret = queue_msg(out_buff, out_size);
+    delete out_buff;
+    return ret;
 }

@@ -1,9 +1,18 @@
 #include "lib/dls/logger.h"
+#include "common/types.h"
+#include <stdexcept>
 
 using namespace dls;
 
 Logger::Logger(std::string queue_name): open(false) {
     this->queue_name = queue_name;
+    if(Open() != SUCCESS) {
+        throw new std::runtime_error("Failed to open logger");
+    }
+}
+
+Logger::~Logger() {
+    Close();
 }
 
 RetType Logger::Open() {

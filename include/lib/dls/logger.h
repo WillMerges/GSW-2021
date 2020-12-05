@@ -15,6 +15,7 @@ namespace dls {
     class Logger {
     public:
         Logger(std::string queue_name);
+        ~Logger();
         RetType Open();
         RetType Close();
         RetType queue_msg(const char* buffer, size_t size);

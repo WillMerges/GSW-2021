@@ -1,27 +1,18 @@
 # SAMPLE CONFIGURATION
 # assumes in order
+# this is what packet's coming from the receiver should look like
+# if measurements have the same name the latest one's size is used (furthest down in the file)!
 
-#constant value
-_:
-    1 #size
-    < #value
+# these need to be set at some point!
+protocol = udp
+#src = 127.0.0.1
+port = 1234
 
-ACCELXMEAS: #measurement name
-    4 #size
-    double #type
+# measurements look like [measurement name] [size in bytes]
+ACCELXMEAS 4
 
-ACCELYMEAS:
-    4
-    double
+ACCELYMEAS 4
 
-ACCELZMEAS:
-    4
-    double
+ACCELZMEAS 4
 
-# checksum
-checksum:
-    2 # size of checksum
-
-_:
-    1
-    >
+checksum 2

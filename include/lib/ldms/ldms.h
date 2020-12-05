@@ -12,14 +12,18 @@
 
 
 // responsible for reading telemtry data and writing it to shared mem
-// must rely on the VCM library to write to shmem
+// this should be the only lib that needs to use the shm lib
+// TODO not the best name
 class TelemetryParser {
 public:
-    TelemtryParser(); // uses default config_file
-    TelemtryParser(std::string config_file); // config file must be same as VCM lib uses
+    TelemetryParser(); // uses default config_file
+    TelemetryParser(std::string config_file); // config file must be same as VCM lib uses
     RetType Parse(); // runs loop until sent stop signal or error (returns failure on error, success on stop)
     void Stop(); // stop the parser
 private:
+    // maybe store src and port differently
+    int src;
+    int port;
     volatile bool stop;
 };
 
