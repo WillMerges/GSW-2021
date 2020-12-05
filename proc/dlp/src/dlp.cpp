@@ -99,8 +99,6 @@ int main(int argc, char* argv[]) {
 
     std::thread m_thread(read_queue, MESSAGE_MQUEUE_NAME, msg_file.c_str(), false);
     std::thread t_thread(read_queue, TELEMETRY_MQUEUE_NAME, tel_file.c_str(), true);
-    //read_queue(MESSAGE_MQUEUE_NAME, msg_file.c_str(), false);
-    //read_queue(TELEMETRY_MQUEUE_NAME, tel_file.c_str());
 
     m_thread.join();
     t_thread.join();
