@@ -1,7 +1,6 @@
 /**
 *   Base Logger class. Used to write messages to POSIX mqueues.
 **/
-
 #ifndef LOGGER_H
 #define LOGGER_H
 

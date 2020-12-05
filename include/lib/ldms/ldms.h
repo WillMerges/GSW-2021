@@ -7,27 +7,20 @@
 *
 *  RIT Launch Initiative
 *********************************************************************/
-
 #ifndef LDMS_H
 #define LDMS_H
 
-#include <string>
-#include <stdint.h>
 
-namespace ldms {
-
-    typedef struct {
-        void* addr;
-        size_t size;
-    } measurement_info_t;
-
-    class LDMS {
-    public:
-        LDMS(); // uses default config file
-        LDMS(std::string config_file);
-        measurement_info_t get_info(std::string measurement); // get the info of a measurement
-    };
-
-}
+// responsible for reading telemtry data and writing it to shared mem
+// must rely on the VCM library to write to shmem
+class TelemetryParser {
+public:
+    TelemtryParser(); // uses default config_file
+    TelemtryParser(std::string config_file); // config file must be same as VCM lib uses
+    RetType Parse(); // runs loop until sent stop signal or error (returns failure on error, success on stop)
+    void Stop(); // stop the parser
+private:
+    volatile bool stop;
+};
 
 #endif

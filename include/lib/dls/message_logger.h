@@ -3,7 +3,6 @@
 *   The message writer process will read the queue and write the packets to
 *   the correcty log files atomically.
 **/
-
 #ifndef MESSAGE_LOGGER_H
 #define MESSAGE_LOGGER_H
 

@@ -8,9 +8,7 @@
 *
 *  RIT Launch Initiative
 *********************************************************************/
-
 #include <stdint.h>
-
 #include "types.h"
 
 // create shared memory block
