@@ -82,7 +82,6 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
                 file << timestamp << " " << buffer << '\n';
             }
             writes++;
-            printf("%d\n", writes);
 
             fflush(stdout);
             file.flush();
