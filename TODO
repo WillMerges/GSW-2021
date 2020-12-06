@@ -6,7 +6,7 @@ DONE - lib/shm -rename lib/loadconfig to something better
 
 DONE add in Makefile to copy .so libraries to lib/bin so they can be easier linked with processes in proc
 
-create a mkshm tool in proc
+NOT DOING - no need, just attach each time - create a mkshm tool in proc
 
 DONE make includes easier to manage (move to includes dir instead of next to src)
 
