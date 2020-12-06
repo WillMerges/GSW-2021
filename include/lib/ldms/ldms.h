@@ -18,9 +18,9 @@
 #include "lib/vcm/vcm.h"
 
 namespace ldms {
-    // responsible for reading telemtry data and writing it to shared mem
-    // this should be the only lib that needs to use the shm lib
-    // TODO not the best name
+
+    static const int GSW_PORT = 7070;
+
     class TelemetryParser {
     public:
         TelemetryParser(vcm::VCM* vcm);

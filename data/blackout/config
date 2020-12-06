@@ -6,13 +6,13 @@
 # these need to be set at some point!
 protocol = udp
 src = 127.0.0.1
-port = 1234
+port = 8080
 
 # measurements look like [measurement name] [size in bytes]
-ACCELXMEAS 4
+#ACCELXMEAS 4
 
-ACCELYMEAS 4
+#ACCELYMEAS 4
 
-ACCELZMEAS 4
+#ACCELZMEAS 4
 
 checksum 2

@@ -73,7 +73,11 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
             }
             buffer[read] = '\0';
             if(verbose) {
-                printf("logging message: %s\n", buffer);
+                if(binary) {
+                    printf("received telemetry packet\n");
+                } else {
+                    printf("logging message: %s\n", buffer);
+                }
             }
 
             if(binary) {

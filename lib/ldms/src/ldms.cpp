@@ -73,14 +73,24 @@ namespace ldms {
 
         if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
            logger.log_message("socket creation failed");
-           throw new std::runtime_error("socket createion failed");
+           throw new std::runtime_error("socket creation failed");
        }
 
        memset(&servaddr, 0, sizeof(servaddr));
 
        servaddr.sin_family = AF_INET;
        servaddr.sin_port = htons(vcm->port);
-       servaddr.sin_addr.s_addr = INADDR_ANY;
+       servaddr.sin_addr.s_addr = htons(INADDR_ANY);
+
+       struct sockaddr_in myaddr;
+       myaddr.sin_addr.s_addr = htons(INADDR_ANY);
+       myaddr.sin_family = AF_INET;
+       myaddr.sin_port = htons(GSW_PORT); // TODO maybe use multiple ports for different devices?
+       int rc = bind(sockfd, (struct sockaddr*) &myaddr, sizeof(myaddr));
+       if(rc) {
+           logger.log_message("socket bind failed");
+           throw new std::runtime_error("socket bind failed");
+       }
 
        buffer = new char[vcm->packet_size];
     }
@@ -96,10 +106,12 @@ namespace ldms {
         PacketLogger plogger("UDP(" + std::to_string(vcm->src) +
                              "," + std::to_string(vcm->port) + ")");
 
-        int n;
+        int n = -1;
+        socklen_t len = sizeof(servaddr);
         while(!stop) {
             n = recvfrom(sockfd, buffer, vcm->packet_size,
-                    MSG_WAITALL, (struct sockaddr *) &servaddr, NULL);
+                    MSG_WAITALL, (struct sockaddr *) &servaddr, &len);
+
             if(n != (int)(vcm->packet_size)) {
                 logger.log_message("Packet size mismatch, " +
                                     std::to_string(vcm->packet_size) +
