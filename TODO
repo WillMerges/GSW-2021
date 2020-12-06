@@ -13,3 +13,5 @@ DONE make includes easier to manage (move to includes dir instead of next to src
 DONE - install/setenv.sh - make build shell script so bash variables can be set (base directory, for where to put bin, queues, and other temp data)
 
 DONE update documentation on confluence for new mqueue system logging
+
+maybe add a proxy process in 'proc' dir that reads measurements and hosts them on a TCP server as JSON packets (so the front end can grab them)

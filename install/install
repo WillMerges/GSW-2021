@@ -7,9 +7,10 @@ set +e
 ln -s ../data/blackout/config ../data/config
 
 chmod +x ../startup/start_*
-chmod +x ../startup/mkshm
 
 mkdir ../log
+sudo mkdir /gsw
+sudo chmod 777 /gsw
 
 chmod +x getdir.py
-. setenv
+. setenv.sh

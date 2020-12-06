@@ -11,6 +11,8 @@
 #include <fstream>
 #include <sys/time.h>
 
+#define MAX_LINES_PER_FILE 512
+
 using namespace dls;
 
 bool verbose = false;
@@ -27,17 +29,8 @@ struct timeval curr_time;
     } while (0) \
 
 void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
-    std::ofstream file;
-    if(binary) {
-        file.open(outfile_name, std::ios::out | std::ios::app);
-    } else {
-        file.open(outfile_name, std::ios::out | std::ios::binary | std::ios::app);
-    }
-
-    if(!file.is_open()) {
-        printf("Failed to open file: %s\n", outfile_name);
-        exit(-1);
-    }
+    unsigned int file_index = 0;
+    std::string filename = outfile_name;
 
     mqd_t mq;
     struct mq_attr attr;
@@ -51,28 +44,52 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
     mq = mq_open(queue_name, O_CREAT | O_RDONLY, 0644, &attr);
     CHECK((mqd_t)-1 != mq);
 
-    ssize_t read = -1;
     while(1) {
+        std::ofstream file;
+        if(binary) {
+            file.open(filename.c_str(), std::ios::out | std::ios::app);
+        } else {
+            file.open(filename.c_str(), std::ios::out | std::ios::binary | std::ios::app);
+        }
+
+        if(!file.is_open()) {
+            printf("Failed to open file: %s\n", outfile_name);
+            exit(-1);
+        }
+
         gettimeofday(&curr_time, NULL);
         std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
+        file << timestamp << " Starting DLP\n";
 
-        read = mq_receive(mq, buffer, MAX_Q_SIZE, NULL);
-        if(read == -1) {
-            printf("Read failed from MQueue: %s\n", queue_name);
-        }
-        buffer[read] = '\0';
-        if(verbose) {
-            printf("logging message: %s\n", buffer);
-        }
+        ssize_t read = -1;
+        unsigned int writes = 0;
+        while(writes < MAX_LINES_PER_FILE) {
+            gettimeofday(&curr_time, NULL);
+            std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
 
-        if(binary) {
-            file << timestamp << buffer;
-        } else {
-            file << timestamp << " " << buffer << '\n';
-        }
+            read = mq_receive(mq, buffer, MAX_Q_SIZE, NULL);
+            if(read == -1) {
+                printf("Read failed from MQueue: %s\n", queue_name);
+            }
+            buffer[read] = '\0';
+            if(verbose) {
+                printf("logging message: %s\n", buffer);
+            }
 
-        fflush(stdout);
-        file.flush();
+            if(binary) {
+                file << timestamp << buffer;
+            } else {
+                file << timestamp << " " << buffer << '\n';
+            }
+            writes++;
+            printf("%d\n", writes);
+
+            fflush(stdout);
+            file.flush();
+        }
+        file_index++;
+        filename = outfile_name;
+        filename += std::to_string(file_index);
     }
 }
 

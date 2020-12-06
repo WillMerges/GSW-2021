@@ -13,7 +13,7 @@
 
 namespace dls {
 
-    static const char* const TELEMETRY_MQUEUE_NAME = "/gsw/telemetry_queue";
+    static const char* const TELEMETRY_MQUEUE_NAME = "/telemetry_queue";
 
     class PacketLogger : public Logger {
     public:
