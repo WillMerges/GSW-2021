@@ -6,6 +6,7 @@ build:
 	-$(MAKE) -C ldms all
 	-$(MAKE) -C vcm all
 	-$(MAKE) -C dls all
+	-$(MAKE) -C shm all
 
 copy:
 	rm -rf bin || true
@@ -17,4 +18,5 @@ clean:
 	-$(MAKE) -C ldms clean
 	-$(MAKE) -C vcm clean
 	-$(MAKE) -C dls clean
+	-$(MAKE) -C shm clean
 	rm -r bin

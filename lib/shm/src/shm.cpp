@@ -7,36 +7,48 @@
 *
 *  RIT Launch Initiative
 *********************************************************************/
-
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <stdlib.h>
+#include "lib/shm/shm.h"
+#include "common/types.h"
 
-#include "shm.h"
+namespace shm {
 
-namespace ldms {
+    void* shmem = NULL;
+    size_t size = 1024; // default
+    int shmid = -1;
 
-    // used for generating shm id
-    int id = 65;
-    char* file = "shmfile";
-
-    RetType create_shm(size_t size) {
-        // TODO
+    void set_size(size_t s) {
+        size = s;
     }
 
     RetType attach_to_shm() {
-        // TODO
+        key_t key = ftok(file, id);
+        shmid = shmget(key, size, 0666|IPC_CREAT);
+        shmem = shmat(shmid, (void*)0, 0);
+
+        return SUCCESS;
     }
 
     RetType detach_from_shm() {
-        // TODO
+        if(shmem) {
+            shmdt(shmem);
+            return SUCCESS;
+        }
+        return FAILURE;
     }
 
     RetType destroy_shm() {
-        // TODO
+        if(shmid == -1) {
+            return FAILURE;
+        }
+        shmctl(shmid, IPC_RMID, NULL);
+        return SUCCESS;
     }
 
-    uint8_t* get_shm_block() {
-        // TODO
+    void* get_shm_block() {
+        return shmem;
     }
 
-};
+}
