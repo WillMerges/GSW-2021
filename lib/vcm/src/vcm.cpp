@@ -61,8 +61,6 @@ measurement_info_t* VCM::get_info(std::string measurement) {
 RetType VCM::init() {
     MsgLogger logger;
 
-    logger.log_message("init");
-
     std::ifstream f(config_file.c_str());
     if(!f) {
         logger.log_message("Failed to open config file: "+config_file);
@@ -129,9 +127,6 @@ RetType VCM::init() {
         return FAILURE;
     } else if(protocol == UDP && (src == -1 || port == -1)) {
         logger.log_message("Config file missing port or src for UDP protocol: " + config_file);
-        return FAILURE;
-    } else { // this should never happen
-        logger.log_message("Unexpected protocol: " + protocol);
         return FAILURE;
     }
 

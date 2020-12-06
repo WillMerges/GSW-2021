@@ -9,7 +9,7 @@ build:
 	-$(MAKE) -C shm all
 
 copy:
-	rm -rf bin || true
+	rm -rf bin || true > /dev/null
 	mkdir bin
 	-cp */*.so bin/
 

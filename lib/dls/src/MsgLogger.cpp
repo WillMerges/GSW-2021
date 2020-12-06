@@ -29,7 +29,7 @@ RetType MsgLogger::log_message(std::string msg) {
         new_msg += func_name;
     }
     if(new_msg != "") {
-        new_msg += ")";
+        new_msg += ") ";
     }
 
     new_msg += msg;

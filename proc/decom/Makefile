@@ -1,29 +1,29 @@
+# decom process
+
 TARGET = decom
 
 CXX = g++
 CC = g++
 
-OPTIONS += 
+OPTIONS +=
 
 CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
 CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
-LDFLAGS =
+LDFLAGS = -L$(GSW_HOME)/lib/bin/ -Wl,-rpath=$(GSW_HOME)/lib/bin/
 
-LIBS = 
+LIBS = -lldms -lvcm -ldls -lshm
 
 CPP_FILES := $(wildcard src/*.cpp)
 C_FILES := $(wildcard src/*.c)
 
 OBJS := $(CPP_FILES:.cpp=.o) $(C_FILES:.c=.o)
 
-.PHONY: all clean 
+.PHONY: all clean
 
 all: $(TARGET)
-	chmod +x launch 
 
 $(TARGET): $(OBJS)
-	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS)
+	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LIBS)
 
 clean:
-	rm src/*.o $(TARGET)
-	rm $TARGET
+	-rm src/*.o $(TARGET)

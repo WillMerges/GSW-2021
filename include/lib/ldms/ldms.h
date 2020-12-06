@@ -25,7 +25,7 @@ namespace ldms {
     public:
         TelemetryParser(vcm::VCM* vcm);
         ~TelemetryParser();
-        virtual void Parse() = 0; // runs loop until sent stop signal or error (returns failure on error, success on stop)
+        virtual void Parse(); // runs loop until sent stop signal or error (returns failure on error, success on stop)
         void Stop(); // stop the parser
     protected:
         volatile bool stop; // in case this is run in a thread we don't want it cached
@@ -43,10 +43,9 @@ namespace ldms {
         int sockfd;
         char* buffer;
     };
-
     // reads the protocol and size from a config file and sets the correct parser for it
-    RetType create_parser(std::string config_file, TelemetryParser** parser);
-    RetType create_parser(TelemetryParser** parser);
+    TelemetryParser* create_parser(std::string config_file);
+    TelemetryParser* create_default_parser();
 }
 
 #endif
