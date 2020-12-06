@@ -6,7 +6,7 @@ using namespace std;
 using namespace shm;
 
 int main() {
-    set_size(4);
+    set_shmem_size(4);
     attach_to_shm();
     char* b = (char*)get_shm_block();
     cout << b << '\n';

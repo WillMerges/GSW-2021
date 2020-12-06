@@ -10,11 +10,10 @@ using namespace dls;
 using namespace vcm;
 
 VCM::VCM() {
-    printf("testing123");
     MsgLogger logger("VCM", "Constructor");
 
     // default values
-    addr = port = -1;
+    src = port = -1;
     protocol = PROTOCOL_NOT_SET;
     packet_size = 0;
 
@@ -38,7 +37,7 @@ VCM::VCM(std::string config_file) {
     this->config_file = config_file;
 
     // default values
-    addr = port = -1;
+    src = port = -1;
     protocol = PROTOCOL_NOT_SET;
     packet_size = 0;
 
@@ -55,8 +54,8 @@ VCM::~VCM() {
     }
 }
 
-measurement_info_t VCM::get_info(std::string measurement) {
-    return *(addr_map[measurement]);
+measurement_info_t* VCM::get_info(std::string measurement) {
+    return addr_map[measurement];
 }
 
 RetType VCM::init() {
@@ -88,9 +87,9 @@ RetType VCM::init() {
             ss >> third;
             if(fst == "src") {
                 try {
-                    addr = std::stoi(third, NULL, 10);
+                    src = std::stoi(third, NULL, 10);
                 } catch(std::invalid_argument& ia) {
-                    logger.log_message("Invalid address in line: " + line);
+                    logger.log_message("Invalid src in line: " + line);
                     return FAILURE;
                 }
             } else if(fst == "port") {
@@ -125,8 +124,14 @@ RetType VCM::init() {
         }
     }
 
-    if(addr == -1 || port == -1 || protocol == PROTOCOL_NOT_SET) {
-        logger.log_message("Config file missing addr, port, or protocol: " + config_file);
+    if(protocol == PROTOCOL_NOT_SET) {
+        logger.log_message("Config file missing protocol: " + config_file);
+        return FAILURE;
+    } else if(protocol == UDP && (src == -1 || port == -1)) {
+        logger.log_message("Config file missing port or src for UDP protocol: " + config_file);
+        return FAILURE;
+    } else { // this should never happen
+        logger.log_message("Unexpected protocol: " + protocol);
         return FAILURE;
     }
 

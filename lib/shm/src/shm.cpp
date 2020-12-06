@@ -19,7 +19,7 @@ namespace shm {
     size_t size = 1024; // default
     int shmid = -1;
 
-    void set_size(size_t s) {
+    void set_shmem_size(size_t s) {
         size = s;
     }
 

@@ -37,9 +37,10 @@ namespace vcm {
         VCM(); // uses default config file
         VCM(std::string config_file);
         ~VCM();
-        measurement_info_t get_info(std::string measurement); // get the info of a measurement
+        measurement_info_t* get_info(std::string measurement); // get the info of a measurement
         size_t packet_size;
-        int addr; // UDP address and port
+        // TODO maybe put addr and port in another subclass
+        int src; // address and port (only for UDP right now)
         int port;
         protocol_t protocol;
     private:

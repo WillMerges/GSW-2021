@@ -17,7 +17,7 @@ namespace shm {
     const char* const file = "/gsw/shmfile";
 
     // set the size of the block
-    void set_size(size_t size);
+    void set_shmem_size(size_t size);
 
     // attach the current process to the shared memory block
     RetType attach_to_shm();
