@@ -15,3 +15,6 @@ DONE - install/setenv.sh - make build shell script so bash variables can be set 
 DONE update documentation on confluence for new mqueue system logging
 
 maybe add a proxy process in 'proc' dir that reads measurements and hosts them on a TCP server as JSON packets (so the front end can grab them)
+
+add signal handlers for SIGKILL for any process using a network / file resouce
+    - I think right now this is dlp closing files and decom closing it's socket

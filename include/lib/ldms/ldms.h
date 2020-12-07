@@ -24,12 +24,12 @@ namespace ldms {
     class TelemetryParser {
     public:
         TelemetryParser(vcm::VCM* vcm);
-        ~TelemetryParser();
+        virtual ~TelemetryParser();
         virtual void Parse(); // runs loop until sent stop signal or error (returns failure on error, success on stop)
         void Stop(); // stop the parser
     protected:
-        volatile bool stop; // in case this is run in a thread we don't want it cached
         vcm::VCM* vcm;
+        volatile bool stop; // in case this is run in a thread we don't want it cached
         void* shmem;
     };
 

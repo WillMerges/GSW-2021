@@ -12,6 +12,7 @@
 
 #include <string>
 #include <stdint.h>
+#include <fstream>
 #include <unordered_map>
 #include "common/types.h"
 
@@ -45,6 +46,7 @@ namespace vcm {
         protocol_t protocol;
     private:
         // local vars
+        std::ifstream* f;
         std::string config_file;
         std::unordered_map<std::string, measurement_info_t*> addr_map;
 

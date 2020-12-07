@@ -52,6 +52,11 @@ VCM::~VCM() {
     for(auto i : addr_map) {
         delete i.second;
     }
+
+    if(f->is_open()) {
+        f->close();
+    }
+    delete f;
 }
 
 measurement_info_t* VCM::get_info(std::string measurement) {
@@ -61,13 +66,13 @@ measurement_info_t* VCM::get_info(std::string measurement) {
 RetType VCM::init() {
     MsgLogger logger;
 
-    std::ifstream f(config_file.c_str());
+    f = new std::ifstream(config_file.c_str());
     if(!f) {
         logger.log_message("Failed to open config file: "+config_file);
         return FAILURE;
     }
 
-    for(std::string line; std::getline(f,line); ) {
+    for(std::string line; std::getline(*f,line); ) {
         if(line == "" || !line.rfind("#",0)) { // blank or comment '#'
             continue;
         }
@@ -121,6 +126,8 @@ RetType VCM::init() {
             return FAILURE;
         }
     }
+
+    f->close();
 
     if(protocol == PROTOCOL_NOT_SET) {
         logger.log_message("Config file missing protocol: " + config_file);

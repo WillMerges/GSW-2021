@@ -2,6 +2,7 @@
 
 # abrupt way to kill all gsw processes
 # will NOT free any network / file resources first (kill those processes more gracefully)
+# ^^^ the decom process has a signal handler to fix this problem
 
 if ! [ -v GSW_HOME ]
 then
@@ -17,6 +18,7 @@ else
     while read l; do
         echo "killing PID $l"
         sudo kill $l
+        sleep 1 
     done <$FILE
 fi
 

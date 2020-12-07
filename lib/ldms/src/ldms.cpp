@@ -6,6 +6,7 @@
 #include <string>
 #include <string.h>
 #include <exception>
+#include <unistd.h>
 #include "common/types.h"
 #include "lib/vcm/vcm.h"
 #include "lib/dls/dls.h"
@@ -99,6 +100,7 @@ namespace ldms {
         if(buffer) {
             delete buffer;
         }
+        close(sockfd);
     }
 
     void UDPParser::Parse() {
