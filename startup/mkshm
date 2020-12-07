@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# makes shared memory, calls tool that uses lib/shm and lib/vcm to init the shared memory segment
-# ldms will then later use lib/shm to access the segment
-
-NO LONGER DOING (I think)

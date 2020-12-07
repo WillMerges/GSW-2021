@@ -1,4 +1,6 @@
-import socket 
+#!/usr/bin/python3
+
+import socket
 import time
 
 ip = "127.0.0.1"

@@ -1,1 +1,21 @@
 #!/bin/bash
+
+set -e
+
+if ! [ -v GSW_HOME ]
+then
+    echo environment not set, must run '. setenv' first
+fi
+
+# create shared memory
+${GSW_HOME}/proc/shmctl/shmctl -on
+
+# start data logging process
+echo "starting data logging process"
+${GSW_HOME}/proc/dlp/dlp &
+echo $! >> pidlist
+
+# start the decom process
+echo "starting decom process"
+${GSW_HOME}/proc/decom/decom &
+echo $! >> pidlist
