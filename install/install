@@ -3,14 +3,14 @@
 # ignore failed commands
 set +e
 
-# TODO let operator select this (make a tool to change eventually)
-ln -s ../data/blackout/config ../data/config
+# TODO let operator select this
+# for now use a default config file
+ln -s ../data/sample/config ../data/config
 
 chmod +x ../startup/start_*
+chmod +x ../shutdown/shutdown_*
+chmod +x ../data/select_config.sh
 
-mkdir ../log
-sudo mkdir /gsw
-sudo chmod 777 /gsw
+. ../setenv
 
-chmod +x getdir.py
-../setenv
+(cd ..; make all)

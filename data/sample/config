@@ -1,0 +1,12 @@
+# SAMPLE CONFIGURATION
+# assumes in order
+# this is what packet's coming from the receiver should look like
+# if measurements have the same name the latest one's size is used (furthest down in the file)!
+
+# these need to be set at some point!
+protocol = udp
+src = 127.0.0.1
+port = 8080
+
+# [measurement name] [measurement size in bytes]
+TEST 2
