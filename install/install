@@ -13,4 +13,4 @@ sudo mkdir /gsw
 sudo chmod 777 /gsw
 
 chmod +x getdir.py
-. setenv.sh
+../setenv

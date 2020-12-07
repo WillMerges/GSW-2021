@@ -18,3 +18,6 @@ maybe add a proxy process in 'proc' dir that reads measurements and hosts them o
 
 add signal handlers for SIGKILL for any process using a network / file resouce
     - I think right now this is dlp closing files and decom closing it's socket
+
+maybe add a status shared lib so processes can report their status
+    -e.g. decom is up, decom network error, etc.

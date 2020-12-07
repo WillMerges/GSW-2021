@@ -13,3 +13,9 @@ How to build:
 
 How to clean:
 *make clean*
+
+How to startup GSW:
+*./startup/startup_gsw*
+
+How to shutdown GSW:
+*./shutdown/shutdown_gsw*
