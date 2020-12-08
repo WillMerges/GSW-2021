@@ -21,3 +21,10 @@ add signal handlers for SIGKILL for any process using a network / file resouce
 
 maybe add a status shared lib so processes can report their status
     -e.g. decom is up, decom network error, etc.
+
+
+add a program that attaches to dlp and views it's stdout
+    - use strace and look for write
+
+pipe out system messages to the UI? maybe don't do this
+    - they would probably go out the network
