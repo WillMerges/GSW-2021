@@ -19,6 +19,7 @@ RetType Logger::Open() {
     if(open) {
         return SUCCESS;
     }
+
     mq = mq_open(queue_name.c_str(), O_WRONLY);
     if((mqd_t)-1 == mq) {
         // no sense in logging this because it is the logger!
