@@ -1,0 +1,4 @@
+need some way to shutdown
+
+maybe have start scripts save PID's of started processes somewhere so they can be killed
+or use a starter process that is a parent of all of processes and use it to kill other processes? 

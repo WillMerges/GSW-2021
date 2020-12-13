@@ -10,6 +10,7 @@
 
 using namespace vcm;
 using namespace shm;
+using namespace dls;
 
 bool on = false;
 bool off = false;
