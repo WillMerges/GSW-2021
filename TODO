@@ -28,3 +28,9 @@ add a program that attaches to dlp and views it's stdout
 
 pipe out system messages to the UI? maybe don't do this
     - they would probably go out the network
+
+save the logs in shutdown_gsw
+
+consider changing timestamping to be when log_message is called rather than inserted by DLP
+
+maybe add an option to pass in a different VCM config file to shmctl process

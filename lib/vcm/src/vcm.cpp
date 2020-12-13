@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <exception>
+#include <unordered_map>
 
 using namespace dls;
 using namespace vcm;
@@ -60,7 +61,11 @@ VCM::~VCM() {
 }
 
 measurement_info_t* VCM::get_info(std::string measurement) {
-    return addr_map[measurement];
+    if(addr_map.count(measurement)) {
+        return addr_map.at(measurement);
+    } else {
+        return NULL;
+    }
 }
 
 RetType VCM::init() {
