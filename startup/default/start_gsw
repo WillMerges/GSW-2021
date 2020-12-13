@@ -7,6 +7,8 @@ then
     echo environment not set, must run '. setenv' first
 fi
 
+cd ${GSW_HOME}/startup/default
+
 # create the pidlist file
 if ! [ -f pidlist ]
 then
@@ -15,9 +17,6 @@ else
     echo "GSW is already running!"
     exit
 fi
-
-# create shared memory
-${GSW_HOME}/proc/shmctl/shmctl -on
 
 # NOTE: PIDs are added to the begining of the file
 #       so they are shutdown in the reverse order they started up
@@ -28,6 +27,9 @@ ${GSW_HOME}/proc/shmctl/shmctl -on
 echo "starting data logging process"
 ${GSW_HOME}/proc/dlp/dlp &
 echo $! | cat - pidlist > temp && mv temp pidlist
+
+# create shared memory
+${GSW_HOME}/proc/shmctl/shmctl -on
 
 # start the decom process
 echo "starting decom process"

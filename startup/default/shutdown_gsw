@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# abrupt way to kill all gsw processes
+# will NOT free any network / file resources first (kill those processes more gracefully)
+# ^^^ the decom process has a signal handler to fix this problem
+
+if ! [ -v GSW_HOME ]
+then
+    echo environment not set, must run '. setenv' first
+fi
+
+FILE=${GSW_HOME}/startup/default/pidlist
+if ! [ -f $FILE ]
+then
+    echo "no pidlist file"
+    exit
+else
+    while read l; do
+        echo "killing PID $l"
+        sudo kill $l
+        sleep 1 
+    done <$FILE
+fi
+
+rm $FILE
+
+# destroy shared memory
+${GSW_HOME}/proc/shmctl/shmctl -off
+
+# save the logs (leave the most recent in GSW_HOME/log/system.log and telemetry.log)
+TIMESTAMP=`date +%Y-%m-%d_%H-%M-%S`
+cd ${GSW_HOME}/log
+./save.sh $TIMESTAMP

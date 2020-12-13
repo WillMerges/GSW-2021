@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 
     if(on) {
         printf("creating shared memory\n");
-        logger.log_message("destroying shared memory");
+        logger.log_message("creating shared memory");
         return attach_to_shm();
     } else if(off) {
         printf("destroying shared memory\n");
