@@ -25,14 +25,16 @@ fi
 # create the system log fifo
 echo "creating log FIFO"
 ${GSW_HOME}/log/fifo.sh -make
+sleep 0.5
 
 # start data logging process
 echo "starting data logging process"
-${GSW_HOME}/proc/dlp/dlp &
+#${GSW_HOME}/proc/dlp/dlp -v > ${GSW_HOME}/log/system.fifo &
+${GSW_HOME}/proc/dlp/dlp -v &
 echo $! | cat - pidlist > temp && mv temp pidlist
 
 # create shared memory
-${GSW_HOME}/proc/shmctl/shmctl -on
+#${GSW_HOME}/proc/shmctl/shmctl -on
 
 # start the decom process
 echo "starting decom process"

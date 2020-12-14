@@ -19,14 +19,14 @@ else
     while read l; do
         echo "killing PID $l"
         sudo kill $l
-        sleep 1 
+        sleep 1.0 
     done <$FILE
 fi
 
 rm $FILE
 
 # destroy shared memory
-${GSW_HOME}/proc/shmctl/shmctl -off
+#${GSW_HOME}/proc/shmctl/shmctl -off
 
 # kill the system log FIFO
 echo "stopping log FIFO"

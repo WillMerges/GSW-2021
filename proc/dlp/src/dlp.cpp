@@ -19,6 +19,7 @@ using namespace dls;
 bool verbose = false;
 struct timeval curr_time;
 
+
 // from stack overflow https://stackoverflow.com/questions/3056307/how-do-i-use-mqueue-in-a-c-program-on-a-linux-based-system
 #define CHECK(x) \
     do { \
@@ -29,16 +30,9 @@ struct timeval curr_time;
         } \
     } while (0) \
 
-void read_queue(const char* queue_name, const char* outfile_name, const char* fifo_name, bool binary) {
+void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
     unsigned int file_index = 0;
     std::string filename = outfile_name;
-
-    // int fifo_fd = -1;
-    // fifo_fd = open(fifo_name, O_WRONLY);
-    // if(fifo_fd == -1) {
-    //     printf("Failed to open FIFO: %s\n", fifo_name);
-    //     // not a fatal error, so continue on
-    // }
 
     mqd_t mq;
     struct mq_attr attr;
@@ -69,6 +63,7 @@ void read_queue(const char* queue_name, const char* outfile_name, const char* fi
         gettimeofday(&curr_time, NULL);
         std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
         file << timestamp << " Starting DLP\n";
+        file.flush();
 
         ssize_t read = -1;
         unsigned int writes = 0;
@@ -83,28 +78,16 @@ void read_queue(const char* queue_name, const char* outfile_name, const char* fi
             buffer[read] = '\0';
             if(verbose) {
                 if(binary) {
-                    printf("received telemetry packet\n");
+                    printf("%s received telemetry packet\n", timestamp.c_str());
                 } else {
-                    printf("logging message: %s\n", buffer);
+                    printf("%s\n", buffer);
                 }
             }
 
             if(binary) {
                 file << timestamp << buffer;
-                // if(fifo_fd != -1) {
-                //     std::string send = timestamp;
-                //     send += " telemetry packet received";
-                //     write(fifo_fd, send.c_str(), send.size());
-                // }
             } else {
                 file << timestamp << " " << buffer << '\n';
-                // if(fifo_fd != -1) {
-                //     std::string send = timestamp;
-                //     timestamp += " ";
-                //     timestamp += buffer;
-                //     timestamp += "\n";
-                //     write(fifo_fd, send.c_str(), send.size());
-                // }
             }
             writes++;
 
@@ -138,10 +121,8 @@ int main(int argc, char* argv[]) {
     std::string msg_file = gsw_home + "/log/system.log";
     std::string tel_file = gsw_home + "/log/telemetry.log";
 
-    std::string msg_fifo = gsw_home + "/log/system.fifo";
-
-    std::thread m_thread(read_queue, MESSAGE_MQUEUE_NAME, msg_file.c_str(), msg_fifo.c_str(), false);
-    std::thread t_thread(read_queue, TELEMETRY_MQUEUE_NAME, tel_file.c_str(), msg_fifo.c_str(), true);
+    std::thread m_thread(read_queue, MESSAGE_MQUEUE_NAME, msg_file.c_str(), false);
+    std::thread t_thread(read_queue, TELEMETRY_MQUEUE_NAME, tel_file.c_str(), true);
 
     m_thread.join();
     t_thread.join();

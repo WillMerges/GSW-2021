@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <iostream>
 #include "lib/vcm/vcm.h"
 #include "lib/shm/shm.h"
 #include "common/types.h"
@@ -29,8 +30,13 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    VCM vcm;
-    set_shmem_size(vcm.packet_size);
+    try {
+        VCM vcm;
+        set_shmem_size(vcm.packet_size);
+    } catch (const std::runtime_error& e) {
+        std::cout << e.what() << '\n';
+        exit(-1);
+    }
 
     if(on) {
         printf("creating shared memory\n");

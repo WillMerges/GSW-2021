@@ -105,8 +105,7 @@ namespace ldms {
 
     void UDPParser::Parse() {
         MsgLogger logger("UDPParser", "Parse");
-        PacketLogger plogger("UDP(" + std::to_string(vcm->src) +
-                             "," + std::to_string(vcm->port) + ")");
+        PacketLogger plogger("UDP(" + std::to_string(vcm->port) + ")");
 
         int n = -1;
         socklen_t len = sizeof(servaddr);
