@@ -1,6 +1,7 @@
 #include "lib/dls/dls.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <mqueue.h>
@@ -11,7 +12,7 @@
 #include <fstream>
 #include <sys/time.h>
 
-#define MAX_LINES_PER_FILE 512
+#define MAX_LINES_PER_FILE 4096
 
 using namespace dls;
 
@@ -28,9 +29,16 @@ struct timeval curr_time;
         } \
     } while (0) \
 
-void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
+void read_queue(const char* queue_name, const char* outfile_name, const char* fifo_name, bool binary) {
     unsigned int file_index = 0;
     std::string filename = outfile_name;
+
+    // int fifo_fd = -1;
+    // fifo_fd = open(fifo_name, O_WRONLY);
+    // if(fifo_fd == -1) {
+    //     printf("Failed to open FIFO: %s\n", fifo_name);
+    //     // not a fatal error, so continue on
+    // }
 
     mqd_t mq;
     struct mq_attr attr;
@@ -46,6 +54,7 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
 
     while(1) {
         std::ofstream file;
+
         if(binary) {
             file.open(filename.c_str(), std::ios::out | std::ios::app);
         } else {
@@ -82,8 +91,20 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
 
             if(binary) {
                 file << timestamp << buffer;
+                // if(fifo_fd != -1) {
+                //     std::string send = timestamp;
+                //     send += " telemetry packet received";
+                //     write(fifo_fd, send.c_str(), send.size());
+                // }
             } else {
                 file << timestamp << " " << buffer << '\n';
+                // if(fifo_fd != -1) {
+                //     std::string send = timestamp;
+                //     timestamp += " ";
+                //     timestamp += buffer;
+                //     timestamp += "\n";
+                //     write(fifo_fd, send.c_str(), send.size());
+                // }
             }
             writes++;
 
@@ -117,8 +138,10 @@ int main(int argc, char* argv[]) {
     std::string msg_file = gsw_home + "/log/system.log";
     std::string tel_file = gsw_home + "/log/telemetry.log";
 
-    std::thread m_thread(read_queue, MESSAGE_MQUEUE_NAME, msg_file.c_str(), false);
-    std::thread t_thread(read_queue, TELEMETRY_MQUEUE_NAME, tel_file.c_str(), true);
+    std::string msg_fifo = gsw_home + "/log/system.fifo";
+
+    std::thread m_thread(read_queue, MESSAGE_MQUEUE_NAME, msg_file.c_str(), msg_fifo.c_str(), false);
+    std::thread t_thread(read_queue, TELEMETRY_MQUEUE_NAME, tel_file.c_str(), msg_fifo.c_str(), true);
 
     m_thread.join();
     t_thread.join();

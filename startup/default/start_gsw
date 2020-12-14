@@ -22,6 +22,9 @@ fi
 #       so they are shutdown in the reverse order they started up
 #       this keeps the data logger alive as long as possible
 
+# create the system log fifo
+echo "creating log FIFO"
+${GSW_HOME}/log/fifo.sh -make
 
 # start data logging process
 echo "starting data logging process"
@@ -35,3 +38,4 @@ ${GSW_HOME}/proc/shmctl/shmctl -on
 echo "starting decom process"
 ${GSW_HOME}/proc/decom/decom &
 echo $! | cat - pidlist > temp && mv temp pidlist
+

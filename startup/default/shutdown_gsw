@@ -9,6 +9,7 @@ then
     echo environment not set, must run '. setenv' first
 fi
 
+# BE CAREFUL if copying this file
 FILE=${GSW_HOME}/startup/default/pidlist
 if ! [ -f $FILE ]
 then
@@ -27,7 +28,13 @@ rm $FILE
 # destroy shared memory
 ${GSW_HOME}/proc/shmctl/shmctl -off
 
+# kill the system log FIFO
+echo "stopping log FIFO"
+${GSW_HOME}/log/fifo.sh -delete
+
 # save the logs (leave the most recent in GSW_HOME/log/system.log and telemetry.log)
+echo "saving logs"
 TIMESTAMP=`date +%Y-%m-%d_%H-%M-%S`
 cd ${GSW_HOME}/log
 ./save.sh $TIMESTAMP
+

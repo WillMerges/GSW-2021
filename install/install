@@ -12,6 +12,8 @@ chmod +x ../shutdown/*/shutdown_*
 chmod +x ../data/select_config.sh
 chmod +x ../log/clean.sh
 chmod +x ../log/save.sh
+chmod +x ../log/fifo.sh
+chmod +x ../startup/select_current.sh
 
 . ../setenv
 

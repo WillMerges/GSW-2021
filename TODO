@@ -33,3 +33,12 @@ DONE save the logs in shutdown_gsw
 consider changing timestamping to be when log_message is called rather than inserted by DLP
 
 maybe add an option to pass in a different VCM config file to shmctl process
+
+consider adding priorities to system messages
+    - show high priorities in a notification
+
+look at using Grafana and InfluxDB for UI
+    -I think can send data to influx over UDP
+    -make a separate process to poll data and update influx
+    -not sure how to set data as read? maybe have a unique nonce in the shmem that decom updates
+        -if the nonce is the same, don't read it (nonce could just be a timestamp)
