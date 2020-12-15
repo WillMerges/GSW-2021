@@ -19,6 +19,7 @@ using namespace dls;
 bool verbose = false;
 struct timeval curr_time;
 
+//std::ofstream fifo;
 
 // from stack overflow https://stackoverflow.com/questions/3056307/how-do-i-use-mqueue-in-a-c-program-on-a-linux-based-system
 #define CHECK(x) \
@@ -50,9 +51,9 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
         std::ofstream file;
 
         if(binary) {
-            file.open(filename.c_str(), std::ios::out | std::ios::app);
+            file.open(filename.c_str(), std::ios::out | std::ios::trunc);
         } else {
-            file.open(filename.c_str(), std::ios::out | std::ios::binary | std::ios::app);
+            file.open(filename.c_str(), std::ios::out | std::ios::binary | std::ios::trunc);
         }
 
         if(!file.is_open()) {
@@ -86,8 +87,10 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
 
             if(binary) {
                 file << timestamp << buffer;
+                //fifo << timestamp << buffer;
             } else {
                 file << timestamp << " " << buffer << '\n';
+                //fifo << timestamp << " "  << buffer << '\n';
             }
             writes++;
 
@@ -117,6 +120,14 @@ int main(int argc, char* argv[]) {
         size_t size = strlen(env);
         gsw_home.assign(env, size);
     }
+
+    // std::string fifo_file = gsw_home + "/log/system.fifo";
+    // mkfifo(fifo_file.c_str(), O_WRONLY | O_NONBLOCK);
+    // fifo.open(fifo_file.c_str(), std::ios::out);
+    // if(!fifo.is_open()) {
+    //     printf("Failed to open fifo: %s", fifo_file.c_str());
+    //     exit(-1);
+    // }
 
     std::string msg_file = gsw_home + "/log/system.log";
     std::string tel_file = gsw_home + "/log/telemetry.log";
