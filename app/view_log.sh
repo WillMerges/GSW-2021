@@ -24,3 +24,4 @@ fi
 # this won't stop reading from system.log, and won't read system.log1....
 # potential solution: have dlp write to a FIFO called system.fifo and have tail read that
 tail -f ${GSW_HOME}/log/system.fifo
+#cat < ${GSW_HOME}/log/system.fifo
