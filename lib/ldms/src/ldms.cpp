@@ -98,7 +98,7 @@ namespace ldms {
 
     UDPParser::~UDPParser() {
         if(buffer) {
-            delete buffer;
+            delete[] buffer;
         }
         close(sockfd);
     }

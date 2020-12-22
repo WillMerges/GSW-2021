@@ -20,6 +20,6 @@ RetType PacketLogger::log_packet(unsigned char* buffer, size_t size) {
     out_buff[out_size - 1] = '>';
 
     RetType ret = queue_msg(out_buff, out_size);
-    delete out_buff;
+    delete[] out_buff;
     return ret;
 }
