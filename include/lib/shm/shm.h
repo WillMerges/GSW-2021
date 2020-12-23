@@ -17,7 +17,10 @@ namespace shm {
     const char* const file = "/gsw/shmfile";
 
     // set the size of the block
-    void set_shmem_size(size_t size);
+    RetType set_shmem_size(size_t size);
+
+    // get the size of the block
+    size_t get_shmem_size();
 
     // attach the current process to the shared memory block
     RetType attach_to_shm();
@@ -30,4 +33,5 @@ namespace shm {
 
     // return pointer to shared memory block
     void* get_shm_block();
+
 }

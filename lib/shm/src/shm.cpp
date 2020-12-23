@@ -19,8 +19,16 @@ namespace shm {
     size_t size = 1024; // default
     int shmid = -1;
 
-    void set_shmem_size(size_t s) {
-        size = s;
+    RetType set_shmem_size(size_t s) {
+        if(size > 0) {
+            size = s + 1; // add 1 for lock bit
+            return SUCCESS;
+        }
+        return FAILURE;
+    }
+
+    size_t get_shmem_size() {
+        return size - 1; // subtract 1 for lock bit
     }
 
     RetType attach_to_shm() {
