@@ -28,6 +28,8 @@ VCM::VCM() {
     config_file += "/";
     config_file += DEFAULT_CONFIG_FILE;
 
+    state_info = NULL;
+
     // init
     if(init() != SUCCESS) {
         throw new std::runtime_error("Error in VCM init");
@@ -68,6 +70,10 @@ measurement_info_t* VCM::get_info(std::string measurement) {
     }
 }
 
+measurement_info_t* VCM::get_state_info() {
+    return state_info;
+}
+
 RetType VCM::init() {
     MsgLogger logger;
 
@@ -77,6 +83,13 @@ RetType VCM::init() {
         return FAILURE;
     }
 
+    // allocate the first bit for read status
+    packet_size = 1;
+    state_info = new measurement_info_t;
+    state_info->addr = 0;
+    state_info->size = 1;
+
+    // read the config file
     for(std::string line; std::getline(*f,line); ) {
         if(line == "" || !line.rfind("#",0)) { // blank or comment '#'
             continue;

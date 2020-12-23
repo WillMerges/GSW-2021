@@ -25,7 +25,7 @@
 namespace vcm {
 
     typedef struct {
-        void* addr;
+        void* addr; // offset into shmem
         size_t size;
     } measurement_info_t;
 
@@ -39,6 +39,7 @@ namespace vcm {
         VCM(std::string config_file);
         ~VCM();
         measurement_info_t* get_info(std::string measurement); // get the info of a measurement
+        measurement_info_t* get_state_info(); // get the address of the state byte
         size_t packet_size;
         // TODO maybe put addr and port in another subclass
         int src; // address and port (only for UDP right now)
@@ -49,6 +50,7 @@ namespace vcm {
         std::ifstream* f;
         std::string config_file;
         std::unordered_map<std::string, measurement_info_t*> addr_map;
+        measurement_info_t* state_info;
 
         // helper method(s)
         RetType init();
