@@ -22,10 +22,10 @@ DONE (I think) add signal handlers for SIGKILL for any process using a network /
 maybe add a status shared lib so processes can report their status
     -e.g. decom is up, decom network error, etc.
 
-add a program that attaches to dlp and views it's stdout
+DONE - was in app/view_log.sh, now reads system.fifo instead of using strace - add a program that attaches to dlp and views it's stdout
     - use strace and look for write
 
-pipe out system messages to the UI? maybe don't do this
+DONE ish - look in startup/default/start_gsw (pipes to system.fifo) (not on the network, something else could do this though) - pipe out system messages to the UI? maybe don't do this
     - they would probably go out the network
 
 DONE save the logs in shutdown_gsw
@@ -42,3 +42,10 @@ look at using Grafana and InfluxDB for UI
     -make a separate process to poll data and update influx
     -not sure how to set data as read? maybe have a unique nonce in the shmem that decom updates
         -if the nonce is the same, don't read it (nonce could just be a timestamp)
+
+add locking to shared mem:
+    -a way for a reading process to mark the shmem as read
+    -a way for a writing process to mark the shmem as written
+    -think about multiple readers
+        -assign each reader a bit in the lock byte (writer sets it, reader clears it)
+    -the lock byte can only be modified in a mutex

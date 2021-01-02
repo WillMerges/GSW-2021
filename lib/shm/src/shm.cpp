@@ -13,6 +13,8 @@
 #include "lib/shm/shm.h"
 #include "common/types.h"
 
+// TODO add some better error checking
+
 namespace shm {
 
     void* shmem = NULL;
@@ -21,14 +23,14 @@ namespace shm {
 
     RetType set_shmem_size(size_t s) {
         if(size > 0) {
-            size = s + 1; // add 1 for lock bit
+            size = s + 1; // add 1 for lock byte
             return SUCCESS;
         }
         return FAILURE;
     }
 
     size_t get_shmem_size() {
-        return size - 1; // subtract 1 for lock bit
+        return size - 1; // subtract 1 for lock byte
     }
 
     RetType attach_to_shm() {
