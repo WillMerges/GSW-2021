@@ -51,11 +51,21 @@ namespace ldms {
     }
 
     TelemetryParser::TelemetryParser(VCM* vcm) {
-        stop = false;
-        set_shmem_size(vcm->packet_size);
-        attach_to_shm();
-        shmem = get_shm_block();
+        MsgLogger logger("TelemetryParser", "Constructor");
+
+        if(FAILURE == set_shmem_size(vcm->packet_size)) {
+            logger.log_message("Could not set shared memory size");
+            throw new std::runtime_error("Could not set shared memory size");
+        }
+
+        if(FAILURE == attach_to_shm()) {
+            logger.log_message("Could not attach to shared memory");
+            throw new std::runtime_error("Could not attach to shared memory");
+        }
+
+        // shmem = get_shm_block();
         this->vcm = vcm;
+        stop = false;
     }
 
     TelemetryParser::~TelemetryParser() {
@@ -118,10 +128,18 @@ namespace ldms {
                 logger.log_message("Packet size mismatch, " +
                                     std::to_string(vcm->packet_size) +
                                     " != " + std::to_string(n) + " (received)");
-                memset(shmem, 0, vcm->packet_size);
+                //memset(shmem, 0, vcm->packet_size);
+                if(FAILURE == clear_shm()) {
+                    logger.log_message("Unable to clear shared memory");
+                    // ignore and continue on
+                }
             } else {
                 plogger.log_packet((unsigned char*)buffer, n);
-                memcpy(shmem, buffer, n);
+                //memcpy(shmem, buffer, n);
+                if(FAILURE == write_to_shm(buffer, n)) {
+                    logger.log_message("Unable to write to shared memory");
+                    // ignore and continue on
+                }
             }
         }
     }

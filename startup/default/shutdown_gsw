@@ -26,7 +26,7 @@ fi
 rm $FILE
 
 # destroy shared memory
-#${GSW_HOME}/proc/shmctl/shmctl -off
+${GSW_HOME}/proc/shmctl/shmctl -off
 
 # kill the system log FIFO
 echo "stopping log FIFO"

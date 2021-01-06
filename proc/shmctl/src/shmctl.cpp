@@ -41,10 +41,25 @@ int main(int argc, char* argv[]) {
     if(on) {
         printf("creating shared memory\n");
         logger.log_message("creating shared memory");
-        return attach_to_shm();
+        if(FAILURE == create_shm()) {
+            printf("Failed to create shared memory\n");
+            logger.log_message("Failed to create shared memory");
+            return FAILURE;
+        }
+        return SUCCESS;
     } else if(off) {
+        if(FAILURE == attach_to_shm()) {
+            printf("Shared memory not created, nothing to destroy\n");
+            logger.log_message("Shared memory not created, nothing to destroy");
+            return FAILURE;
+        }
         printf("destroying shared memory\n");
         logger.log_message("destroying shared memory");
-        return destroy_shm();
+        if(FAILURE == destroy_shm()) {
+            printf("Failed to destroy shared memory\n");
+            logger.log_message("Failed to destroy shared memory");
+            return FAILURE;
+        }
+        return SUCCESS;
     }
 }
