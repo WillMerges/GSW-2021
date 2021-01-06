@@ -49,3 +49,6 @@ add locking to shared mem:
     -think about multiple readers
         -assign each reader a bit in the lock byte (writer sets it, reader clears it)
     -the lock byte can only be modified in a mutex
+
+add logging to the shm lib (currently does none)
+    -log perror messages

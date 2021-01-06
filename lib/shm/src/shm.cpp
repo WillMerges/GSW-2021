@@ -17,7 +17,7 @@
 #include "common/types.h"
 
 // TODO add some better error checking
-
+// this is sorta done
 
 // TODO
 // use shared mem and put pthread mutexes/semaphores in it to handle locking
