@@ -57,3 +57,5 @@ instead:
 
 add logging to the shm lib (currently does none)
     -log perror messages (using strerror)
+
+remove commented out code / cleanup
