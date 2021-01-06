@@ -19,7 +19,8 @@
 
 namespace ldms {
 
-    static const int GSW_PORT = 7070;
+    // no longer a constant, uses the port from the vcm file
+    //static const int GSW_PORT = 7070;
 
     class TelemetryParser {
     public:

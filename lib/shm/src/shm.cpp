@@ -15,7 +15,25 @@
 
 // TODO add some better error checking
 
+// TODO figure out locking for readers and writers
+// have a single lock that represents "writing"
+// have read/write functions that copy in/out of shmem?
+// or just have lock/unlock functions
+
 namespace shm {
+
+    // // process node type
+    // typedef struct {
+    //     int id;
+    //     p_node_t* next;
+    // } p_node_t;
+    //
+    // // shared mem info block
+    // typedef struct {
+    //     p_node_t* writers;
+    //     p_node_t* readers;
+    // } shm_info_t;
+
 
     void* shmem = NULL;
     size_t size = 1024; // default

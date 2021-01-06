@@ -86,7 +86,8 @@ namespace ldms {
        struct sockaddr_in myaddr;
        myaddr.sin_addr.s_addr = htons(INADDR_ANY);
        myaddr.sin_family = AF_INET;
-       myaddr.sin_port = htons(GSW_PORT); // TODO maybe use multiple ports for different devices?
+       //myaddr.sin_port = htons(GSW_PORT); // TODO maybe use multiple ports for different devices?
+       myaddr.sin_port = htons(vcm->port); // use the same port for the server and client
        int rc = bind(sockfd, (struct sockaddr*) &myaddr, sizeof(myaddr));
        if(rc) {
            logger.log_message("socket bind failed");
