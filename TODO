@@ -43,12 +43,17 @@ look at using Grafana and InfluxDB for UI
     -not sure how to set data as read? maybe have a unique nonce in the shmem that decom updates
         -if the nonce is the same, don't read it (nonce could just be a timestamp)
 
+
 add locking to shared mem:
-    -a way for a reading process to mark the shmem as read
-    -a way for a writing process to mark the shmem as written
-    -think about multiple readers
-        -assign each reader a bit in the lock byte (writer sets it, reader clears it)
-    -the lock byte can only be modified in a mutex
+//    -a way for a reading process to mark the shmem as read
+//    -a way for a writing process to mark the shmem as written
+//    -think about multiple readers
+//        -assign each reader a bit in the lock byte (writer sets it, reader clears it)
+//    -the lock byte can only be modified in a mutex
+^^^ don't do it this way
+instead:
+    -make a common block of shared mem that holds pthread mutexes/semaphores
+    -control locking/unlocking of readers/writer(s) with those
 
 add logging to the shm lib (currently does none)
-    -log perror messages
+    -log perror messages (using strerror)
