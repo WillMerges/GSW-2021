@@ -22,6 +22,9 @@ void sighandler(int signum) {
 }
 
 int main() {
+    MsgLogger logger("DECOM");
+    logger.log_message("starting decom");
+
     // can't catch sigkill or sigstop though
     signal(SIGINT, sighandler);
     signal(SIGTERM, sighandler);

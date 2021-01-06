@@ -33,6 +33,7 @@ echo "starting data logging process"
 ${GSW_HOME}/proc/dlp/dlp -v | tee > ${GSW_HOME}/log/system.fifo &
 #${GSW_HOME}/proc/dlp/dlp -v &
 echo $! | cat - pidlist > temp && mv temp pidlist
+sleep 0.5
 
 # create shared memory
 ${GSW_HOME}/proc/shmctl/shmctl -on

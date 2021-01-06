@@ -9,6 +9,9 @@ then
     echo environment not set, must run '. setenv' first
 fi
 
+# TODO should probably kill DLP last (after destroying shared memory)
+#      not a huge issue though
+
 # BE CAREFUL if copying this file
 FILE=${GSW_HOME}/startup/default/pidlist
 if ! [ -f $FILE ]
