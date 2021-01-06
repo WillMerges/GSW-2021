@@ -14,6 +14,6 @@ datagramSocket.bind(listeningAddress)
 
 data = "ab"
 while(True):
-    datagramSocket.sendto(data.encode(), ("127.0.0.1", 7070))
+    datagramSocket.sendto(data.encode(), ("127.0.0.1", 8080))
     print("sent")
     time.sleep(3)
