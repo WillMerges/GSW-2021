@@ -96,7 +96,7 @@ namespace shm {
 
     RetType create_shm() {
         key_t key = ftok(file, id);
-        shmid = shmget(key, shm_size, 0666|IPC_CREAT);
+        shmid = shmget(key, shm_size, 0666|IPC_CREAT|IPC_EXCL);
         if(shmid == -1) {
             return FAILURE;
         }
@@ -108,12 +108,14 @@ namespace shm {
         key_t key = ftok(file, id);
         shmid = shmget(key, shm_size, 0666);
         if(shmid == -1) {
+            // perror
             return FAILURE;
         }
 
         shmem = shmat(shmid, (void*)0, 0);
         if(shmem == (void*) -1) {
             shmem = NULL;
+            // perror
             return FAILURE;
         }
 

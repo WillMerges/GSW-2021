@@ -4,9 +4,17 @@
 
 using namespace shm;
 
+// shmctl should NOT be turned on before this
+
 int main() {
     if(FAILURE == set_shmem_size(4)) {
         printf("Failed to set shared memory size\n");
+        return -1;
+    }
+
+
+    if(FAILURE == create_shm()) {
+        printf("Failed to create shared memory\n");
         return -1;
     }
 

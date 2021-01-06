@@ -6,6 +6,8 @@
 using namespace std;
 using namespace shm;
 
+// shmctl should NOT be turned on before this
+
 int main() {
     if(FAILURE == set_shmem_size(4)) {
         printf("Failed to set shared memory size\n");
@@ -26,8 +28,9 @@ int main() {
 
     cout << b << '\n';
 
-    if(FAILURE == detach_from_shm()) {
-        printf("Failed to detach from shared memory\n");
+
+    if(FAILURE == destroy_shm()) {
+        printf("Failed to destroy shared memory\n");
         return -1;
     }
 }
