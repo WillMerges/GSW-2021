@@ -1,0 +1,1 @@
+Can verify that shared memory is created/destroyed by using the "ipcs" command
