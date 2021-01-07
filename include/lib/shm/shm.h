@@ -12,10 +12,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-// NOTE: need to create this file on the system first (current issue)
-#define SHM_FILE "/gsw/shmfile" // TODO this can't be a fixed location (or can it? idk)
-// probably need to do this anyways
-
 namespace shm {
     // used for generating shm id
     const int id = 65; // random number

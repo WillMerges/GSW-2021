@@ -12,17 +12,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <string>
 #include <pthread.h>
 // #include <semaphore.h> // don't need (using pthread_mutex_t instead)
 #include "lib/shm/shm.h"
 // #include "lib/dls/dls.h" // TODO add logging (make sure to change startup order)
 #include "common/types.h"
-
-// TODO
-// change shared mem id
-// if running multiple GSW instances they will try to create the same shared mem
-// maybe hash some file location (like GSW_HOME?)
-// or hash VCM file location (so could run multiple configs in same GSW at same time?)
 
 // NOTE:
 // shared memory can be manually altered with 'ipcs' and 'ipcrm' programs
@@ -39,6 +34,8 @@
     } \
 
 namespace shm {
+
+    std::string shm_file = "";
 
     // info block for locking shared memory
     typedef struct {
@@ -163,9 +160,22 @@ namespace shm {
     }
 
     RetType create_shm() {
+        // create shmem file
+        char* env = getenv("GSW_HOME");
+        if(env == NULL) {
+            //logger.log_message("GSW_HOME environment variable not set!");
+            return FAILURE;
+        }
+        shm_file = env;
+        shm_file += "/shm";
+        std::string cmd = "touch ";
+        cmd += shm_file;
+        system(cmd.c_str());
+
         // create info shmem
-        key_t info_key = ftok(SHM_FILE, info_id);
+        key_t info_key = ftok(shm_file.c_str(), info_id);
         if(info_key == (key_t) -1) {
+            perror("EXPECTED FAIL");
             return FAILURE;
         }
 
@@ -214,7 +224,7 @@ namespace shm {
         info = NULL;
 
         // set up shmem
-        key_t key = ftok(SHM_FILE, id);
+        key_t key = ftok(shm_file.c_str(), id);
         if(key == (key_t) -1) {
             return FAILURE;
         }
@@ -228,7 +238,16 @@ namespace shm {
     }
 
     RetType attach_to_shm() {
-        key_t info_key = ftok(SHM_FILE, info_id);
+        // get path of shmem file
+        char* env = getenv("GSW_HOME");
+        if(env == NULL) {
+            //logger.log_message("GSW_HOME environment variable not set!");
+            return FAILURE;
+        }
+        shm_file = env;
+        shm_file += "/shm";
+
+        key_t info_key = ftok(shm_file.c_str(), info_id);
         if(info_key == (key_t) -1) {
             return FAILURE;
         }
@@ -245,7 +264,7 @@ namespace shm {
             return FAILURE;
         }
 
-        key_t key = ftok(SHM_FILE, id);
+        key_t key = ftok(shm_file.c_str(), id);
         if(key == (key_t) -1) {
             return FAILURE;
         }
@@ -282,6 +301,11 @@ namespace shm {
     }
 
     RetType destroy_shm() {
+        // delete shmem file
+        std::string cmd = "rm ";
+        cmd += shm_file;
+        system(cmd.c_str());
+
         RetType ret = SUCCESS;
 
         if(shmid == -1 || info_shmid == -1) {
