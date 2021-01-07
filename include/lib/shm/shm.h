@@ -8,23 +8,24 @@
 *
 *  RIT Launch Initiative
 *********************************************************************/
-#include "common/types.h"
 #include <stdint.h>
 #include <stdlib.h>
+#include "lib/vcm/vcm.h"
+#include "common/types.h"
 
 namespace shm {
     // used for generating shm id
     const int id = 65; // random number
     const int info_id = 23;
 
-    // set the size of the block
-    RetType set_shmem_size(size_t size);
+    // // set the size of the block
+    // RetType set_shmem_size(size_t size);
 
     // get the size of the block
     size_t get_shmem_size();
 
     // attach the current process to the shared memory block
-    RetType attach_to_shm();
+    RetType attach_to_shm(vcm::VCM* vcm);
 
     // detach the current process to the shared memory block
     RetType detach_from_shm();
@@ -41,7 +42,7 @@ namespace shm {
     RetType read_from_shm(void* dst, size_t size);
 
     // create shared memory
-    RetType create_shm();
+    RetType create_shm(vcm::VCM* vcm);
 
     // set all shared memory to zero
     RetType clear_shm();

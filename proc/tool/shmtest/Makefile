@@ -9,18 +9,24 @@ CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
 CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -ggdb
 LDFLAGS = -L$(GSW_HOME)/lib/bin/ -Wl,-rpath=$(GSW_HOME)/lib/bin/
 
-LIBS = -lshm
+LIBS = -lvcm -lshm -ldls
 
 CPP_FILES := $(wildcard src/*.cpp)
 C_FILES := $(wildcard src/*.c)
 
-OBJS := $(CPP_FILES:.cpp=.o) $(C_FILES:.c=.o)
-
 .PHONY: all clean
 
-all:
-	$(CXX) $(CPPFLAGS) src/shmwrite.cpp -o write_test $(LDFLAGS) $(LIBS)
-	$(CXX) $(CPPFLAGS) src/shmread.cpp -o read_test $(LDFLAGS) $(LIBS)
+all: shmread shmwrite
+
+shmread: src/shmread.o
+	$(CXX) $(LDFLAGS) -o read_test src/shmread.o $(LIBS)
+
+shmwrite: src/shmwrite.o
+	$(CXX) $(LDFLAGS) -o write_test src/shmwrite.o $(LIBS)
+
+#src/*.o:
+#	$(CXX) $(CPPFLAGS) $(CPP_FILES)#
+#	$(CC) $(CFLAGS) $(C_FILES)
 
 clean:
 	rm *.o write_test read_test

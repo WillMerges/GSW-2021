@@ -8,4 +8,4 @@ all:
 clean:
 	-$(MAKE) -C shmtest clean
 	-$(MAKE) -C mqueue_test clean
-	-$(MAKE) -C mqueue_test clean
+	-$(MAKE) -C vcm_test clean

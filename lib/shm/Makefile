@@ -11,7 +11,7 @@ CFLAGS = I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -fpic -ggdb
 CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -fpic -ggdb
 LDFLAGS = -shared
 
-LIBS = -lrt -lpthread
+LIBS = -ldls -lvcm -lrt -lpthread
 
 CPP_FILES := $(wildcard src/*.cpp)
 C_FILES := $(wildcard src/*.c)
@@ -27,4 +27,3 @@ $(TARGET): $(OBJS)
 
 clean:
 	rm src/*.o $(TARGET)
-	rm $TARGET

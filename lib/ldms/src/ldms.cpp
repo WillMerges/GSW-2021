@@ -53,12 +53,12 @@ namespace ldms {
     TelemetryParser::TelemetryParser(VCM* vcm) {
         MsgLogger logger("TelemetryParser", "Constructor");
 
-        if(FAILURE == set_shmem_size(vcm->packet_size)) {
-            logger.log_message("Could not set shared memory size");
-            throw new std::runtime_error("Could not set shared memory size");
-        }
+        // if(FAILURE == set_shmem_size(vcm->packet_size)) {
+        //     logger.log_message("Could not set shared memory size");
+        //     throw new std::runtime_error("Could not set shared memory size");
+        // }
 
-        if(FAILURE == attach_to_shm()) {
+        if(FAILURE == attach_to_shm(vcm)) {
             logger.log_message("Could not attach to shared memory");
             throw new std::runtime_error("Could not attach to shared memory");
         }

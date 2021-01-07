@@ -1,24 +1,28 @@
-#include "lib/shm/shm.h"
 #include <stdint.h>
 #include <stdio.h>
+#include "lib/shm/shm.h"
+#include "lib/vcm/vcm.h"
 
 using namespace shm;
+using namespace vcm;
 
 // shmctl should NOT be turned on before this
 
 int main() {
-    if(FAILURE == set_shmem_size(4)) {
-        printf("Failed to set shared memory size\n");
-        return -1;
-    }
+    // if(FAILURE == set_shmem_size(4)) {
+    //     printf("Failed to set shared memory size\n");
+    //     return -1;
+    // }
 
+    VCM vcm;
+    vcm.packet_size = 4; // this is bad, only changing for testing
 
-    if(FAILURE == create_shm()) {
+    if(FAILURE == create_shm(&vcm)) {
         printf("Failed to create shared memory\n");
         return -1;
     }
 
-    if(FAILURE == attach_to_shm()) {
+    if(FAILURE == attach_to_shm(&vcm)) {
         printf("Failed to attach to shared memory\n");
         return -1;
     }

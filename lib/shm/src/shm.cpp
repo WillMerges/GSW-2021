@@ -16,6 +16,7 @@
 #include <pthread.h>
 // #include <semaphore.h> // don't need (using pthread_mutex_t instead)
 #include "lib/shm/shm.h"
+#include "lib/vcm/vcm.h"
 // #include "lib/dls/dls.h" // TODO add logging (make sure to change startup order)
 #include "common/types.h"
 
@@ -33,9 +34,11 @@
         return FAILURE; \
     } \
 
+
 namespace shm {
 
-    std::string shm_file = "";
+    // std::string shm_file = "";
+    vcm::VCM* vcm = NULL;
 
     // info block for locking shared memory
     typedef struct {
@@ -53,7 +56,7 @@ namespace shm {
 
     // main shmem block
     void* shmem = NULL;
-    size_t shm_size = 1024; // default
+    // size_t shm_size = 1024; // default
     int shmid = -1;
 
 
@@ -63,7 +66,7 @@ namespace shm {
         if(!shmem || !info) {
             return FAILURE;
         }
-        if(size > shm_size) {
+        if(size > vcm->packet_size) {
             return FAILURE;
         }
 
@@ -95,7 +98,7 @@ namespace shm {
         if(!shmem || !info) {
             return FAILURE;
         }
-        if(size < shm_size) {
+        if(size < vcm->packet_size) {
             return FAILURE;
         }
 
@@ -133,7 +136,7 @@ namespace shm {
         V(info->wmutex);
         P(info->resource);
 
-        memset(shmem, 0, shm_size);
+        memset(shmem, 0, vcm->packet_size);
 
         V(info->resource);
 
@@ -147,35 +150,26 @@ namespace shm {
         return SUCCESS;
     }
 
-    RetType set_shmem_size(size_t s) {
-        if(s > 0) {
-            shm_size = s;
-            return SUCCESS;
-        }
-        return FAILURE;
-    }
+    // RetType set_shmem_size(size_t s) {
+    //     if(s > 0) {
+    //         vcm->packet_size = s;
+    //         return SUCCESS;
+    //     }
+    //     return FAILURE;
+    // }
 
     size_t get_shmem_size() {
-        return shm_size;
+        if(vcm) {
+            return vcm->packet_size;
+        }
+        return 0;
+        //return vcm->packet_size;
     }
 
-    RetType create_shm() {
-        // create shmem file
-        char* env = getenv("GSW_HOME");
-        if(env == NULL) {
-            //logger.log_message("GSW_HOME environment variable not set!");
-            return FAILURE;
-        }
-        shm_file = env;
-        shm_file += "/shm";
-        std::string cmd = "touch ";
-        cmd += shm_file;
-        system(cmd.c_str());
-
+    RetType create_shm(vcm::VCM* vcm) {
         // create info shmem
-        key_t info_key = ftok(shm_file.c_str(), info_id);
+        key_t info_key = ftok(vcm->config_file.c_str(), info_id);
         if(info_key == (key_t) -1) {
-            perror("EXPECTED FAIL");
             return FAILURE;
         }
 
@@ -189,7 +183,6 @@ namespace shm {
         info = (shm_info_t*) shmat(info_shmid, (void*)0, 0);
         if(info == (void*) -1) {
             info = NULL;
-            // perror
             return FAILURE;
         }
 
@@ -214,6 +207,7 @@ namespace shm {
             return FAILURE;
         }
 
+        // init reader/writer counts to 0
         info->readers = 0;
         info->writers = 0;
 
@@ -224,12 +218,13 @@ namespace shm {
         info = NULL;
 
         // set up shmem
-        key_t key = ftok(shm_file.c_str(), id);
+        key_t key = ftok(vcm->config_file.c_str(), id);
         if(key == (key_t) -1) {
             return FAILURE;
         }
 
-        shmid = shmget(key, shm_size, 0666|IPC_CREAT|IPC_EXCL);
+        // shmid = shmget(key, vcm->packet_size, 0666|IPC_CREAT|IPC_EXCL);
+        shmid = shmget(key, vcm->packet_size, 0666|IPC_CREAT|IPC_EXCL);
         if(shmid == -1) {
             return FAILURE;
         }
@@ -237,17 +232,10 @@ namespace shm {
         return SUCCESS;
     }
 
-    RetType attach_to_shm() {
-        // get path of shmem file
-        char* env = getenv("GSW_HOME");
-        if(env == NULL) {
-            //logger.log_message("GSW_HOME environment variable not set!");
-            return FAILURE;
-        }
-        shm_file = env;
-        shm_file += "/shm";
+    RetType attach_to_shm(vcm::VCM* selected_vcm) {
+        vcm = selected_vcm; // hopefully this doesn't get deleted
 
-        key_t info_key = ftok(shm_file.c_str(), info_id);
+        key_t info_key = ftok(vcm->config_file.c_str(), info_id);
         if(info_key == (key_t) -1) {
             return FAILURE;
         }
@@ -264,12 +252,12 @@ namespace shm {
             return FAILURE;
         }
 
-        key_t key = ftok(shm_file.c_str(), id);
+        key_t key = ftok(vcm->config_file.c_str(), id);
         if(key == (key_t) -1) {
             return FAILURE;
         }
 
-        shmid = shmget(key, shm_size, 0666);
+        shmid = shmget(key, vcm->packet_size, 0666);
         if(shmid == -1) {
             return FAILURE;
         }
@@ -294,6 +282,7 @@ namespace shm {
         if(shmem) {
             if(shmdt(shmem) == 0) {
                 shmem = NULL;
+                vcm = NULL;
                 return SUCCESS;
             }
         }
@@ -301,11 +290,6 @@ namespace shm {
     }
 
     RetType destroy_shm() {
-        // delete shmem file
-        std::string cmd = "rm ";
-        cmd += shm_file;
-        system(cmd.c_str());
-
         RetType ret = SUCCESS;
 
         if(shmid == -1 || info_shmid == -1) {
@@ -326,6 +310,14 @@ namespace shm {
             shmem = NULL;
         }
 
+        // only reset vcm if
+        if(ret == SUCCESS) {
+            vcm = NULL;
+        }
+
         return ret;
     }
 }
+
+#undef P
+#undef V

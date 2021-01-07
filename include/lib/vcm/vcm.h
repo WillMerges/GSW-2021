@@ -44,10 +44,10 @@ namespace vcm {
         int src; // address and port (only for UDP right now)
         int port;
         protocol_t protocol;
+        std::string config_file;
     private:
         // local vars
         std::ifstream* f;
-        std::string config_file;
         std::unordered_map<std::string, measurement_info_t*> addr_map;
 
         // helper method(s)
