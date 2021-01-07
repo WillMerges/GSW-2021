@@ -44,7 +44,7 @@ look at using Grafana and InfluxDB for UI
         -if the nonce is the same, don't read it (nonce could just be a timestamp)
 
 
-add locking to shared mem:
+DONE add locking to shared mem:
 //    -a way for a reading process to mark the shmem as read
 //    -a way for a writing process to mark the shmem as written
 //    -think about multiple readers
