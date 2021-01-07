@@ -7,6 +7,7 @@ set +e
 # for now use a default config file
 ln -s ../data/sample/config ../data/config
 
+chmod +x ../setenv
 chmod +x ../startup/*/start_*
 chmod +x ../shutdown/*/shutdown_*
 chmod +x ../data/select_config.sh

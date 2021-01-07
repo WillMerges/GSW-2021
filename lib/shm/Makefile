@@ -7,11 +7,11 @@ CC = g++
 
 OPTIONS +=
 
-CFLAGS = I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -fpic
-CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -fpic
+CFLAGS = I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -fpic -ggdb
+CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -fpic -ggdb
 LDFLAGS = -shared
 
-LIBS =
+LIBS = -lrt -lpthread
 
 CPP_FILES := $(wildcard src/*.cpp)
 C_FILES := $(wildcard src/*.c)

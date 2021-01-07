@@ -12,10 +12,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+// NOTE: need to create this file on the system first (current issue)
+#define SHM_FILE "/gsw/shmfile" // TODO this can't be a fixed location (or can it? idk)
+// probably need to do this anyways
+
 namespace shm {
     // used for generating shm id
     const int id = 65; // random number
-    const char* const file = "/gsw/shmfile";
+    const int info_id = 23;
 
     // set the size of the block
     RetType set_shmem_size(size_t size);
@@ -45,8 +49,4 @@ namespace shm {
 
     // set all shared memory to zero
     RetType clear_shm();
-
-    // return pointer to shared memory block
-    // void* get_shm_block();
-
 }
