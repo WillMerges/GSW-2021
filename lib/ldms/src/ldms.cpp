@@ -128,14 +128,12 @@ namespace ldms {
                 logger.log_message("Packet size mismatch, " +
                                     std::to_string(vcm->packet_size) +
                                     " != " + std::to_string(n) + " (received)");
-                //memset(shmem, 0, vcm->packet_size);
                 if(FAILURE == clear_shm()) {
                     logger.log_message("Unable to clear shared memory");
                     // ignore and continue on
                 }
             } else {
                 plogger.log_packet((unsigned char*)buffer, n);
-                //memcpy(shmem, buffer, n);
                 if(FAILURE == write_to_shm(buffer, n)) {
                     logger.log_message("Unable to write to shared memory");
                     // ignore and continue on

@@ -127,6 +127,7 @@ RetType VCM::init() {
             }
             packet_size += entry->size;
             addr_map[fst] = entry;
+            measurements.push_back(fst);
         } else {
             logger.log_message("Invalid line: " + line);
             return FAILURE;

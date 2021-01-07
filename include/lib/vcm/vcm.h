@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <fstream>
 #include <unordered_map>
+#include <vector>
 #include "common/types.h"
 
 #define DEFAULT_CONFIG_FILE "data/config"
@@ -39,6 +40,7 @@ namespace vcm {
         VCM(std::string config_file);
         ~VCM();
         measurement_info_t* get_info(std::string measurement); // get the info of a measurement
+        std::vector<std::string> measurements; // list of measurement names
         size_t packet_size;
         // TODO maybe put addr and port in another subclass
         int src; // address and port (only for UDP right now)
