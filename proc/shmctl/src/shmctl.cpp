@@ -1,13 +1,15 @@
 #include <stdio.h>
 #include <string.h>
 #include <iostream>
+#include <string>
 #include "lib/vcm/vcm.h"
 #include "lib/shm/shm.h"
 #include "common/types.h"
 #include "lib/dls/dls.h"
 
-// run as shmctl -on or shmctl -off to create and destroy shared memory for the
-// current VCM file
+// run as shmctl -on or shmctl -off to create and destroy shared memory
+// option -f argument to specify VCM config file (current default used otherwise)
+// use as shmctl (-on | -off) [-f path_to_config_file]
 
 using namespace vcm;
 using namespace shm;
@@ -19,11 +21,20 @@ bool off = false;
 int main(int argc, char* argv[]) {
     MsgLogger logger("SHMCTL", "");
 
+    std::string config_file = "";
+
     for(int i = 1; i < argc; i++) {
         if(!strcmp(argv[i], "-on") && !off) {
             on = true;
         } else if(!strcmp(argv[i], "-off") && !on) {
             off = true;
+        } else if(!strcmp(argv[i], "-f")) {
+            if(i + 1 > argc) {
+                printf("Must specify a path to the config file after using the -f option\n");
+                return -1;
+            } else {
+                config_file = argv[++i];
+            }
         } else {
             printf("Invalid argument: %s\n", argv[i]);
             return -1;
@@ -32,7 +43,11 @@ int main(int argc, char* argv[]) {
 
     VCM* vcm;
     try {
-        vcm = new VCM(); // use default config file
+        if(config_file == "") {
+            vcm = new VCM(); // use default config file
+        } else {
+            vcm = new VCM(config_file); // use specified config file
+        }
     } catch (const std::runtime_error& e) {
         std::cout << e.what() << '\n';
         exit(-1);

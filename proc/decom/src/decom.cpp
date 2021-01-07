@@ -4,6 +4,7 @@
 #include "lib/dls/dls.h"
 #include "common/types.h"
 #include <csignal>
+#include <string>
 
 using namespace ldms;
 using namespace dls;
@@ -21,7 +22,13 @@ void sighandler(int signum) {
     exit(signum);
 }
 
-int main() {
+int main(int argc, char** argv) {
+    // interpret the 1st argument as a config_file location if available
+    std::string config_file = "";
+    if(argc > 1) {
+        config_file = argv[1];
+    }
+
     MsgLogger logger("DECOM");
     logger.log_message("starting decom");
 
@@ -32,7 +39,11 @@ int main() {
     signal(SIGFPE, sighandler);
     signal(SIGABRT, sighandler);
 
-    tp = ldms::create_default_parser();
+    if(config_file == "") {
+        tp = ldms::create_default_parser();
+    } else {
+        tp = ldms::create_parser(config_file);
+    }
     if(!tp) {
         printf("Unable to create parser\n");
         return -1;

@@ -32,7 +32,7 @@ DONE save the logs in shutdown_gsw
 
 consider changing timestamping to be when log_message is called rather than inserted by DLP
 
-maybe add an option to pass in a different VCM config file to shmctl process
+DONE maybe add an option to pass in a different VCM config file to shmctl and decom process
 
 consider adding priorities to system messages
     - show high priorities in a notification
