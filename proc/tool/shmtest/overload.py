@@ -1,4 +1,4 @@
-#!/bin/python
+#!/usr/bin/python
 
 #Send a lot of writes
 

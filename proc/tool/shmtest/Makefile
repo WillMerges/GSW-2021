@@ -32,4 +32,5 @@ script:
 #	$(CC) $(CFLAGS) $(C_FILES)
 
 clean:
-	rm src/*.o write_test read_test
+	-rm src/*.o write_test read_test
+	-chmod -x overload.py
