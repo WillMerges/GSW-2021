@@ -9,4 +9,4 @@ src = 127.0.0.1
 port = 8080
 
 # [measurement name] [measurement size in bytes]
-TEST 2
+TEST 4 

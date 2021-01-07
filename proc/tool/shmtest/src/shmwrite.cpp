@@ -9,18 +9,13 @@ using namespace vcm;
 // shmctl should NOT be turned on before this
 
 int main() {
-    // if(FAILURE == set_shmem_size(4)) {
-    //     printf("Failed to set shared memory size\n");
+    VCM vcm;
+    //vcm.packet_size = 4; // this is bad, only changing for testing
+
+    // if(FAILURE == create_shm(&vcm)) {
+    //     printf("Failed to create shared memory\n");
     //     return -1;
     // }
-
-    VCM vcm;
-    vcm.packet_size = 4; // this is bad, only changing for testing
-
-    if(FAILURE == create_shm(&vcm)) {
-        printf("Failed to create shared memory\n");
-        return -1;
-    }
 
     if(FAILURE == attach_to_shm(&vcm)) {
         printf("Failed to attach to shared memory\n");
@@ -33,7 +28,7 @@ int main() {
     b[2] = 'c';
     b[3] = 0;
 
-    if(FAILURE == write_to_shm(b, 4)) {
+    if(FAILURE == write_to_shm(b, (size_t)4)) { // for whatever reason the compiler wants this to be type cast
         printf("Failed to write to shared memory\n");
         return -1;
     }

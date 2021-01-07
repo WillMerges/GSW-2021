@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <string>
 #include <pthread.h>
 #include <semaphore.h>
@@ -42,16 +43,23 @@
 
 namespace shm {
 
+    // VCM (for size and file name)
     vcm::VCM* vcm = NULL;
+
+    // nonce to check for updates
+    unsigned int last_nonce = 0; // this will wrap around, but that's fine
 
     // info block for locking shared memory
     typedef struct {
+        unsigned int nonce;
         unsigned int readers;
         unsigned int writers;
         sem_t rmutex;
         sem_t wmutex;
         sem_t readTry;
         sem_t resource;
+        pthread_mutex_t nonce_lock;
+        pthread_cond_t nonce_cond;
     } shm_info_t;
 
     // info block
@@ -65,11 +73,11 @@ namespace shm {
 
     // reading and writing is done with *writers-preference*
     // https://en.wikipedia.org/wiki/Readers%E2%80%93writers_problem
-    RetType write_to_shm(void* src, size_t size) {
+    RetType write_to_shm(void* src, size_t size, size_t offset) {
         if(!shmem || !info) {
             return FAILURE;
         }
-        if(size > vcm->packet_size) {
+        if((size + offset) > vcm->packet_size) {
             return FAILURE;
         }
 
@@ -79,9 +87,12 @@ namespace shm {
             P(info->readTry);
         }
         V(info->wmutex);
+
         P(info->resource);
 
-        memcpy(shmem, src, size);
+        memcpy((unsigned char*)shmem + offset, src, size);
+        info->nonce++; // update the nonce
+        pthread_cond_broadcast(&(info->nonce_cond)); // TODO error check return value
 
         V(info->resource);
 
@@ -97,11 +108,11 @@ namespace shm {
 
     // reading and writing is done with *writers-preference*
     // https://en.wikipedia.org/wiki/Readers%E2%80%93writers_problem
-    RetType read_from_shm(void* dst, size_t size) {
+    RetType read_from_shm(void* dst, size_t size, size_t offset) {
         if(!shmem || !info) {
             return FAILURE;
         }
-        if(size < vcm->packet_size) {
+        if((size + offset) < vcm->packet_size) {
             return FAILURE;
         }
 
@@ -114,7 +125,8 @@ namespace shm {
         V(info->rmutex);
         V(info->readTry);
 
-        memcpy(dst, shmem, size);
+        memcpy(dst, (unsigned char*)shmem + offset, size);
+        last_nonce = info->nonce;
 
         P(info->rmutex);
         info->readers--;
@@ -126,6 +138,96 @@ namespace shm {
         return SUCCESS;
     }
 
+    RetType read_from_shm_if_updated(void* dst, size_t size, size_t offset) {
+        RetType ret = SUCCESS;
+
+        if(!shmem || !info) {
+            return FAILURE;
+        }
+        if((size + offset) < vcm->packet_size) {
+            return FAILURE;
+        }
+
+        P(info->readTry);
+        P(info->rmutex);
+        info->readers++;
+        if(info->readers == 1) {
+            P(info->resource);
+        }
+        V(info->rmutex);
+        V(info->readTry);
+
+        if(last_nonce == info->nonce) { // no update
+            ret = FAILURE;
+        } else { // updated, do the read
+            memcpy(dst, (unsigned char*)shmem + offset, size);
+            last_nonce = info->nonce;
+        }
+
+        P(info->rmutex);
+        info->readers--;
+        if(info->readers == 0) {
+            V(info->resource);
+        }
+        V(info->rmutex);
+
+        return ret;
+    }
+
+    // TODO check if this causes deadlock
+    RetType read_from_shm_block(void* dst, size_t size, size_t offset) {
+        if(!shmem || !info) {
+            return FAILURE;
+        }
+        if((size + offset) < vcm->packet_size) {
+            return FAILURE;
+        }
+
+        int exit = 0;
+        //pthread_mutex_lock(&(info->nonce_lock)); // this is fake
+        while(!exit) {
+            // enter as a reader
+            P(info->readTry);
+            P(info->rmutex);
+            info->readers++;
+            if(info->readers == 1) {
+                P(info->resource);
+            }
+            V(info->rmutex);
+            V(info->readTry);
+
+            if(last_nonce == info->nonce) { // block
+                // leave as a reader
+                P(info->rmutex);
+                info->readers--;
+                if(info->readers == 0) {
+                    V(info->resource);
+                }
+                V(info->rmutex);
+
+                // we can guarantee no one changed the nonce so we can use a 'fake' lock
+                // only the writer can change the nonce
+                // so block here
+                pthread_cond_wait(&(info->nonce_cond), &(info->nonce_lock)); // TODO error check return value
+            } else { // do the read
+                memcpy(dst, (unsigned char*)shmem + offset, size);
+                last_nonce = info->nonce;
+                exit = 1;
+            }
+        }
+
+        // leave as a reader
+        P(info->rmutex);
+        info->readers--;
+        if(info->readers == 0) {
+            V(info->resource);
+        }
+        V(info->rmutex);
+
+        return SUCCESS;
+    }
+
+    // locking same as write
     RetType clear_shm() {
         if(!shmem || !info) {
             return FAILURE;
@@ -140,6 +242,7 @@ namespace shm {
         P(info->resource);
 
         memset(shmem, 0, vcm->packet_size);
+        info->nonce++; // update the nonce
 
         V(info->resource);
 
@@ -158,7 +261,6 @@ namespace shm {
             return vcm->packet_size;
         }
         return 0;
-        //return vcm->packet_size;
     }
 
     RetType create_shm(vcm::VCM* vcm) {
@@ -187,9 +289,21 @@ namespace shm {
         INIT(info->readTry, 1);
         INIT(info->resource, 1);
 
+        // init a dummy lock to use with the nonce
+        info->nonce_lock = PTHREAD_MUTEX_INITIALIZER;
+
+        // init a shared condition variable to block for updates
+        // TODO check the returns of these for errors
+        pthread_condattr_t cattr;
+        pthread_condattr_setpshared(&cattr, PTHREAD_PROCESS_SHARED);
+        pthread_cond_init(&(info->nonce_cond), &cattr);
+
         // init reader/writer counts to 0
         info->readers = 0;
         info->writers = 0;
+
+        // start the nonce at 0
+        info->nonce = 0;
 
         // detach from info shmem
         if(shmdt(info) != 0) {
@@ -222,7 +336,6 @@ namespace shm {
 
         info_shmid = shmget(info_key, sizeof(shm_info_t), 0666);
         if(info_shmid == -1) {
-            perror("ftok: ");
             return FAILURE;
         }
 
