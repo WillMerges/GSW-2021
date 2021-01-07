@@ -13,7 +13,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <pthread.h>
-// #include <semaphore.h>
+// #include <semaphore.h> // don't need (using pthread_mutex_t instead)
 #include "lib/shm/shm.h"
 // #include "lib/dls/dls.h" // TODO add logging (make sure to change startup order)
 #include "common/types.h"
@@ -40,7 +40,7 @@
 
 namespace shm {
 
-    // multiple simultaneous readers only one writer allowed
+    // info block for locking shared memory
     typedef struct {
         unsigned int readers;
         unsigned int writers;
@@ -50,12 +50,15 @@ namespace shm {
         pthread_mutex_t resource;
     } shm_info_t;
 
+    // info block
     shm_info_t* info = NULL;
     int info_shmid = -1;
 
+    // main shmem block
     void* shmem = NULL;
     size_t shm_size = 1024; // default
     int shmid = -1;
+
 
     // reading and writing is done with *writers-preference*
     // https://en.wikipedia.org/wiki/Readers%E2%80%93writers_problem
@@ -89,7 +92,6 @@ namespace shm {
         return SUCCESS;
     }
 
-
     // reading and writing is done with *writers-preference*
     // https://en.wikipedia.org/wiki/Readers%E2%80%93writers_problem
     RetType read_from_shm(void* dst, size_t size) {
@@ -121,13 +123,30 @@ namespace shm {
         return SUCCESS;
     }
 
-    // TODO oops
-    // THIS NEEDS LOCKING TOO!!!
     RetType clear_shm() {
-        if(shmem) {
+        if(!shmem || !info) {
             return FAILURE;
         }
+
+        P(info->wmutex);
+        info->writers++;
+        if(info->writers == 1) {
+            P(info->readTry);
+        }
+        V(info->wmutex);
+        P(info->resource);
+
         memset(shmem, 0, shm_size);
+
+        V(info->resource);
+
+        P(info->wmutex);
+        info->writers--;
+        if(info->writers == 0) {
+            V(info->readTry);
+        }
+        V(info->wmutex);
+
         return SUCCESS;
     }
 
