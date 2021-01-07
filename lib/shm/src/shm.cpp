@@ -14,40 +14,44 @@
 #include <stdio.h>
 #include <string>
 #include <pthread.h>
-// #include <semaphore.h> // don't need (using pthread_mutex_t instead)
+#include <semaphore.h>
 #include "lib/shm/shm.h"
 #include "lib/vcm/vcm.h"
 // #include "lib/dls/dls.h" // TODO add logging (make sure to change startup order)
 #include "common/types.h"
 
-// NOTE:
-// shared memory can be manually altered with 'ipcs' and 'ipcrm' programs
+// NOTE: shared memory can be manually altered with 'ipcs' and 'ipcrm' programs
 
 // P and V semaphore macros
 #define P(X) \
-    if(0 != pthread_mutex_lock( &( (X) ) )) { \
+    if(0 != sem_wait( &( (X) ) )) { \
         return FAILURE; \
     } \
 
 #define V(X) \
-    if(0 != pthread_mutex_unlock( &( (X) ) )) { \
+    if(0 != sem_post( &( (X) ) )) { \
+        return FAILURE; \
+    } \
+
+// initialize semaphore macro
+#define INIT(X, V) \
+    if(0 != sem_init( &( (X) ), 1, (V) )) { \
         return FAILURE; \
     } \
 
 
 namespace shm {
 
-    // std::string shm_file = "";
     vcm::VCM* vcm = NULL;
 
     // info block for locking shared memory
     typedef struct {
         unsigned int readers;
         unsigned int writers;
-        pthread_mutex_t rmutex;
-        pthread_mutex_t wmutex;
-        pthread_mutex_t readTry;
-        pthread_mutex_t resource;
+        sem_t rmutex;
+        sem_t wmutex;
+        sem_t readTry;
+        sem_t resource;
     } shm_info_t;
 
     // info block
@@ -56,7 +60,6 @@ namespace shm {
 
     // main shmem block
     void* shmem = NULL;
-    // size_t shm_size = 1024; // default
     int shmid = -1;
 
 
@@ -150,14 +153,6 @@ namespace shm {
         return SUCCESS;
     }
 
-    // RetType set_shmem_size(size_t s) {
-    //     if(s > 0) {
-    //         vcm->packet_size = s;
-    //         return SUCCESS;
-    //     }
-    //     return FAILURE;
-    // }
-
     size_t get_shmem_size() {
         if(vcm) {
             return vcm->packet_size;
@@ -186,26 +181,11 @@ namespace shm {
             return FAILURE;
         }
 
-        // set up shmem info
-        if(pthread_mutex_init(&(info->rmutex), NULL) != 0) {
-            // error creating mutex
-            return FAILURE;
-        }
-
-        if(pthread_mutex_init(&(info->wmutex), NULL) != 0) {
-            // error creating mutex
-            return FAILURE;
-        }
-
-        if(pthread_mutex_init(&(info->readTry), NULL) != 0) {
-            // error creating mutex
-            return FAILURE;
-        }
-
-        if(pthread_mutex_init(&(info->resource), NULL) != 0) {
-            // error creating mutex
-            return FAILURE;
-        }
+        // init semaphores
+        INIT(info->rmutex, 1);
+        INIT(info->wmutex, 1);
+        INIT(info->readTry, 1);
+        INIT(info->resource, 1);
 
         // init reader/writer counts to 0
         info->readers = 0;
@@ -321,3 +301,4 @@ namespace shm {
 
 #undef P
 #undef V
+#undef INIT
