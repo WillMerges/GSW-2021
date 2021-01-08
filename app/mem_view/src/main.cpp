@@ -73,7 +73,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-
     // clear the screen
     printf("\033[2J");
 

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# ignore failed commands
+set +e
+
+# change script permissions
+chmod +x setenv
+chmod +x startup/*/start_*
+chmod +x data/select_config.sh
+chmod +x log/clean.sh
+chmod +x log/save.sh
+chmod +x log/fifo.sh
+chmod +x startup/select_current.sh
+
+. setenv
+
+# TODO let operator select this
+# for now use a default config file
+(cd data; ./select_config.sh sample)
+
+make all
