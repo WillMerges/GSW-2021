@@ -2,7 +2,6 @@
 #include <string.h>
 #include <iostream>
 #include <string>
-#include <stdint.h>
 #include "lib/vcm/vcm.h"
 #include "lib/shm/shm.h"
 #include "lib/dls/dls.h"
@@ -20,7 +19,7 @@ bool on = false;
 bool off = false;
 
 int main(int argc, char* argv[]) {
-    MsgLogger logger("SHMCTL", "");
+    MsgLogger logger("SHMCTL");
 
     std::string config_file = "";
 

@@ -59,3 +59,11 @@ add logging to the shm lib (currently does none)
     -log perror messages (using strerror)
 
 remove commented out code / cleanup
+
+abstract networking to a network manager shared lib
+    -queues messages up
+    -another process sends them out
+        -or using some smart locking instead and unbind after each send
+
+consider adding types to measurements in VCM file
+    -have an enum associationed with a measurements info_t that vcm::VCM::get_info returns

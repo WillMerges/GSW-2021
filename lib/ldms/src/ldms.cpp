@@ -7,6 +7,7 @@
 #include <string.h>
 #include <exception>
 #include <unistd.h>
+#include <iostream> // TODO remove
 #include "common/types.h"
 #include "lib/vcm/vcm.h"
 #include "lib/dls/dls.h"
@@ -53,11 +54,6 @@ namespace ldms {
     TelemetryParser::TelemetryParser(VCM* vcm) {
         MsgLogger logger("TelemetryParser", "Constructor");
 
-        // if(FAILURE == set_shmem_size(vcm->packet_size)) {
-        //     logger.log_message("Could not set shared memory size");
-        //     throw new std::runtime_error("Could not set shared memory size");
-        // }
-
         if(FAILURE == attach_to_shm(vcm)) {
             logger.log_message("Could not attach to shared memory");
             throw new std::runtime_error("Could not attach to shared memory");
@@ -87,6 +83,18 @@ namespace ldms {
            throw new std::runtime_error("socket creation failed");
        }
 
+       int on = 1;
+       // if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
+       //     logger.log_message("failed to set socket to reusreaddr");
+       //     throw new std::runtime_error("failed to set socket to reuseaddr");
+       // }
+
+       on = 1;
+       if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) < 0) {
+           logger.log_message("failed to set socket to reuseport");
+           throw new std::runtime_error("failed to set socket to reuseport");
+       }
+
        memset(&servaddr, 0, sizeof(servaddr));
 
        servaddr.sin_family = AF_INET;
@@ -96,7 +104,7 @@ namespace ldms {
        struct sockaddr_in myaddr;
        myaddr.sin_addr.s_addr = htons(INADDR_ANY);
        myaddr.sin_family = AF_INET;
-       //myaddr.sin_port = htons(GSW_PORT); // TODO maybe use multiple ports for different devices?
+       // myaddr.sin_port = htons(GSW_PORT); // TODO maybe use multiple ports for different devices?
        myaddr.sin_port = htons(vcm->port); // use the same port for the server and client
        int rc = bind(sockfd, (struct sockaddr*) &myaddr, sizeof(myaddr));
        if(rc) {

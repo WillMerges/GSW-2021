@@ -12,7 +12,7 @@ using namespace dls;
 TelemetryParser* tp = NULL;
 
 void sighandler(int signum) {
-    MsgLogger logger("DECOM", "");
+    MsgLogger logger("DECOM");
     logger.log_message("decom killed, cleaning up resources");
 
     if(tp) {
