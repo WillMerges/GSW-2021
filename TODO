@@ -67,3 +67,5 @@ abstract networking to a network manager shared lib
 
 consider adding types to measurements in VCM file
     -have an enum associationed with a measurements info_t that vcm::VCM::get_info returns
+
+figure out padding of telemetry packets
