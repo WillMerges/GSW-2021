@@ -87,6 +87,7 @@ namespace ldms {
        // REUSEADDR and REUSEPORT are used for simulation purposes as well
        // as allowing for the possibilty to send from this port in another process(es)
        // in theory multiple processes can now use this port (including the process sending simulation data)
+       // related release notes -> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c617f398edd4db2b8567a28e899a88f8f574798d
        int on = 1;
        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
            logger.log_message("failed to set socket to reusreaddr");
