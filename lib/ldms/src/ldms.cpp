@@ -83,11 +83,15 @@ namespace ldms {
            throw new std::runtime_error("socket creation failed");
        }
 
+       // TODO maybe find a work around
+       // REUSEADDR and REUSEPORT are used for simulation purposes as well
+       // as allowing for the possibilty to send from this port in another process(es)
+       // in theory multiple processes can now use this port (including the process sending simulation data)
        int on = 1;
-       // if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
-       //     logger.log_message("failed to set socket to reusreaddr");
-       //     throw new std::runtime_error("failed to set socket to reuseaddr");
-       // }
+       if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
+           logger.log_message("failed to set socket to reusreaddr");
+           throw new std::runtime_error("failed to set socket to reuseaddr");
+       }
 
        on = 1;
        if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) < 0) {
