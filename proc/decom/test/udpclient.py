@@ -16,4 +16,5 @@ datagramSocket.bind(listeningAddress)
 
 while(True):
     data, _ = datagramSocket.recvfrom(4)
+    #data = datagramSocket.recv(4) # this works??? but recvfrom doesn't
     print(data)
