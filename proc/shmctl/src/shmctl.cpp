@@ -2,10 +2,11 @@
 #include <string.h>
 #include <iostream>
 #include <string>
+#include <stdint.h>
 #include "lib/vcm/vcm.h"
 #include "lib/shm/shm.h"
-#include "common/types.h"
 #include "lib/dls/dls.h"
+#include "common/types.h"
 
 // run as shmctl -on or shmctl -off to create and destroy shared memory
 // option -f argument to specify VCM config file (current default used otherwise)
@@ -30,12 +31,16 @@ int main(int argc, char* argv[]) {
             off = true;
         } else if(!strcmp(argv[i], "-f")) {
             if(i + 1 > argc) {
+                logger.log_message("Must specify a path to the config file after using the -f option");
                 printf("Must specify a path to the config file after using the -f option\n");
                 return -1;
             } else {
                 config_file = argv[++i];
             }
         } else {
+            std::string msg = "Invalid argument: ";
+            msg += argv[i];
+            logger.log_message(msg.c_str());
             printf("Invalid argument: %s\n", argv[i]);
             return -1;
         }
