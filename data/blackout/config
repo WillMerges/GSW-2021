@@ -1,13 +1,67 @@
 # BLACKOUT 2021
+#
+# this is what packets coming from the rocket should look like sent over RF
+# the ground receiver then forwards this packet to the groundstation using UDP
+# it is expected that the 'port' listed is used as the src and dst port of the UDP packet
+# 'addr' is the ipv4 address of the receiver
+#
+# every measurement MUST be byte aligned currently
+# whether this padding is done by the ground station or by the receiver is TBD
+# measurements are given by [measurement name] [measurement size in bytes]
 
+# use UDP protocol
 protocol = udp
-src = 127.0.0.1
+addr = 127.0.0.1
 port = 8080
 
-ACCELXMEAS 4
+# reserve 8 bytes for the receiver to send messages to us (status, bad packet, errors, etc.)
+RECV_MESSAGE 8
 
-ACCELYMEAS 4
+# accelerations from the IMU (12 bits each, 2 bytes w/ padding)
+ACCEL_IMU_X 2
+ACCEL_IMU_Y 2
+ACCEL_IMU_Z 2
 
-ACCELZMEAS 4
+# high G accelerometer (2 bytes I think, need to check this one)
+ACCEL_HIGHG 2
 
-checksum 2
+# heading (9 bits each, 2 bytes w/ padding)
+PITCH 2
+ROLL 2
+YAW 2
+
+# altitude from both altimeters (2 bytes each)
+ALTITUDE_1 2
+ALTITUDE_2 2
+
+# GPS data (these are mostly 4 byte floats)
+GPS_LAT 4
+GPS_LONG 4
+GPS_ALT 4
+GPS_FIX 1 # boolean
+GPS_NUM_SATS 1
+GPS_TIME_H 1
+GPS_TIME_M 1
+GPS_TIME_S 1
+GPS_TIME_MS 2 # milliseconds is 2 bytes
+
+# uptime, in seconds (2 bytes is ~18 hours before overflow)
+UPTIME 2
+
+# charge continuity (1 byte boolean X 4 charges)
+CONT_1 1
+CONT_2 1
+CONT_3 1
+CONT_4 1
+
+# charge deployment status (1 byte boolean X 4 charges)
+DEPLOY_1 1
+DEPLOY_2 1
+DEPLOY_3 1
+DEPLOY_4 1
+
+# temperature (need to double check this one too)
+TEMP 2
+
+# checksum isn't currently used, this may be handled by the ground receiver
+# checksum 2

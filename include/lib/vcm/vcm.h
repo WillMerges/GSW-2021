@@ -27,7 +27,7 @@ namespace vcm {
 
     typedef struct {
         void* addr; // offset into shmem
-        size_t size;
+        size_t size; // bits NOT bytes // TODO decide this (currenytly BYTES not bits)
     } measurement_info_t;
 
     typedef enum {
@@ -43,7 +43,7 @@ namespace vcm {
         std::vector<std::string> measurements; // list of measurement names
         size_t packet_size;
         // TODO maybe put addr and port in another subclass
-        int src; // address and port (only for UDP right now)
+        int addr; // address and port (only for UDP right now)
         int port;
         protocol_t protocol;
         std::string config_file;

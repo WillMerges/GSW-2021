@@ -5,8 +5,8 @@
 
 # these need to be set at some point!
 protocol = udp
-src = 127.0.0.1
+addr = 127.0.0.1
 port = 8080
 
 # [measurement name] [measurement size in bytes]
-TEST 4 
+TEST 4

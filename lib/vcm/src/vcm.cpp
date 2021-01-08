@@ -14,7 +14,7 @@ VCM::VCM() {
     MsgLogger logger("VCM", "Constructor");
 
     // default values
-    src = port = -1;
+    addr = port = -1;
     protocol = PROTOCOL_NOT_SET;
     packet_size = 0;
 
@@ -38,7 +38,7 @@ VCM::VCM(std::string config_file) {
     this->config_file = config_file;
 
     // default values
-    src = port = -1;
+    addr = port = -1;
     protocol = PROTOCOL_NOT_SET;
     packet_size = 0;
 
@@ -94,11 +94,11 @@ RetType VCM::init() {
         if(snd == "=") {
             std::string third;
             ss >> third;
-            if(fst == "src") {
+            if(fst == "addr") {
                 try {
-                    src = std::stoi(third, NULL, 10);
+                    addr = std::stoi(third, NULL, 10);
                 } catch(std::invalid_argument& ia) {
-                    logger.log_message("Invalid src in line: " + line);
+                    logger.log_message("Invalid addr in line: " + line);
                     return FAILURE;
                 }
             } else if(fst == "port") {
@@ -120,12 +120,13 @@ RetType VCM::init() {
             measurement_info_t* entry = new measurement_info_t;
             entry->addr = (void*)packet_size;
             try {
-                entry->size = (size_t)(std::stoi(snd, NULL, 10));
+                entry->size = (size_t)(std::stoi(snd, NULL, 10)); // this is in bits
             } catch(std::invalid_argument& ia) {
                 logger.log_message("Invalid measurement size: " + line);
                 return FAILURE;
             }
             packet_size += entry->size;
+            //packet_size += (packet_size % 8); // add byte padding
             addr_map[fst] = entry;
             measurements.push_back(fst);
         } else {
@@ -139,10 +140,14 @@ RetType VCM::init() {
     if(protocol == PROTOCOL_NOT_SET) {
         logger.log_message("Config file missing protocol: " + config_file);
         return FAILURE;
-    } else if(protocol == UDP && (src == -1 || port == -1)) {
-        logger.log_message("Config file missing port or src for UDP protocol: " + config_file);
+    } else if(protocol == UDP && (addr == -1 || port == -1)) {
+        logger.log_message("Config file missing port or addr for UDP protocol: " + config_file);
         return FAILURE;
     }
+    // } else if(packet_size % 8 != 0) {
+    //     logger.log_message("Error byte aligning packet");
+    //     return FAILURE;
+    // }
 
     return SUCCESS;
 }
