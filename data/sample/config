@@ -8,5 +8,8 @@ protocol = udp
 addr = 127.0.0.1
 port = 8080
 
+# device name
+name = sample_device
+
 # [measurement name] [measurement size in bytes]
 TEST 4

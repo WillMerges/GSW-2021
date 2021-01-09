@@ -7,11 +7,12 @@
 #include <string.h>
 #include <exception>
 #include <unistd.h>
-#include <iostream> // TODO remove
 #include "common/types.h"
 #include "lib/vcm/vcm.h"
 #include "lib/dls/dls.h"
 #include "lib/shm/shm.h"
+
+// NOTE: ldms is no longer used, nm is used instead (sends messages as well)
 
 using namespace vcm;
 using namespace dls;
@@ -81,43 +82,43 @@ namespace ldms {
         if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
            logger.log_message("socket creation failed");
            throw new std::runtime_error("socket creation failed");
-       }
+        }
 
-       // TODO maybe find a work around
-       // REUSEADDR and REUSEPORT are used for simulation purposes as well
-       // as allowing for the possibilty to send from this port in another process(es)
-       // in theory multiple processes can now use this port (including the process sending simulation data)
-       // related release notes -> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c617f398edd4db2b8567a28e899a88f8f574798d
-       int on = 1;
-       if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
-           logger.log_message("failed to set socket to reusreaddr");
-           throw new std::runtime_error("failed to set socket to reuseaddr");
-       }
+        // TODO maybe find a work around
+        // REUSEADDR and REUSEPORT are used for simulation purposes as well
+        // as allowing for the possibilty to send from this port in another process(es)
+        // in theory multiple processes can now use this port (including the process sending simulation data)
+        // related release notes -> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c617f398edd4db2b8567a28e899a88f8f574798d
+        int on = 1;
+        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
+            logger.log_message("failed to set socket to reusreaddr");
+            throw new std::runtime_error("failed to set socket to reuseaddr");
+        }
 
-       on = 1;
-       if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) < 0) {
-           logger.log_message("failed to set socket to reuseport");
-           throw new std::runtime_error("failed to set socket to reuseport");
-       }
+        on = 1;
+        if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) < 0) {
+            logger.log_message("failed to set socket to reuseport");
+            throw new std::runtime_error("failed to set socket to reuseport");
+        }
 
-       memset(&servaddr, 0, sizeof(servaddr));
+        memset(&servaddr, 0, sizeof(servaddr));
 
-       servaddr.sin_family = AF_INET;
-       servaddr.sin_port = htons(vcm->port);
-       servaddr.sin_addr.s_addr = htons(INADDR_ANY);
+        servaddr.sin_family = AF_INET;
+        servaddr.sin_port = htons(vcm->port);
+        servaddr.sin_addr.s_addr = htons(INADDR_ANY);
 
-       struct sockaddr_in myaddr;
-       myaddr.sin_addr.s_addr = htons(INADDR_ANY);
-       myaddr.sin_family = AF_INET;
-       // myaddr.sin_port = htons(GSW_PORT); // TODO maybe use multiple ports for different devices?
-       myaddr.sin_port = htons(vcm->port); // use the same port for the server and client
-       int rc = bind(sockfd, (struct sockaddr*) &myaddr, sizeof(myaddr));
-       if(rc) {
-           logger.log_message("socket bind failed");
-           throw new std::runtime_error("socket bind failed");
-       }
+        struct sockaddr_in myaddr;
+        myaddr.sin_addr.s_addr = htons(INADDR_ANY);
+        myaddr.sin_family = AF_INET;
+        // myaddr.sin_port = htons(GSW_PORT); // TODO maybe use multiple ports for different devices?
+        myaddr.sin_port = htons(vcm->port); // use the same port for the server and client
+        int rc = bind(sockfd, (struct sockaddr*) &myaddr, sizeof(myaddr));
+        if(rc) {
+            logger.log_message("socket bind failed");
+            throw new std::runtime_error("socket bind failed");
+        }
 
-       buffer = new char[vcm->packet_size];
+        buffer = new char[vcm->packet_size];
     }
 
     UDPParser::~UDPParser() {

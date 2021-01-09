@@ -11,6 +11,8 @@
 #include <iostream>
 #include <fstream>
 #include <sys/time.h>
+#include <csignal>
+#include <vector>
 
 #define MAX_LINES_PER_FILE 4096
 
@@ -19,7 +21,26 @@ using namespace dls;
 bool verbose = false;
 struct timeval curr_time;
 
-//std::ofstream fifo;
+
+// list of mqueues to close
+pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+std::vector<mqd_t*> mqs;
+
+void sighandler(int signum) {
+    // close any open mqueues
+    for(auto mq : mqs) {
+        mq_close(*mq); // hopefully this doesn't fail
+        // if it does fail just move one, don't want to leave the process hanging
+    }
+
+    exit(signum);
+}
+
+void add_mq_to_close(mqd_t* mq) {
+    pthread_mutex_lock(&lock);
+    mqs.push_back(mq);
+    pthread_mutex_unlock(&lock);
+}
 
 // from stack overflow https://stackoverflow.com/questions/3056307/how-do-i-use-mqueue-in-a-c-program-on-a-linux-based-system
 #define CHECK(x) \
@@ -31,6 +52,8 @@ struct timeval curr_time;
         } \
     } while (0) \
 
+
+// TODO write some printf errors to log file?
 void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
     unsigned int file_index = 0;
     std::string filename = outfile_name;
@@ -46,6 +69,8 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
 
     mq = mq_open(queue_name, O_CREAT | O_RDONLY, 0644, &attr);
     CHECK((mqd_t)-1 != mq);
+
+    add_mq_to_close(&mq);
 
     while(1) {
         std::ofstream file;
@@ -104,6 +129,13 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
 }
 
 int main(int argc, char* argv[]) {
+    // add signal handlers to close any open mqueues
+    signal(SIGINT, sighandler);
+    signal(SIGTERM, sighandler);
+    signal(SIGSEGV, sighandler);
+    signal(SIGFPE, sighandler);
+    signal(SIGABRT, sighandler);
+
     if(argc > 1) {
         if(!strcmp(argv[1], "-v")) {
             printf("Running in verbose mode.\n\n");
@@ -120,14 +152,6 @@ int main(int argc, char* argv[]) {
         size_t size = strlen(env);
         gsw_home.assign(env, size);
     }
-
-    // std::string fifo_file = gsw_home + "/log/system.fifo";
-    // mkfifo(fifo_file.c_str(), O_WRONLY | O_NONBLOCK);
-    // fifo.open(fifo_file.c_str(), std::ios::out);
-    // if(!fifo.is_open()) {
-    //     printf("Failed to open fifo: %s", fifo_file.c_str());
-    //     exit(-1);
-    // }
 
     std::string msg_file = gsw_home + "/log/system.log";
     std::string tel_file = gsw_home + "/log/telemetry.log";

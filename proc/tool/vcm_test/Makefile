@@ -8,7 +8,7 @@ CC = gcc
 OPTIONS +=
 
 CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
-CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
+CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -ggdb
 LDFLAGS = -L$(GSW_HOME)/lib/bin/ -Wl,-rpath=$(GSW_HOME)/lib/bin/
 
 LIBS = -lvcm -ldls -lrt

@@ -19,10 +19,10 @@ namespace dls {
         RetType Open();
         RetType Close();
         RetType queue_msg(const char* buffer, size_t size);
+        bool open;
     private:
         std::string queue_name;
         mqd_t mq;
-        bool open;
     };
 }
 #endif

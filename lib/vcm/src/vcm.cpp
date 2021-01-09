@@ -17,6 +17,7 @@ VCM::VCM() {
     addr = port = -1;
     protocol = PROTOCOL_NOT_SET;
     packet_size = 0;
+    device = "";
 
     // figure out default config file
     char* env = getenv("GSW_HOME");
@@ -41,6 +42,7 @@ VCM::VCM(std::string config_file) {
     addr = port = -1;
     protocol = PROTOCOL_NOT_SET;
     packet_size = 0;
+    device = "";
 
     // init
     if(init() != SUCCESS) {
@@ -69,7 +71,7 @@ measurement_info_t* VCM::get_info(std::string measurement) {
 }
 
 RetType VCM::init() {
-    MsgLogger logger;
+    MsgLogger logger("VCM", "init");
 
     f = new std::ifstream(config_file.c_str());
     if(!f) {
@@ -115,6 +117,8 @@ RetType VCM::init() {
                     logger.log_message("Unrecogonized protocol on line: " + line);
                     return FAILURE;
                 }
+            } else if(fst == "name") {
+                device = third;
             }
         } else if(fst != "" && snd != "") {
             measurement_info_t* entry = new measurement_info_t;

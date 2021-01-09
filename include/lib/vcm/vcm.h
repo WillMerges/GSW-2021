@@ -47,6 +47,7 @@ namespace vcm {
         int port;
         protocol_t protocol;
         std::string config_file;
+        std::string device;
     private:
         // local vars
         std::ifstream* f;

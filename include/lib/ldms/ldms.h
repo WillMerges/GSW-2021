@@ -14,8 +14,10 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string>
-#include "common/types.h"
 #include "lib/vcm/vcm.h"
+#include "common/types.h"
+
+// NOTE: ldms is no longer used, nm is used instead (sends messages as well)
 
 namespace ldms {
 

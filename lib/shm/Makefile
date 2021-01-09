@@ -11,7 +11,7 @@ CFLAGS = I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -fpic -ggdb
 CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -fpic -ggdb
 LDFLAGS = -shared
 
-LIBS = -ldls -lvcm -lrt -lpthread
+LIBS = -lrt -lpthread
 
 CPP_FILES := $(wildcard src/*.cpp)
 C_FILES := $(wildcard src/*.c)

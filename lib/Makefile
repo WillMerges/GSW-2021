@@ -7,6 +7,7 @@ build:
 	-$(MAKE) -C vcm all
 	-$(MAKE) -C dls all
 	-$(MAKE) -C shm all
+	-$(MAKE) -C nm all
 
 copy:
 	rm -rf bin || true > /dev/null
@@ -19,4 +20,5 @@ clean:
 	-$(MAKE) -C vcm clean
 	-$(MAKE) -C dls clean
 	-$(MAKE) -C shm clean
+	-$(MAKE) -C nm clean
 	rm -r bin
