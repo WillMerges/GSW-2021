@@ -11,5 +11,5 @@ port = 8080
 # device name
 name = sample_device
 
-# [measurement name] [measurement size in bytes]
-TEST 4
+# [measurement name] [measurement size in bytes] [optional type of int or float]
+TEST 4 int
