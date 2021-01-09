@@ -21,35 +21,35 @@ name = blackout_v0.1
 RECV_MESSAGE 8
 
 # accelerations from the IMU (12 bits each, 2 bytes w/ padding)
-ACCEL_IMU_X 2
-ACCEL_IMU_Y 2
-ACCEL_IMU_Z 2
+ACCEL_IMU_X 2 int
+ACCEL_IMU_Y 2 int
+ACCEL_IMU_Z 2 int
 
 # high G accelerometer (2 bytes I think, need to check this one)
-ACCEL_HIGHG 2
+ACCEL_HIGHG 2 int
 
 # heading (9 bits each, 2 bytes w/ padding)
-PITCH 2
-ROLL 2
-YAW 2
+PITCH 2 float
+ROLL 2 float
+YAW 2 float
 
 # altitude from both altimeters (2 bytes each)
-ALTITUDE_1 2
-ALTITUDE_2 2
+ALTITUDE_1 2 int
+ALTITUDE_2 2 int
 
 # GPS data (these are mostly 4 byte floats)
-GPS_LAT 4
-GPS_LONG 4
-GPS_ALT 4
-GPS_FIX 1 # boolean
-GPS_NUM_SATS 1
-GPS_TIME_H 1
-GPS_TIME_M 1
-GPS_TIME_S 1
-GPS_TIME_MS 2 # milliseconds is 2 bytes
+GPS_LAT 4 float
+GPS_LONG 4 float
+GPS_ALT 4 float
+GPS_FIX 1 int
+GPS_NUM_SATS 1 int
+GPS_TIME_H 1 int
+GPS_TIME_M 1 int
+GPS_TIME_S 1 int
+GPS_TIME_MS 2int # milliseconds is 2 bytes
 
 # uptime, in seconds (2 bytes is ~18 hours before overflow)
-UPTIME 2
+UPTIME 2 int
 
 # charge continuity (1 byte boolean X 4 charges)
 CONT_1 1
@@ -64,7 +64,7 @@ DEPLOY_3 1
 DEPLOY_4 1
 
 # temperature (need to double check this one too)
-TEMP 2
+TEMP 2 float
 
 # checksum isn't currently used, this may be handled by the ground receiver
 # checksum 2

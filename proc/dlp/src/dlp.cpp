@@ -112,10 +112,8 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
 
             if(binary) {
                 file << timestamp << buffer;
-                //fifo << timestamp << buffer;
             } else {
                 file << timestamp << " " << buffer << '\n';
-                //fifo << timestamp << " "  << buffer << '\n';
             }
             writes++;
 

@@ -55,6 +55,12 @@ RetType NetworkManager::Open() {
         return FAILURE;
     }
 
+    // clear shared memory
+    if(FAILURE == clear_shm()) {
+        logger.log_message("unable to clear shared memory");
+        return FAILURE;
+    }
+
     // open the mqueue
     struct mq_attr attr;
     attr.mq_flags = 0;
@@ -173,19 +179,18 @@ RetType NetworkManager::Iterate() {
     int n = -1;
     socklen_t len = sizeof(servaddr);
 
+    // MSG_DONTWAIT should be taken care of by O_NONBLOCK
+    // MSG_TRUNC is set so that we know if we have a size mismatch
     n = recvfrom(sockfd, buffer, vcm->packet_size,
-                MSG_DONTWAIT, (struct sockaddr *) &servaddr, &len); // MSG_DONTWAIT should be taken care of by O_NONBLOCK
+                MSG_DONTWAIT | MSG_TRUNC, (struct sockaddr *) &servaddr, &len);
 
     if(n == -1) { // timeout or error
         return ret;
     }
-    else if(n != (int)(vcm->packet_size)) { // TODO maybe make <= in case just a message packet is sent?
+    else if(n != (int)(vcm->packet_size)) {
         logger.log_message("Packet size mismatch, " + std::to_string(vcm->packet_size) +
                            " != " + std::to_string(n) + " (received)");
-        if(FAILURE == clear_shm()) {
-            logger.log_message("Unable to clear shared memory");
-            // ignore and continue on
-        }
+        plogger.log_packet((unsigned char*)buffer, n); // log the packet anyways
         ret = FAILURE;
     } else {
         plogger.log_packet((unsigned char*)buffer, n);

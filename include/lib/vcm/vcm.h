@@ -25,9 +25,17 @@
 // data needs to be sent into shm through this lib as well
 namespace vcm {
 
+    // int and float don't specify sizes, just what type they are
+    // for example a single byte measurement may say int because it can be treated as one
+    // TODO add doubles and other things
+    typedef enum {
+        UNDEFINED_TYPE, INT_TYPE, FLOAT_TYPE
+    } measurement_type_t;
+
     typedef struct {
         void* addr; // offset into shmem
         size_t size; // bits NOT bytes // TODO decide this (currenytly BYTES not bits)
+        measurement_type_t type;
     } measurement_info_t;
 
     typedef enum {

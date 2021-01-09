@@ -91,11 +91,11 @@ RetType VCM::init() {
         ss >> fst;
         std::string snd;
         ss >> snd;
+        std::string third;
+        ss >> third;
 
         // port or addr or protocol line
         if(snd == "=") {
-            std::string third;
-            ss >> third;
             if(fst == "addr") {
                 try {
                     addr = std::stoi(third, NULL, 10);
@@ -131,6 +131,16 @@ RetType VCM::init() {
             }
             packet_size += entry->size;
             //packet_size += (packet_size % 8); // add byte padding
+
+            // check for type
+            if(third == "int") {
+                entry->type = INT_TYPE;
+            } else if(third == "float") {
+                entry->type = FLOAT_TYPE;
+            } else {
+                entry->type = UNDEFINED_TYPE;
+            }
+
             addr_map[fst] = entry;
             measurements.push_back(fst);
         } else {
