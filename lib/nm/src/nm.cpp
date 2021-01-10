@@ -110,7 +110,7 @@ RetType NetworkManager::Open() {
 
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(vcm->port);
-    servaddr.sin_addr.s_addr = htons(INADDR_ANY);
+    servaddr.sin_addr.s_addr = htons(INADDR_ANY); // TODO this needs to be a specific IP of the receiver
 
     struct sockaddr_in myaddr;
     myaddr.sin_addr.s_addr = htons(INADDR_ANY);
@@ -167,7 +167,7 @@ RetType NetworkManager::Iterate() {
     // send the message from the mqueue out of the socket
     if(read != -1) {
         ssize_t sent = -1;
-        sent = sendto(sockfd, buffer, MAX_MSG_SIZE, 0,
+        sent = sendto(sockfd, buffer, read, 0,
             (struct sockaddr*)&servaddr, sizeof(servaddr));
         if(sent == -1) {
             logger.log_message("Failed to send UDP message");

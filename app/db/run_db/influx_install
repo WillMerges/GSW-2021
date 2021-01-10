@@ -13,3 +13,5 @@ sudo influxd -config path/to/.conf
 
 create database [whatever]
 use database [name]
+
+use udp line protocol to send data
