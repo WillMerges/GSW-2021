@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <csignal>
 #include "lib/vcm/vcm.h"
 #include "lib/shm/shm.h"
 #include "lib/dls/dls.h"
@@ -20,7 +21,6 @@
 
 // TODO
 // remove printfs? or add verbose mode
-// add sighandlers to shutdown socket
 
 using namespace vcm;
 using namespace shm;
@@ -28,6 +28,17 @@ using namespace dls;
 
 #define INFLUXDB_UDP_PORT 8089
 #define INFLUXDB_ADDR "127.0.0.1"
+
+int sockfd;
+unsigned char sock_open = 0;
+
+void sighandler(int signum) {
+    if(sock_open) {
+        close(sockfd);
+    }
+
+    exit(signum);
+}
 
 int main(int argc, char* argv[]) {
     MsgLogger logger("db fwd");
@@ -66,13 +77,20 @@ int main(int argc, char* argv[]) {
         return FAILURE;
     }
 
+    // add signal handlers to close the socket if opened
+    signal(SIGINT, sighandler);
+    signal(SIGTERM, sighandler);
+    signal(SIGSEGV, sighandler);
+    signal(SIGFPE, sighandler);
+    signal(SIGABRT, sighandler);
+
     // set up the UDP socket
-    int sockfd;
     if((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
        logger.log_message("socket creation failed");
        printf("socket creation failed\n");
        return FAILURE;
     }
+    sock_open = 1;
 
     // define influxdb server endpoint
     struct sockaddr_in servaddr;
