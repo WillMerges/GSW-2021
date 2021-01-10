@@ -1,0 +1,4 @@
+maybe have script use sys arguments for which measurements to forward
+or have it read a file?
+
+if the file is just a simple list do 'cat file > xargs ./fwd'
