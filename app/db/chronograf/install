@@ -1,0 +1,9 @@
+wget https://dl.influxdata.com/chronograf/releases/chronograf_1.8.9.1_amd64.deb
+sudo dpkg -i chronograf_1.8.9.1_amd64.deb
+
+to run:
+> chronograf
+
+go to http://localhost:8888
+
+sudo service chronograf start/stop
