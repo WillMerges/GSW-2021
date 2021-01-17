@@ -65,10 +65,13 @@ DONE abstract networking to a network manager shared lib
     -another process sends them out
         -or using some smart locking instead and unbind after each send
 
-consider adding types to measurements in VCM file
+DONE (only ints and floats) consider adding types to measurements in VCM file
     -have an enum associationed with a measurements info_t that vcm::VCM::get_info returns
 
 figure out padding of telemetry packets
 
-check if incorrectly sized packets are still logged
+DONE - they are logged and there size is written - check if incorrectly sized packets are still logged
     -not sure if this is true, but we should still log them just in case
+
+have a way to play back telemetry packet log
+    -and/or export a log to csv
