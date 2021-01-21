@@ -77,3 +77,8 @@ have a way to play back telemetry packet log
     -and/or export a log to csv
 
 add some kind of process manager to check status of processes and be able to start/restart/stop them
+
+clean up documentation
+    - file headers
+    - comments
+    - function headers for .h files
