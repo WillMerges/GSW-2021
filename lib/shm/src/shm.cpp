@@ -18,7 +18,7 @@
 #include <semaphore.h>
 #include "lib/shm/shm.h"
 #include "lib/vcm/vcm.h"
-// #include "lib/dls/dls.h" // TODO add logging (make sure to change startup order)
+#include "lib/dls/dls.h"
 #include "common/types.h"
 
 // NOTE: shared memory can be manually altered with 'ipcs' and 'ipcrm' programs
@@ -40,6 +40,8 @@
         return FAILURE; \
     } \
 
+
+using namespace dls;
 
 namespace shm {
 
@@ -74,10 +76,15 @@ namespace shm {
     // reading and writing is done with *writers-preference*
     // https://en.wikipedia.org/wiki/Readers%E2%80%93writers_problem
     RetType write_to_shm(void* src, size_t size, size_t offset) {
+        MsgLogger logger("SHM", "write_to_shm");
+
         if(!shmem || !info) {
+            logger.log_message("Not attached to shared memory, cannot write");
             return FAILURE;
         }
+
         if((size + offset) > vcm->packet_size) {
+            logger.log_message("Size to great to write to shared memory");
             return FAILURE;
         }
 
@@ -109,10 +116,15 @@ namespace shm {
     // reading and writing is done with *writers-preference*
     // https://en.wikipedia.org/wiki/Readers%E2%80%93writers_problem
     RetType read_from_shm(void* dst, size_t size, size_t offset) {
+        MsgLogger logger("SHM", "read_from_shm");
+
         if(!shmem || !info) {
+            logger.log_message("Not attached to shared memory, cannot read");
             return FAILURE;
         }
+
         if((size + offset) < vcm->packet_size) {
+            logger.log_message("Shared memory too large to read into destination buffer");
             return FAILURE;
         }
 
@@ -139,12 +151,17 @@ namespace shm {
     }
 
     RetType read_from_shm_if_updated(void* dst, size_t size, size_t offset) {
+        MsgLogger logger("SHM", "read_from_shm_if_updated");
+
         RetType ret = SUCCESS;
 
         if(!shmem || !info) {
+            logger.log_message("Not attached to shared memory, cannot read");
             return FAILURE;
         }
+
         if((size + offset) < vcm->packet_size) {
+            logger.log_message("Shared memory too large to read into destination buffer");
             return FAILURE;
         }
 
@@ -176,10 +193,15 @@ namespace shm {
 
     // TODO check if this causes deadlock
     RetType read_from_shm_block(void* dst, size_t size, size_t offset) {
+        MsgLogger logger("SHM", "read_from_shm_block");
+
         if(!shmem || !info) {
+            logger.log_message("Not attached to shared memory, cannot read");
             return FAILURE;
         }
+
         if((size + offset) < vcm->packet_size) {
+            logger.log_message("Shared memory too large to read into destination buffer");
             return FAILURE;
         }
 
@@ -227,9 +249,12 @@ namespace shm {
         return SUCCESS;
     }
 
-    // locking same as write
+    // locking works the same as write
     RetType clear_shm() {
+        MsgLogger logger("SHM", "clear_shm");
+
         if(!shmem || !info) {
+            logger.log_message("Not attached to shared memory, cannot clear");
             return FAILURE;
         }
 
@@ -264,15 +289,19 @@ namespace shm {
     }
 
     RetType create_shm(vcm::VCM* vcm) {
+        MsgLogger logger("SHM", "create_shm");
+
         // create info shmem
         key_t info_key = ftok(vcm->config_file.c_str(), info_id);
         if(info_key == (key_t) -1) {
+            logger.log_message("ftok failure, no key generated for info shmem");
             return FAILURE;
         }
 
         info_shmid = shmget(info_key, sizeof(shm_info_t),
                             0666|IPC_CREAT|IPC_EXCL);
         if(info_shmid == -1) {
+            logger.log_message("shmget failure for info shmem");
             return FAILURE;
         }
 
@@ -280,6 +309,7 @@ namespace shm {
         info = (shm_info_t*) shmat(info_shmid, (void*)0, 0);
         if(info == (void*) -1) {
             info = NULL;
+            logger.log_message("shmat failure, cannot attach to info shmem");
             return FAILURE;
         }
 
@@ -307,6 +337,7 @@ namespace shm {
 
         // detach from info shmem
         if(shmdt(info) != 0) {
+            logger.log_message("shmdt failure, failed to detach from info shmem");
             return FAILURE;
         }
         info = NULL;
@@ -314,12 +345,14 @@ namespace shm {
         // set up shmem
         key_t key = ftok(vcm->config_file.c_str(), id);
         if(key == (key_t) -1) {
+            logger.log_message("ftok failure, no key generated");
             return FAILURE;
         }
 
         // shmid = shmget(key, vcm->packet_size, 0666|IPC_CREAT|IPC_EXCL);
         shmid = shmget(key, vcm->packet_size, 0666|IPC_CREAT|IPC_EXCL);
         if(shmid == -1) {
+            logger.log_message("shmget failure");
             return FAILURE;
         }
 
@@ -327,37 +360,45 @@ namespace shm {
     }
 
     RetType attach_to_shm(vcm::VCM* selected_vcm) {
-        vcm = selected_vcm; // hopefully this doesn't get deleted
+        MsgLogger logger("SHM", "attach_to_shm");
+
+        vcm = new vcm::VCM(*selected_vcm); // copy the VCM
 
         key_t info_key = ftok(vcm->config_file.c_str(), info_id);
         if(info_key == (key_t) -1) {
+            logger.log_message("ftok failure, no key generated for info shmem");
             return FAILURE;
         }
 
         info_shmid = shmget(info_key, sizeof(shm_info_t), 0666);
         if(info_shmid == -1) {
+            logger.log_message("shmget failure for info shmem");
             return FAILURE;
         }
 
         info = (shm_info_t*) shmat(info_shmid, (void*)0, 0);
         if(info == (void*) -1) {
             info = NULL;
+            logger.log_message("shmat failure, cannot attach to info shmem");
             return FAILURE;
         }
 
         key_t key = ftok(vcm->config_file.c_str(), id);
         if(key == (key_t) -1) {
+            logger.log_message("ftok failure, no key generated");
             return FAILURE;
         }
 
         shmid = shmget(key, vcm->packet_size, 0666);
         if(shmid == -1) {
+            logger.log_message("shmget failure");
             return FAILURE;
         }
 
         shmem = shmat(shmid, (void*)0, 0);
         if(shmem == (void*) -1) {
             shmem = NULL;
+            logger.log_message("shmat failure");
             return FAILURE;
         }
 
@@ -365,8 +406,11 @@ namespace shm {
     }
 
     RetType detach_from_shm() {
+        MsgLogger logger("SHM", "detach_from_shm");
+
         if(info) {
             if(shmdt(info) != 0) {
+                logger.log_message("shmdt failure for info shmem");
                 return FAILURE;
             }
             info = NULL;
@@ -379,17 +423,22 @@ namespace shm {
                 return SUCCESS;
             }
         }
+        logger.log_message("shmdt failure");
         return FAILURE;
     }
 
     RetType destroy_shm() {
+        MsgLogger logger("SHM", "destroy_shm");
+
         RetType ret = SUCCESS;
 
         if(shmid == -1 || info_shmid == -1) {
+            logger.log_message("No shmem to destroy");
             ret = FAILURE;
         }
 
         if(shmctl(info_shmid, IPC_RMID, NULL) == -1) {
+            logger.log_message("shmctl failure for info shmem");
             ret = FAILURE;
         } else {
             info_shmid = -1;
@@ -397,6 +446,7 @@ namespace shm {
         }
 
         if(shmctl(shmid, IPC_RMID, NULL) == -1) {
+            logger.log_message("shmctl failure");
             ret = FAILURE;
         } else {
             shmid = -1;

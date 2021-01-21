@@ -55,8 +55,8 @@ instead:
     -make a common block of shared mem that holds pthread mutexes/semaphores
     -control locking/unlocking of readers/writer(s) with those
 
-add logging to the shm lib (currently does none)
-    -log perror messages (using strerror)
+DONE add logging to the shm lib (currently does none)
+    DIDNT DO -log perror messages (using strerror)
 
 remove commented out code / cleanup
 
@@ -75,3 +75,5 @@ DONE - they are logged and there size is written - check if incorrectly sized pa
 
 have a way to play back telemetry packet log
     -and/or export a log to csv
+
+add some kind of process manager to check status of processes and be able to start/restart/stop them
