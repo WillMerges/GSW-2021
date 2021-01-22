@@ -27,7 +27,7 @@ namespace vcm {
 
     // int and float don't specify sizes, just what type they are
     // for example a single byte measurement may say int because it can be treated as one
-    // TODO add doubles and other things
+    // TODO add doubles and other things?1
     typedef enum {
         UNDEFINED_TYPE, INT_TYPE, FLOAT_TYPE
     } measurement_type_t;
