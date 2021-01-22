@@ -46,7 +46,7 @@ GPS_NUM_SATS 1 int
 GPS_TIME_H 1 int
 GPS_TIME_M 1 int
 GPS_TIME_S 1 int
-GPS_TIME_MS 2int # milliseconds is 2 bytes
+GPS_TIME_MS 2 int # milliseconds is 2 bytes
 
 # uptime, in seconds (2 bytes is ~18 hours before overflow)
 UPTIME 2 int
