@@ -22,8 +22,12 @@ namespace nm {
         RetType Open();
         RetType Close(); // returns fail if anything goes wrong
 
-        //returns FAILURE if anything goes wrong
-        RetType Iterate(); // send a message from the mqueue and then receive any messages available and place them into shmeme
+        RetType Send(); // send any outgoing messages from the mqueue, return FAILURE on error
+        RetType Receive(); // receive any messages and write them to in_buffer, return FAILURE if nothing was received (or error)
+
+        char* in_buffer;
+        size_t in_size;
+
         // TODO consider adding priority to sending some messages (like deployment)
     private:
         mqd_t mq;
@@ -32,7 +36,7 @@ namespace nm {
 
         struct sockaddr_in servaddr;
         int sockfd;
-        
+
         char* buffer;
         bool open;
     };

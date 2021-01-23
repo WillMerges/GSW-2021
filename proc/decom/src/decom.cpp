@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <csignal>
 #include "lib/nm/nm.h"
+#include "lib/shm/shm.h"
 // #include "lib/ldms/ldms.h"
 #include "lib/dls/dls.h"
 #include "lib/vcm/vcm.h"
@@ -12,6 +13,7 @@
 using namespace dls;
 using namespace vcm;
 using namespace nm;
+using namespace shm;
 
 // TelemetryParser* tp = NULL;
 NetworkManager* net = NULL;
@@ -71,9 +73,37 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    // attach to shared memory
+    if(FAILURE == attach_to_shm(vcm)) {
+        logger.log_message("unable to attach to shared memory");
+        return FAILURE;
+    }
+
+    // clear shared memory
+    if(FAILURE == clear_shm()) {
+        logger.log_message("unable to clear shared memory");
+        return FAILURE;
+    }
+
+
+    PacketLogger plogger(vcm->device);
     while(1) {
-        if(SUCCESS != net->Iterate()) {
+        //if(SUCCESS != net->Iterate()) {
             // do something maybe
+        //}
+
+        // send any outgoing messages
+        net->Send(); // don't care about the return
+
+        // read any incoming message and write it to shared memory
+        if(SUCCESS == net->Receive()) {
+            if(net->in_size != vcm->packet_size) {
+                logger.log_message("Packet size mismatch, " + std::to_string(vcm->packet_size) +
+                                   " != " + std::to_string(net->in_size) + " (received)");
+            } else { // only write the packet to shared mem if it's the correct size
+                write_to_shm((void*)net->in_buffer, net->in_size);
+            }
+            plogger.log_packet((unsigned char*)net->in_buffer, net->in_size); // log the packet anyways
         }
     }
 }

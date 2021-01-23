@@ -29,6 +29,9 @@ NetworkManager::NetworkManager(VCM* vcm) {
 
     open = false;
 
+    in_buffer = new char[vcm->packet_size];
+    in_size = 0;
+
     // if(SUCCESS != Open()) {
     //     throw new std::runtime_error("failed to open network manager");
     // }
@@ -37,6 +40,10 @@ NetworkManager::NetworkManager(VCM* vcm) {
 NetworkManager::~NetworkManager() {
     if(buffer) {
         delete[] buffer;
+    }
+
+    if(in_buffer) {
+        delete[] in_buffer;
     }
 
     if(open) {
@@ -49,18 +56,6 @@ RetType NetworkManager::Open() {
 
     if(open) {
         return SUCCESS;
-    }
-
-    // attach to shared memory
-    if(FAILURE == attach_to_shm(vcm)) {
-        logger.log_message("unable to attach to shared memory");
-        return FAILURE;
-    }
-
-    // clear shared memory
-    if(FAILURE == clear_shm()) {
-        logger.log_message("unable to clear shared memory");
-        return FAILURE;
     }
 
     // open the mqueue
@@ -151,16 +146,13 @@ RetType NetworkManager::Close() {
     return ret;
 }
 
-RetType NetworkManager::Iterate() {
-    MsgLogger logger("NetworkManager", "Iterate");
-    PacketLogger plogger(vcm->device);
+RetType NetworkManager::Send() {
+    MsgLogger logger("NetworkManager", "Send");
 
     if(!open) {
         logger.log_message("network manager not open");
         return FAILURE;
     }
-
-    RetType ret = SUCCESS;
 
     // check the mqueue
     ssize_t read = -1;
@@ -173,36 +165,31 @@ RetType NetworkManager::Iterate() {
             (struct sockaddr*)&servaddr, sizeof(servaddr));
         if(sent == -1) {
             logger.log_message("Failed to send UDP message");
-            ret = FAILURE;
+            return FAILURE;
         }
     }
 
-    // read in a message if available and write it to shared memory
+    return SUCCESS;
+}
+
+RetType NetworkManager::Receive() {
+    MsgLogger logger("NetworkManager", "Receive");
+
     int n = -1;
     socklen_t len = sizeof(servaddr);
 
     // MSG_DONTWAIT should be taken care of by O_NONBLOCK
     // MSG_TRUNC is set so that we know if we have a size mismatch
-    n = recvfrom(sockfd, buffer, vcm->packet_size,
+    n = recvfrom(sockfd, in_buffer, vcm->packet_size,
                 MSG_DONTWAIT | MSG_TRUNC, (struct sockaddr *) &servaddr, &len);
 
     if(n == -1) { // timeout or error
-        return ret;
+        in_size = 0;
+        return FAILURE; // no packet
     }
-    else if(n != (int)(vcm->packet_size)) {
-        logger.log_message("Packet size mismatch, " + std::to_string(vcm->packet_size) +
-                           " != " + std::to_string(n) + " (received)");
-        plogger.log_packet((unsigned char*)buffer, n); // log the packet anyways
-        ret = FAILURE;
-    } else {
-        plogger.log_packet((unsigned char*)buffer, n);
-        if(FAILURE == write_to_shm(buffer, n)) {
-            logger.log_message("Unable to write to shared memory");
-            ret = FAILURE;
-            // ignore and continue on
-        }
-    }
-    return ret;
+
+    in_size = n;
+    return SUCCESS;
 }
 
 NetworkInterface::NetworkInterface(VCM* vcm) {
