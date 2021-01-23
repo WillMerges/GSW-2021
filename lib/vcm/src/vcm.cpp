@@ -42,6 +42,7 @@ VCM::VCM(std::string config_file) {
     addr = port = -1;
     protocol = PROTOCOL_NOT_SET;
     packet_size = 0;
+    compressed_size = 0;
     device = "";
 
     // init
@@ -93,6 +94,10 @@ RetType VCM::init() {
         ss >> snd;
         std::string third;
         ss >> third;
+        std::string fourth;
+        ss >> fourth;
+        std::string fifth;
+        ss >> fifth;
 
         // port or addr or protocol line
         if(snd == "=") {
@@ -120,22 +125,25 @@ RetType VCM::init() {
             } else if(fst == "name") {
                 device = third;
             }
-        } else if(fst != "" && snd != "") {
+        } else if(fst != "" && snd != "" && third != "" && fourth != "") {
             measurement_info_t* entry = new measurement_info_t;
             entry->addr = (void*)packet_size;
             try {
-                entry->size = (size_t)(std::stoi(snd, NULL, 10)); // this is in bits
+                entry->size = (size_t)(std::stoi(snd, NULL, 10));
+                entry->l_padding = (size_t)(std::stoi(third, NULL, 10));
+                entry->r_padding = (size_t)(std::stoi(fourth, NULL, 10));
             } catch(std::invalid_argument& ia) {
                 logger.log_message("Invalid measurement size: " + line);
                 return FAILURE;
             }
             packet_size += entry->size;
-            //packet_size += (packet_size % 8); // add byte padding
+            compressed_size += (entry->size*8) - (entry->l_padding + entry->r_padding);
+
 
             // check for type
-            if(third == "int") {
+            if(fifth == "int") {
                 entry->type = INT_TYPE;
-            } else if(third == "float") {
+            } else if(fifth == "float") {
                 entry->type = FLOAT_TYPE;
             } else {
                 entry->type = UNDEFINED_TYPE;
@@ -158,10 +166,6 @@ RetType VCM::init() {
         logger.log_message("Config file missing port or addr for UDP protocol: " + config_file);
         return FAILURE;
     }
-    // } else if(packet_size % 8 != 0) {
-    //     logger.log_message("Error byte aligning packet");
-    //     return FAILURE;
-    // }
 
     return SUCCESS;
 }

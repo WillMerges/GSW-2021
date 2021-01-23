@@ -32,7 +32,7 @@ namespace nm {
 
         struct sockaddr_in servaddr;
         int sockfd;
-
+        
         char* buffer;
         bool open;
     };

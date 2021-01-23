@@ -7,7 +7,6 @@ using namespace vcm;
 int main() {
     VCM vcm;
 
-
     for (auto& it : vcm.measurements) {
         std::cout << it << " ";
 

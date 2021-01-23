@@ -27,6 +27,8 @@ NetworkManager::NetworkManager(VCM* vcm) {
 
     buffer = new char[MAX_MSG_SIZE];
 
+    open = false;
+
     // if(SUCCESS != Open()) {
     //     throw new std::runtime_error("failed to open network manager");
     // }

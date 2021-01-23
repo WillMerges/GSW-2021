@@ -34,7 +34,9 @@ namespace vcm {
 
     typedef struct {
         void* addr; // offset into shmem
-        size_t size; // bits NOT bytes // TODO decide this (currenytly BYTES not bits)
+        size_t size; // bytes
+        size_t l_padding; // bits of left padding (most significant bits)
+        size_t r_padding; // bits of right padding (least significant bits)
         measurement_type_t type;
     } measurement_info_t;
 
@@ -47,9 +49,13 @@ namespace vcm {
         VCM(); // uses default config file
         VCM(std::string config_file);
         ~VCM();
+
         measurement_info_t* get_info(std::string measurement); // get the info of a measurement
         std::vector<std::string> measurements; // list of measurement names
-        size_t packet_size;
+
+        size_t packet_size; // bytes, size of packet after padding is added
+        size_t compressed_size; // bits, size of packet before padding added
+
         // TODO maybe put addr and port in another subclass
         int addr; // address and port (only for UDP right now)
         int port;
