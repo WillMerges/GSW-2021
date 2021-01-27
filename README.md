@@ -31,3 +31,6 @@ For example: \
     *./shutdown_gsw* \
 \
 note: do **not** alter or delete the *pidlist* file, it tracks what processes should be killed on shutdown
+
+
+Other information --> https://wiki.rit.edu/display/ritlaunch/Walkthrough+-+GSW+2021
