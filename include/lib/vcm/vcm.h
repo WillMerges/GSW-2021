@@ -54,7 +54,7 @@ namespace vcm {
         std::vector<std::string> measurements; // list of measurement names
 
         size_t packet_size; // bytes, size of packet after padding is added
-        size_t compressed_size; // bits, size of packet before padding added
+        // size_t compressed_size; // bits, size of packet before padding added
 
         // TODO maybe put addr and port in another subclass
         int addr; // address and port (only for UDP right now)

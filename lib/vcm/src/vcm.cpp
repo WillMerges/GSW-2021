@@ -42,7 +42,7 @@ VCM::VCM(std::string config_file) {
     addr = port = -1;
     protocol = PROTOCOL_NOT_SET;
     packet_size = 0;
-    compressed_size = 0;
+    // compressed_size = 0;
     device = "";
 
     // init
@@ -87,6 +87,7 @@ RetType VCM::init() {
         }
 
         // get 1st + 2nd tokens
+        // this is really ugly ¯\_(ツ)_/¯
         std::istringstream ss(line);
         std::string fst;
         ss >> fst;
@@ -137,7 +138,7 @@ RetType VCM::init() {
                 return FAILURE;
             }
             packet_size += entry->size;
-            compressed_size += (entry->size*sizeof(unsigned char)) - (entry->l_padding + entry->r_padding);
+            // compressed_size += (entry->size*sizeof(unsigned char)) - (entry->l_padding + entry->r_padding);
 
 
             // check for type

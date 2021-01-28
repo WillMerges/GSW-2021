@@ -1,6 +1,6 @@
-# telemtry memory view
+# forward telemetry data to InfluxDB
 
-TARGET = fwd 
+TARGET = influx_fwd 
 
 CXX = g++
 CC = g++
