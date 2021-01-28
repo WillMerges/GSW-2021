@@ -137,7 +137,7 @@ RetType VCM::init() {
                 return FAILURE;
             }
             packet_size += entry->size;
-            compressed_size += (entry->size*8) - (entry->l_padding + entry->r_padding);
+            compressed_size += (entry->size*sizeof(unsigned char)) - (entry->l_padding + entry->r_padding);
 
 
             // check for type
