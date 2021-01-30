@@ -106,7 +106,7 @@ RetType NetworkManager::Open() {
     memset(&servaddr, 0, sizeof(servaddr));
 
     servaddr.sin_family = AF_INET;
-    servaddr.sin_port = htons(vcm->port);
+    // servaddr.sin_port = htons(vcm->port); // TODO uncomment this
     servaddr.sin_addr.s_addr = htons(vcm->addr);
 
     struct sockaddr_in myaddr;

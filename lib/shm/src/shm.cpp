@@ -16,6 +16,10 @@
 #include <string>
 #include <pthread.h>
 #include <semaphore.h>
+#include <linux/futex.h>
+#include <unistd.h>
+#include <limits.h>
+#include <sys/syscall.h>
 #include "lib/shm/shm.h"
 #include "lib/vcm/vcm.h"
 #include "lib/dls/dls.h"
@@ -53,15 +57,13 @@ namespace shm {
 
     // info block for locking shared memory
     typedef struct {
-        unsigned int nonce;
+        uint32_t nonce;
         unsigned int readers;
         unsigned int writers;
         sem_t rmutex;
         sem_t wmutex;
         sem_t readTry;
         sem_t resource;
-        pthread_mutex_t nonce_lock;
-        pthread_cond_t nonce_cond;
     } shm_info_t;
 
     // info block
@@ -99,7 +101,7 @@ namespace shm {
 
         memcpy((unsigned char*)shmem + offset, src, size);
         info->nonce++; // update the nonce
-        pthread_cond_broadcast(&(info->nonce_cond)); // TODO error check return value
+        syscall(SYS_futex, &(info->nonce), FUTEX_WAKE, INT_MAX, NULL, NULL, 0); // TODO check return
 
         V(info->resource);
 
@@ -230,7 +232,7 @@ namespace shm {
                 // we can guarantee no one changed the nonce so we can use a 'fake' lock
                 // only the writer can change the nonce
                 // so block here
-                pthread_cond_wait(&(info->nonce_cond), &(info->nonce_lock)); // TODO error check return value
+                syscall(SYS_futex, &(info->nonce), FUTEX_WAIT, last_nonce, NULL, NULL, 0); // TODO check return
             } else { // do the read
                 memcpy(dst, (unsigned char*)shmem + offset, size);
                 last_nonce = info->nonce;
@@ -268,6 +270,7 @@ namespace shm {
 
         memset(shmem, 0, vcm->packet_size);
         info->nonce++; // update the nonce
+        syscall(SYS_futex, &(info->nonce), FUTEX_WAKE, INT_MAX, NULL, NULL, 0); // TODO check return
 
         V(info->resource);
 
@@ -318,15 +321,6 @@ namespace shm {
         INIT(info->wmutex, 1);
         INIT(info->readTry, 1);
         INIT(info->resource, 1);
-
-        // init a dummy lock to use with the nonce
-        info->nonce_lock = PTHREAD_MUTEX_INITIALIZER;
-
-        // init a shared condition variable to block for updates
-        // TODO check the returns of these for errors
-        pthread_condattr_t cattr;
-        pthread_condattr_setpshared(&cattr, PTHREAD_PROCESS_SHARED);
-        pthread_cond_init(&(info->nonce_cond), &cattr);
 
         // init reader/writer counts to 0
         info->readers = 0;

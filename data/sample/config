@@ -6,7 +6,7 @@
 # these need to be set at some point!
 protocol = udp
 addr = 127.0.0.1
-port = 8080
+port = 8081
 
 # device name
 name = sample_device

@@ -91,13 +91,14 @@ int main(int argc, char* argv[]) {
             }
 
             // print the data
-            if(m_info->type == INT_TYPE) {
+            if(m_info->type == INT_TYPE && false) {
                 unsigned char val[sizeof(int)];
                 memset(val, 0, sizeof(int));
                 for(size_t i = 0; i < m_info->size; i++) {
                     val[i] = buff[addr + i]; // assumes little endian
                 }
-                printf("%i\n", *((int*)val));
+                int v = *((int*)val);
+                printf("%i\n", v);
             } else if(m_info->type == FLOAT_TYPE) {
                 unsigned char val[sizeof(float)];
                 memset(val, 0, sizeof(float));

@@ -1,0 +1,15 @@
+# simulation
+
+protocol = udp
+addr = 127.0.0.1
+port = 8081
+
+name = sim_v1
+
+X_VELOCITY 4 0 0 int
+Y_VELOCITY 4 0 0 int
+X_ACCEL 4 0 0 int
+Y_ACCEL 4 0 0 int
+ALT 4 0 0 int
+TEMP 4 0 0 int
+UPTIME 4 0 0 int

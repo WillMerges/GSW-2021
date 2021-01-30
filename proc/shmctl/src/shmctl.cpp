@@ -67,13 +67,12 @@ int main(int argc, char* argv[]) {
         }
         return SUCCESS;
     } else if(off) {
+        printf("destroying shared memory\n");
+        logger.log_message("destroying shared memory");
         if(FAILURE == attach_to_shm(vcm)) {
             printf("Shared memory not created, nothing to destroy\n");
             logger.log_message("Shared memory not created, nothing to destroy");
-            return FAILURE;
         }
-        printf("destroying shared memory\n");
-        logger.log_message("destroying shared memory");
         if(FAILURE == destroy_shm()) {
             printf("Failed to destroy shared memory\n");
             logger.log_message("Failed to destroy shared memory");
