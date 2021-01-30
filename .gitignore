@@ -34,3 +34,6 @@ log/*/*.log
 *.exe
 *.out
 *.app
+
+# package files
+*.deb

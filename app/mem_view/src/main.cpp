@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
             // ignore and continue
         } else {
             // clear the screen
-            // printf("\033[2J");
+            printf("\033[2J");
         }
 
         usleep(1000);

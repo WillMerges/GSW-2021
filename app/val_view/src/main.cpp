@@ -91,11 +91,11 @@ int main(int argc, char* argv[]) {
             }
 
             // print the data
-            if(m_info->type == INT_TYPE && false) {
+            if(m_info->type == INT_TYPE) {
                 unsigned char val[sizeof(int)];
                 memset(val, 0, sizeof(int));
-                for(size_t i = 0; i < m_info->size; i++) {
-                    val[i] = buff[addr + i]; // assumes little endian
+                for(size_t i = m_info->size; i > 0; --i) {
+                    val[i] = buff[addr + i]; // assumes little endian? maybe big lol
                 }
                 int v = *((int*)val);
                 printf("%i\n", v);
