@@ -20,10 +20,14 @@ OBJS := $(CPP_FILES:.cpp=.o) $(C_FILES:.c=.o)
 
 .PHONY: all clean
 
-all: $(TARGET)
+all: $(TARGET) script
 
 $(TARGET): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LIBS)
 
+script:
+	-chmod +x clear_influx.sh
+
 clean:
 	-rm src/*.o $(TARGET)
+	-chmod -x clear_influx.sh
