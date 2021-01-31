@@ -1,5 +1,5 @@
 /********************************************************************
-*  Name: ldms.h
+*  Name: vcm.h
 *
 *  Purpose: Header for vehicle configuration manager source.
 *

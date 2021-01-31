@@ -2,7 +2,6 @@
 #include <csignal>
 #include "lib/nm/nm.h"
 #include "lib/shm/shm.h"
-// #include "lib/ldms/ldms.h"
 #include "lib/dls/dls.h"
 #include "lib/vcm/vcm.h"
 #include "common/types.h"

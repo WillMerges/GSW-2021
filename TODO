@@ -82,3 +82,8 @@ clean up documentation
     - file headers
     - comments
     - function headers for .h files
+
+figure out how to handle endianness
+
+make a conversion library
+- takes bytes and turns it into a type
