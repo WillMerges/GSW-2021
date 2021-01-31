@@ -1,6 +1,6 @@
 # forward telemetry data to InfluxDB
 
-TARGET = influx_fwd 
+TARGET = fwd_influx 
 
 CXX = g++
 CC = g++
