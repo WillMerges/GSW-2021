@@ -41,7 +41,7 @@ void sighandler(int signum) {
 }
 
 int main(int argc, char* argv[]) {
-    MsgLogger logger("db fwd");
+    MsgLogger logger("DB_FWD");
 
     logger.log_message("starting database forwarding");
 
@@ -144,7 +144,7 @@ int main(int argc, char* argv[]) {
                 unsigned char val[sizeof(int)];
                 memset(val, 0, sizeof(int));
                 for(size_t i = 0; i < m_info->size; i++) {
-                    val[i] = buff[addr + i]; // assumes little endian
+                    val[m_info->size - i - 1] = buff[addr + i]; // assumes little endian
                 }
 
                 msg += meas;
@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
                 unsigned char val[sizeof(float)];
                 memset(val, 0, sizeof(float));
                 for(size_t i = 0; i < m_info->size; i++) {
-                    val[i] = buff[addr + i]; // assumes little endian
+                    val[m_info->size - i - 1] = buff[addr + i]; // assumes little endian
                 }
 
                 msg += meas;

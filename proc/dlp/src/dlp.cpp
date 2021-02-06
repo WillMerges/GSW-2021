@@ -101,7 +101,9 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
             if(read == -1) {
                 printf("Read failed from MQueue: %s\n", queue_name);
             }
-            buffer[read] = '\0';
+            if(!binary) {
+                buffer[read] = '\0';
+            }
             if(verbose) {
                 if(binary) {
                     printf("%s received telemetry packet\n", timestamp.c_str());
@@ -111,7 +113,8 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
             }
 
             if(binary) {
-                file << timestamp << buffer;
+                file << timestamp;
+                file.write(buffer, read);
             } else {
                 file << timestamp << " " << buffer << '\n';
             }

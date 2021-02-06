@@ -90,12 +90,13 @@ int main(int argc, char* argv[]) {
                 printf(" ");
             }
 
+            // TODO support more types (and signs)
             // print the data
             if(m_info->type == INT_TYPE) {
                 unsigned char val[sizeof(int)];
                 memset(val, 0, sizeof(int));
-                for(size_t i = m_info->size; i > 0; --i) {
-                    val[i] = buff[addr + i]; // assumes little endian? maybe big lol
+                for(size_t i = 0; i < m_info->size; i++) {
+                    val[m_info->size - i - 1] = buff[addr + i]; // assumes little endian
                 }
                 int v = *((int*)val);
                 printf("%i\n", v);
@@ -103,7 +104,7 @@ int main(int argc, char* argv[]) {
                 unsigned char val[sizeof(float)];
                 memset(val, 0, sizeof(float));
                 for(size_t i = 0; i < m_info->size; i++) {
-                    val[i] = buff[addr + i]; // assumes little endian
+                    val[m_info->size - i - 1] = buff[addr + i]; // assumes little endian
                 }
                 printf("%f\n", *((float*)val));
             } else {

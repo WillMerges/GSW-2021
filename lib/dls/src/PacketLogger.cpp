@@ -32,7 +32,7 @@ RetType PacketLogger::log_packet(unsigned char* buffer, size_t size) {
     char* out_buff = new char[out_size];
 
     memcpy(out_buff, dev_id.c_str(), len); // write the device id
-    memcpy(out_buff, &size, sizeof(size_t)); // write the packet size
+    memcpy(out_buff+len, &size, sizeof(size_t)); // write the packet size
     memcpy(out_buff+len+sizeof(size_t), buffer, size); // write the packet
 
     RetType ret = queue_msg(out_buff, out_size);

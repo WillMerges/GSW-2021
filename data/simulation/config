@@ -2,14 +2,14 @@
 
 protocol = udp
 addr = 127.0.0.1
-port = 8081
+port = 8080
 
 name = sim_v1
 
-X_VELOCITY 4 0 0 int signed
-Y_VELOCITY 4 0 0 int signed
-X_ACCEL 4 0 0 int signed
-Y_ACCEL 4 0 0 int signed
-ALT 4 0 0 int signed
-TEMP 4 0 0 int signed
-UPTIME 4 0 0 int signed
+X_VELOCITY 4 0 0 float signed
+Y_VELOCITY 4 0 0 float signed
+X_ACCEL 4 0 0 float signed
+Y_ACCEL 4 0 0 float signed
+ALT 4 0 0 float signed
+TEMP 4 0 0 float signed
+UPTIME 4 0 0 float signed
