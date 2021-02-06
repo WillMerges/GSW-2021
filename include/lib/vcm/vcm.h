@@ -53,7 +53,7 @@ namespace vcm {
     // };
 
     // TODO make this a class w/ to_string, to_int, to_float etc.
-    // actually, just add functions 
+    // actually, just add functions
     typedef struct {
         void* addr; // offset into shmem
         size_t size; // bytes
