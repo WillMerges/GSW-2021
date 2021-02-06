@@ -18,7 +18,7 @@ port = 8081
 name = blackout_v0.1
 
 # reserve 8 bytes for the receiver to send messages to us (status, bad packet, errors, etc.)
-RECV_MESSAGE 8 0 0
+RECV_MESSAGE 8 0 0 string
 
 # accelerations from the IMU (12 bits each, 2 bytes w/ padding)
 ACCEL_IMU_X 2 0 0 int
@@ -52,16 +52,16 @@ GPS_TIME_MS 2 0 0  int # milliseconds is 2 bytes
 UPTIME 2 0 0 int
 
 # charge continuity (1 byte boolean X 4 charges)
-CONT_1 1 0 0
-CONT_2 1 0 0 
-CONT_3 1 0 0 
-CONT_4 1 0 0 
+CONT_1 1 0 0 int
+CONT_2 1 0 0 int
+CONT_3 1 0 0 int
+CONT_4 1 0 0 int
 
 # charge deployment status (1 byte boolean X 4 charges)
-DEPLOY_1 1 0 0 
-DEPLOY_2 1 0 0 
-DEPLOY_3 1 0 0 
-DEPLOY_4 1 0 0 
+DEPLOY_1 1 0 0 int
+DEPLOY_2 1 0 0 int
+DEPLOY_3 1 0 0 int
+DEPLOY_4 1 0 0 int
 
 # temperature (need to double check this one too)
 TEMP 2 0 0 float

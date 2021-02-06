@@ -23,6 +23,9 @@ int main() {
                 case FLOAT_TYPE:
                     std::cout << "float";
                     break;
+                case STRING_TYPE:
+                    std::cout << "string";
+                    break;
             }
             std::cout << '\n';
         }

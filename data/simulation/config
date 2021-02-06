@@ -6,10 +6,10 @@ port = 8081
 
 name = sim_v1
 
-X_VELOCITY 4 0 0 int
-Y_VELOCITY 4 0 0 int
-X_ACCEL 4 0 0 int
-Y_ACCEL 4 0 0 int
-ALT 4 0 0 int
-TEMP 4 0 0 int
-UPTIME 4 0 0 int
+X_VELOCITY 4 0 0 int signed
+Y_VELOCITY 4 0 0 int signed
+X_ACCEL 4 0 0 int signed
+Y_ACCEL 4 0 0 int signed
+ALT 4 0 0 int signed
+TEMP 4 0 0 int signed
+UPTIME 4 0 0 int signed

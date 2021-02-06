@@ -29,15 +29,38 @@ namespace vcm {
     // for example a single byte measurement may say int because it can be treated as one
     // TODO add doubles and other things?1
     typedef enum {
-        UNDEFINED_TYPE, INT_TYPE, FLOAT_TYPE
+        UNDEFINED_TYPE, INT_TYPE, FLOAT_TYPE, STRING_TYPE
     } measurement_type_t;
 
+    typedef enum {
+        SIGNED_TYPE, UNSIGNED_TYPE
+    } measurement_sign_t;
+
+
+    // class GSW_Type {
+    // public:
+    //     void* addr; // offset into shmem
+    //     size_t size; // bytes
+    //     size_t l_padding; // bits of left padding (most significant bits)
+    //     size_t r_padding; // bits of right padding (least significant bits)
+    //     measurement_type_t type;
+    //     measurement_sign_t sign;
+    //
+    //     float to_float(void* shmem);
+    //     double to_double(void* shmem);
+    //     int to_int(void* shmem);
+    //     std::string to_str(void* shmem); // adds null terminator
+    // };
+
+    // TODO make this a class w/ to_string, to_int, to_float etc.
+    // actually, just add functions 
     typedef struct {
         void* addr; // offset into shmem
         size_t size; // bytes
         size_t l_padding; // bits of left padding (most significant bits)
         size_t r_padding; // bits of right padding (least significant bits)
         measurement_type_t type;
+        measurement_sign_t sign;
     } measurement_info_t;
 
     typedef enum {

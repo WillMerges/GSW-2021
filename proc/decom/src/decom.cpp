@@ -8,22 +8,17 @@
 #include <csignal>
 #include <string>
 
-// using namespace ldms;
 using namespace dls;
 using namespace vcm;
 using namespace nm;
 using namespace shm;
 
-// TelemetryParser* tp = NULL;
 NetworkManager* net = NULL;
 
 void sighandler(int signum) {
     MsgLogger logger("DECOM");
     logger.log_message("decom killed, cleaning up resources");
 
-    // if(tp) {
-    //     delete tp;
-    // }
     if(net) {
         delete net; // this also calls close
     }
@@ -47,17 +42,6 @@ int main(int argc, char** argv) {
     signal(SIGSEGV, sighandler);
     signal(SIGFPE, sighandler);
     signal(SIGABRT, sighandler);
-
-    // if(config_file == "") {
-    //     tp = ldms::create_default_parser();
-    // } else {
-    //     tp = ldms::create_parser(config_file);
-    // }
-    // if(!tp) {
-    //     printf("Unable to create parser\n");
-    //     return -1;
-    // }
-    // tp->Parse();
 
     VCM* vcm = NULL;
     if(config_file == "") {
@@ -87,10 +71,6 @@ int main(int argc, char** argv) {
 
     PacketLogger plogger(vcm->device);
     while(1) {
-        //if(SUCCESS != net->Iterate()) {
-            // do something maybe
-        //}
-
         // send any outgoing messages
         net->Send(); // don't care about the return
 

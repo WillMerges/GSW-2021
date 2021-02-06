@@ -87,3 +87,6 @@ figure out how to handle endianness
 
 make a conversion library
 - takes bytes and turns it into a type
+
+add a padding lib that decom calls after getting the packet from nm
+-it goes through and copies the buffer from nm into a new buffer with padding

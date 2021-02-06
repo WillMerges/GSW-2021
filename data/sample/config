@@ -11,5 +11,5 @@ port = 8081
 # device name
 name = sample_device
 
-# [measurement name] [total measurement size in bytes (including padding)] [most sig padding (bits)] [least sig (bits)] [optional type of int or float]
-TEST 4 0 0 int
+# [measurement name] [total measurement size in bytes (including padding)] [most sig padding (bits)] [least sig (bits)] [optional type of int, float, or string] [optional signed or unsigned]
+TEST 4 0 0 int signed

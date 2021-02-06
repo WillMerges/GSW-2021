@@ -95,10 +95,6 @@ RetType VCM::init() {
         ss >> snd;
         std::string third;
         ss >> third;
-        std::string fourth;
-        ss >> fourth;
-        std::string fifth;
-        ss >> fifth;
 
         // port or addr or protocol line
         if(snd == "=") {
@@ -126,7 +122,19 @@ RetType VCM::init() {
             } else if(fst == "name") {
                 device = third;
             }
-        } else if(fst != "" && snd != "" && third != "" && fourth != "") {
+        } else {
+            std::string fourth;
+            ss >> fourth;
+            std::string fifth;
+            ss >> fifth;
+            std::string sixth;
+            ss >> sixth;
+
+            if(fst == "" || snd == "" || third == "" || fourth == "") { // these are required
+                logger.log_message("Missing information: " + line);
+                return FAILURE;
+            }
+
             measurement_info_t* entry = new measurement_info_t;
             entry->addr = (void*)packet_size;
             try {
@@ -141,20 +149,33 @@ RetType VCM::init() {
             // compressed_size += (entry->size*sizeof(unsigned char)) - (entry->l_padding + entry->r_padding);
 
 
-            // check for type
+            // check for type (optional, default is undefined)
             if(fifth == "int") {
                 entry->type = INT_TYPE;
             } else if(fifth == "float") {
                 entry->type = FLOAT_TYPE;
-            } else {
+            } else if(fifth == "string") {
+                entry->type = STRING_TYPE;
+            } else if(fifth == "") {
                 entry->type = UNDEFINED_TYPE;
+            } else {
+                logger.log_message("Invalid type specified: " + fifth);
+                return FAILURE;
+            }
+
+            if(sixth == "unsigned") {
+                entry->sign = UNSIGNED_TYPE;
+            } else if(sixth == "signed") {
+                entry->sign = SIGNED_TYPE;
+            } else if(sixth == "") {
+                entry->sign = SIGNED_TYPE; // default is signed
+            } else {
+                logger.log_message("Invalid sign specified: " + sixth);
+                return FAILURE;
             }
 
             addr_map[fst] = entry;
             measurements.push_back(fst);
-        } else {
-            logger.log_message("Invalid line: " + line);
-            return FAILURE;
         }
     }
 
