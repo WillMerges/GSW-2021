@@ -3,13 +3,16 @@
 # this is what packet's coming from the receiver should look like
 # if measurements have the same name the latest one's size is used (furthest down in the file)!
 
-# these need to be set at some point!
+# these need to be set at some point
 protocol = udp
 addr = 127.0.0.1
 port = 8081
 
 # device name
 name = sample_device
+
+# endianness (coming FROM the receiver, not of the platform) [big or little], if not set defaults to little endian
+endianness = big
 
 # [measurement name] [total measurement size in bytes (including padding)] [most sig padding (bits)] [least sig (bits)] [optional type of int, float, or string] [optional signed or unsigned]
 TEST 4 0 0 int signed

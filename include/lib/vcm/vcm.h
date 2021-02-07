@@ -36,6 +36,10 @@ namespace vcm {
         SIGNED_TYPE, UNSIGNED_TYPE
     } measurement_sign_t;
 
+    typedef enum {
+        GSW_BIG_ENDIAN, GSW_LITTLE_ENDIAN
+    } endianness_t;
+
 
     // class GSW_Type {
     // public:
@@ -85,6 +89,9 @@ namespace vcm {
         protocol_t protocol;
         std::string config_file;
         std::string device;
+
+        endianness_t recv_endianness; // endianness of the receiver
+        endianness_t sys_endianness; // endianness of the system GSW is running on
     private:
         // local vars
         std::ifstream* f;

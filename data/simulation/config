@@ -6,6 +6,8 @@ port = 8080
 
 name = sim_v1
 
+endianness = big # java uses big endian ordering 
+
 X_VELOCITY 4 0 0 float signed
 Y_VELOCITY 4 0 0 float signed
 X_ACCEL 4 0 0 float signed

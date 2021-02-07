@@ -17,6 +17,9 @@ port = 8081
 # device name
 name = blackout_v0.1
 
+# endianess of the receiver
+endianness = big
+
 # reserve 8 bytes for the receiver to send messages to us (status, bad packet, errors, etc.)
 RECV_MESSAGE 8 0 0 string
 

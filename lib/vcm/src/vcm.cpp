@@ -6,6 +6,7 @@
 #include <sstream>
 #include <exception>
 #include <unordered_map>
+#include "endian.h"
 
 using namespace dls;
 using namespace vcm;
@@ -18,6 +19,16 @@ VCM::VCM() {
     protocol = PROTOCOL_NOT_SET;
     packet_size = 0;
     device = "";
+    recv_endianness = GSW_LITTLE_ENDIAN; // default is little endian
+
+    if(__BYTE_ORDER == __BIG_ENDIAN) {
+        sys_endianness = GSW_BIG_ENDIAN;
+    } else if(__BYTE_ORDER == __LITTLE_ENDIAN) {
+        sys_endianness = GSW_LITTLE_ENDIAN;
+    } else {
+        logger.log_message("Could not determine endianness of system, assuming little endian");
+        sys_endianness = GSW_LITTLE_ENDIAN;
+    }
 
     // figure out default config file
     char* env = getenv("GSW_HOME");
@@ -121,6 +132,15 @@ RetType VCM::init() {
                 }
             } else if(fst == "name") {
                 device = third;
+            } else if(fst == "endianness") {
+                if(third == "little") {
+                    recv_endianness = GSW_LITTLE_ENDIAN;
+                } else if(third == "big") {
+                    recv_endianness = GSW_BIG_ENDIAN;
+                } else {
+                    logger.log_message("Unrecogonized endianness on line: " + line);
+                    return FAILURE;
+                }
             }
         } else {
             std::string fourth;
@@ -181,6 +201,7 @@ RetType VCM::init() {
 
     f->close();
 
+    // check for unset mandatory configuration items
     if(protocol == PROTOCOL_NOT_SET) {
         logger.log_message("Config file missing protocol: " + config_file);
         return FAILURE;

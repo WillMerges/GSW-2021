@@ -7,6 +7,24 @@ using namespace vcm;
 int main() {
     VCM vcm;
 
+    std::cout << "device id: " << vcm.device << '\n';
+
+    std::cout << "receiver endianness: ";
+    if(vcm.recv_endianness == GSW_LITTLE_ENDIAN) {
+        std::cout << "little endian\n";
+    } else if(vcm.recv_endianness == GSW_BIG_ENDIAN) {
+        std::cout << "big endian\n";
+    }
+
+    std::cout << "system endianness: ";
+    if(vcm.sys_endianness == GSW_LITTLE_ENDIAN) {
+        std::cout << "little endian\n";
+    } else if(vcm.sys_endianness == GSW_BIG_ENDIAN) {
+        std::cout << "big endian\n";
+    }
+
+    std::cout << '\n';
+
     for (auto& it : vcm.measurements) {
         std::cout << it << " ";
 
