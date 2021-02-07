@@ -1,0 +1,3 @@
+edit /etc/grafana/grafana.ini
+under the [dashboards] setting add 'min_refresh_interval = 100ms'
+in your dashboard go to settings and for refresh intervals add 100ms
