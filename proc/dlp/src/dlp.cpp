@@ -72,6 +72,8 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
 
     add_mq_to_close(&mq);
 
+    bool started = false;
+
     while(1) {
         std::ofstream file;
 
@@ -86,16 +88,19 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
             exit(-1);
         }
 
-        gettimeofday(&curr_time, NULL);
-        std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
-        file << timestamp << " Starting DLP\n";
-        file.flush();
+        if(!started) {
+            gettimeofday(&curr_time, NULL);
+            std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
+            file << timestamp << " Starting DLP\n";
+            file.flush();
+            started = true;
+        }
 
         ssize_t read = -1;
         unsigned int writes = 0;
         while(writes < MAX_LINES_PER_FILE) {
-            gettimeofday(&curr_time, NULL);
-            std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
+            // gettimeofday(&curr_time, NULL);
+            // std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
 
             read = mq_receive(mq, buffer, MAX_Q_SIZE, NULL);
             if(read == -1) {
@@ -106,6 +111,8 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
             }
             if(verbose) {
                 if(binary) {
+                    gettimeofday(&curr_time, NULL);
+                    std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
                     printf("%s received telemetry packet\n", timestamp.c_str());
                 } else {
                     printf("%s\n", buffer);
@@ -113,10 +120,11 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
             }
 
             if(binary) {
-                file << timestamp;
+                //file << timestamp;
                 file.write(buffer, read);
             } else {
-                file << timestamp << " " << buffer << '\n';
+                //file << timestamp << " " << buffer << '\n';
+                file << buffer << '\n';
             }
             writes++;
 

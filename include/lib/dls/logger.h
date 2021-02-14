@@ -7,6 +7,7 @@
 #include "common/types.h"
 #include <string>
 #include <mqueue.h>
+#include <sys/time.h>
 
 namespace dls {
 
@@ -20,6 +21,7 @@ namespace dls {
         RetType Close();
         RetType queue_msg(const char* buffer, size_t size);
         bool open;
+        struct timeval curr_time;
     private:
         std::string queue_name;
         mqd_t mq;
