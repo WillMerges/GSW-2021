@@ -8,6 +8,7 @@
 #include "lib/vcm/vcm.h"
 #include "lib/shm/shm.h"
 #include "lib/dls/dls.h"
+#include "lib/convert/convert.h"
 #include "common/types.h"
 
 // view telemetry memory live
@@ -16,6 +17,7 @@
 using namespace vcm;
 using namespace shm;
 using namespace dls;
+using namespace convert;
 
 int main(int argc, char* argv[]) {
     MsgLogger logger("val_view");
@@ -77,11 +79,11 @@ int main(int argc, char* argv[]) {
     printf("\033[2J");
 
     measurement_info_t* m_info;
-    size_t addr = 0;
+    // size_t addr = 0;
     while(1) {
         for(std::string meas : vcm->measurements) {
             m_info = vcm->get_info(meas);
-            addr = (size_t)m_info->addr;
+            // addr = (size_t)m_info->addr;
 
             printf("%s  ", meas.c_str());
 
@@ -90,29 +92,32 @@ int main(int argc, char* argv[]) {
                 printf(" ");
             }
 
-            // TODO support more types (and signs)
-            // print the data
-            if(m_info->type == INT_TYPE) {
-                unsigned char val[sizeof(int)];
-                memset(val, 0, sizeof(int));
-                for(size_t i = 0; i < m_info->size; i++) {
-                    val[m_info->size - i - 1] = buff[addr + i]; // assumes little endian
-                }
-                int v = *((int*)val);
-                printf("%i\n", v);
-            } else if(m_info->type == FLOAT_TYPE) {
-                unsigned char val[sizeof(float)];
-                memset(val, 0, sizeof(float));
-                for(size_t i = 0; i < m_info->size; i++) {
-                    val[m_info->size - i - 1] = buff[addr + i]; // assumes little endian
-                }
-                printf("%f\n", *((float*)val));
-            } else {
-                for(size_t i = 0; i < m_info->size; i++) {
-                    printf("0x%02X ", buff[addr + i]);
-                }
-                printf("\n");
-            }
+            std::string data = "ERR";
+            convert_str(vcm, m_info, buff, &data);
+            std::cout << data << "\n";
+            // // TODO support more types (and signs)
+            // // print the data
+            // if(m_info->type == INT_TYPE) {
+            //     unsigned char val[sizeof(int)];
+            //     memset(val, 0, sizeof(int));
+            //     for(size_t i = 0; i < m_info->size; i++) {
+            //         val[m_info->size - i - 1] = buff[addr + i]; // assumes little endian
+            //     }
+            //     int v = *((int*)val);
+            //     printf("%i\n", v);
+            // } else if(m_info->type == FLOAT_TYPE) {
+            //     unsigned char val[sizeof(float)];
+            //     memset(val, 0, sizeof(float));
+            //     for(size_t i = 0; i < m_info->size; i++) {
+            //         val[m_info->size - i - 1] = buff[addr + i]; // assumes little endian
+            //     }
+            //     printf("%f\n", *((float*)val));
+            // } else {
+            //     for(size_t i = 0; i < m_info->size; i++) {
+            //         printf("0x%02X ", buff[addr + i]);
+            //     }
+            //     printf("\n");
+            // }
         }
 
         // read from shared memoery

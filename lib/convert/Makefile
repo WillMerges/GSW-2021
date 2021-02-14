@@ -1,6 +1,6 @@
 # builds conversion library
 
-TARGET = convert.so
+TARGET = libconvert.so
 
 CXX = g++
 CC = g++
