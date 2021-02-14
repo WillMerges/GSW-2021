@@ -14,6 +14,7 @@
 #include "lib/vcm/vcm.h"
 #include "lib/shm/shm.h"
 #include "lib/dls/dls.h"
+#include "lib/convert/convert.h"
 #include "common/types.h"
 
 // view telemetry memory live
@@ -25,6 +26,7 @@
 using namespace vcm;
 using namespace shm;
 using namespace dls;
+using namespace convert;
 
 #define INFLUXDB_UDP_PORT 8089
 #define INFLUXDB_ADDR "127.0.0.1"
@@ -112,9 +114,10 @@ int main(int argc, char* argv[]) {
     memset((void*)buff, 0, vcm->packet_size); // zero the buffer
 
     measurement_info_t* m_info;
-    size_t addr = 0;
+    // size_t addr = 0;
 
     std::string msg;
+    std::string val;
 
     // main loop
     while(1) {
@@ -137,32 +140,38 @@ int main(int argc, char* argv[]) {
             first &= 0;
 
             m_info = vcm->get_info(meas);
-            addr = (size_t)m_info->addr;
+            //addr = (size_t)m_info->addr;
 
-            // add data
-            if(m_info->type == INT_TYPE) {
-                unsigned char val[sizeof(int)];
-                memset(val, 0, sizeof(int));
-                for(size_t i = 0; i < m_info->size; i++) {
-                    val[m_info->size - i - 1] = buff[addr + i]; // assumes little endian
-                }
-
+            if(SUCCESS == convert_str(vcm, m_info, buff, &val)) {
                 msg += meas;
                 msg += "=";
-                msg += std::to_string(*((int*)(val)));
-            } else if(m_info->type == FLOAT_TYPE) {
-                unsigned char val[sizeof(float)];
-                memset(val, 0, sizeof(float));
-                for(size_t i = 0; i < m_info->size; i++) {
-                    val[m_info->size - i - 1] = buff[addr + i]; // assumes little endian
-                }
-
-                msg += meas;
-                msg += "=";
-                msg += std::to_string(*((float*)(val)));
-            } else {
-                // don't forward
+                msg += val;
             }
+
+            // // add data
+            // if(m_info->type == INT_TYPE) {
+            //     unsigned char val[sizeof(int)];
+            //     memset(val, 0, sizeof(int));
+            //     for(size_t i = 0; i < m_info->size; i++) {
+            //         val[m_info->size - i - 1] = buff[addr + i]; // assumes little endian
+            //     }
+            //
+            //     msg += meas;
+            //     msg += "=";
+            //     msg += std::to_string(*((int*)(val)));
+            // } else if(m_info->type == FLOAT_TYPE) {
+            //     unsigned char val[sizeof(float)];
+            //     memset(val, 0, sizeof(float));
+            //     for(size_t i = 0; i < m_info->size; i++) {
+            //         val[m_info->size - i - 1] = buff[addr + i]; // assumes little endian
+            //     }
+            //
+            //     msg += meas;
+            //     msg += "=";
+            //     msg += std::to_string(*((float*)(val)));
+            // } else {
+            //     // don't forward
+            // }
         }
 
         // send the message
