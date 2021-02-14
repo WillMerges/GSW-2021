@@ -83,16 +83,20 @@ clean up documentation
     - comments
     - function headers for .h files
 
-figure out how to handle endianness
+DONE - done by convert lib - figure out how to handle endianness
 
-make a conversion library
+DONE - make a conversion library
 - takes bytes and turns it into a type
 
 add a padding lib that decom calls after getting the packet from nm
 -it goes through and copies the buffer from nm into a new buffer with padding
+^^^ this is low priority
 
-have a type library with functions like
+DONE (sort of) needs more work - have a type library with functions like
 RetType to_float(vcm::measurement_info_t measurement, unsigned char* buffer, float* f)
 -tries to set f to the measurement described by 'measurement' in 'buffer'
 -returns SUCCESS if was able to convert, FAILURE otherwise(e.g. size mismatch, nonsensical like string to float) undefined always returns SUCCESS if the size is okay
 -takes into account receiver and system endianness in conversion
+
+
+UDP does automatic checksumming (handled by the OS) - the receiver should check the checksum from the rocket before sending
