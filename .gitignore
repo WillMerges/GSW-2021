@@ -1,3 +1,6 @@
+# personal scripts
+wordcount.sh
+
 # logging files
 log/*.log
 log/*/*.log
