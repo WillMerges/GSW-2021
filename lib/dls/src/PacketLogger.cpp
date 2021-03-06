@@ -1,6 +1,7 @@
 #include "lib/dls/packet_logger.h"
 #include <string.h>
 #include <string>
+#include <stdint.h>
 
 using namespace dls;
 
@@ -16,9 +17,9 @@ RetType PacketLogger::log_packet(unsigned char* buffer, size_t size) {
     std::string header = "[" + std::to_string(curr_time.tv_sec) + "]";
 
     header += "<" + device_name + ">";
-    size_t len = strlen(header.c_str()) * sizeof(char); // want to get actual # of bytes
+    uint32_t len = strlen(header.c_str()) * sizeof(char); // want to get actual # of bytes
 
-    size_t out_size = len + size + sizeof(size_t);
+    uint32_t out_size = len + size + sizeof(uint32_t);
 
     char* out_buff = new char[out_size];
 

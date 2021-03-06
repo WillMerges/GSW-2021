@@ -63,7 +63,7 @@ RetType convert::convert_str(VCM* vcm, measurement_info_t* measurement, const vo
                 return FAILURE;
             }
 
-            unsigned char val[convert_size]; // always assume it's the biggest (don't care about a few bytes)
+            unsigned char* val = (unsigned char*)malloc(convert_size); // always assume it's the biggest (don't care about a few bytes)
             memset(val, 0, convert_size);
 
             size_t addr = (size_t)measurement->addr;
@@ -82,6 +82,7 @@ RetType convert::convert_str(VCM* vcm, measurement_info_t* measurement, const vo
             // sign doesn't exist for floating point
             snprintf(result, MAX_CONVERSION_SIZE, "%f", *((float*)val));
 
+            free(val);
             }
             break;
 
