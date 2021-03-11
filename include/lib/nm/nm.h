@@ -34,7 +34,7 @@ namespace nm {
         std::string mqueue_name;
         vcm::VCM* vcm;
 
-        struct sockaddr_in servaddr;
+        struct sockaddr_in device_addr; // address of the device we're listening to (filled in by recvfrom)
         int sockfd;
 
         char* buffer;

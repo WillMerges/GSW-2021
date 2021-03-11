@@ -72,7 +72,7 @@ RetType NetworkManager::Open() {
     }
 
     // set up the socket
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { // ipv4, UDP
        logger.log_message("socket creation failed");
        return FAILURE;
     }
@@ -103,16 +103,18 @@ RetType NetworkManager::Open() {
         return FAILURE;
     }
 
-    memset(&servaddr, 0, sizeof(servaddr));
+    memset(&device_addr, 0, sizeof(device_addr));
 
-    servaddr.sin_family = AF_INET;
-    // servaddr.sin_port = htons(vcm->port); // TODO uncomment this, right now this gets filled in later when recvfrom is called
-    servaddr.sin_addr.s_addr = htons(vcm->addr);
+    device_addr.sin_family = AF_INET;
+    // we will still recvfrom any port if they send to the correct port, but we fill this in to be used if we send before we receive
+    // if we comment this out and send before receiving, we should get a EDESTADDRREQ error in errno
+    device_addr.sin_port = htons(vcm->port); // TODO we could initialize this with some port, or let recvfrom fill it in
+    device_addr.sin_addr.s_addr = htons(vcm->addr);
 
     struct sockaddr_in myaddr;
-    myaddr.sin_addr.s_addr = htons(INADDR_ANY);
+    myaddr.sin_addr.s_addr = htons(INADDR_ANY); // use any interface we have available
     myaddr.sin_family = AF_INET;
-    myaddr.sin_port = htons(vcm->port); // use the same port for the server and client
+    myaddr.sin_port = htons(vcm->port); // bind OUR port to what the vcm file says (we receive and send from this port now)
     int rc = bind(sockfd, (struct sockaddr*) &myaddr, sizeof(myaddr));
     if(rc) {
         logger.log_message("socket bind failed");
@@ -161,7 +163,7 @@ RetType NetworkManager::Send() {
     if(read != -1) {
         ssize_t sent = -1;
         sent = sendto(sockfd, buffer, read, 0,
-            (struct sockaddr*)&servaddr, sizeof(servaddr));
+            (struct sockaddr*)&device_addr, sizeof(device_addr)); // send to whatever we last received from
         if(sent == -1) {
             logger.log_message("Failed to send UDP message");
             return FAILURE;
@@ -175,12 +177,12 @@ RetType NetworkManager::Receive() {
     MsgLogger logger("NetworkManager", "Receive");
 
     int n = -1;
-    socklen_t len = sizeof(servaddr);
+    socklen_t len = sizeof(device_addr);
 
     // MSG_DONTWAIT should be taken care of by O_NONBLOCK
     // MSG_TRUNC is set so that we know if we have a size mismatch
     n = recvfrom(sockfd, in_buffer, vcm->packet_size,
-                MSG_DONTWAIT | MSG_TRUNC, (struct sockaddr *) &servaddr, &len);
+                MSG_DONTWAIT | MSG_TRUNC, (struct sockaddr *) &device_addr, &len); // fill in device_addr with where the packet came from
 
     if(n == -1) { // timeout or error
         in_size = 0;
