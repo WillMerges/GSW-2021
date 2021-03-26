@@ -15,6 +15,7 @@ namespace nm {
 
     // checks an mqueue of name /[device_name from VCM] for messages to send over UDP
     // checks the UDP socket for incoming messages and writes them to shared memory
+    // should only have ONE of these per vehicle (per vcm file)
     class NetworkManager {
     public:
         NetworkManager(vcm::VCM* vcm);

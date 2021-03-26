@@ -99,4 +99,4 @@ RetType to_float(vcm::measurement_info_t measurement, unsigned char* buffer, flo
 -takes into account receiver and system endianness in conversion
 
 
-UDP does automatic checksumming (handled by the OS) - the receiver should check the checksum from the rocket before sending
+NO WORK NEEDED - UDP does automatic checksumming (handled by the OS) - the receiver should check the checksum from the rocket before sending

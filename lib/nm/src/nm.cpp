@@ -16,7 +16,7 @@ using namespace dls;
 using namespace shm;
 using namespace vcm;
 
-#define MAX_MSG_SIZE 2048
+#define MAX_MSG_SIZE 4096
 #define RECV_TIMEOUT 100000 // 100ms
 
 NetworkManager::NetworkManager(VCM* vcm) {
@@ -56,6 +56,16 @@ RetType NetworkManager::Open() {
 
     if(open) {
         return SUCCESS;
+    }
+
+    // if packet_size >= MAX_MSG_SIZE and we get a message greater than we can fit
+    // in our buffer, in_size will be set to MAX_MSG_SIZE. If packet_size == MAX_MSG_SIZE
+    // then we can't tell if we have a truncated packets or a valid one. If packet_size
+    // is too large we can't store the whole packet regardless.
+    if(vcm->packet_size >= MAX_MSG_SIZE) {
+        logger.log_message("VCM packet size is greater than equal to max message \
+                            size, cannot fit packet in allocated buffer");
+        return FAILURE;
     }
 
     // open the mqueue
@@ -106,13 +116,16 @@ RetType NetworkManager::Open() {
     memset(&device_addr, 0, sizeof(device_addr));
 
     device_addr.sin_family = AF_INET;
-    // we will still recvfrom any port if they send to the correct port, but we fill this in to be used if we send before we receive
-    // if we comment this out and send before receiving, we should get a EDESTADDRREQ error in errno
-    device_addr.sin_port = htons(vcm->port); // TODO we could initialize this with some port, or let recvfrom fill it in
-    device_addr.sin_addr.s_addr = htons(vcm->addr);
+    // we no longer set the port and address of the device
+    // originally, we set these in case we call sendto before recvfrom
+    // recvfrom fills in the port and address of the receiver for us,
+    // but until it sends something we don't know it's port/address
+    // so now we just error if it hasn't sent us anything yet when sendto is called
+    //device_addr.sin_port = htons(vcm->port);
+    //device_addr.sin_addr.s_addr = htons(vcm->addr);
 
     struct sockaddr_in myaddr;
-    myaddr.sin_addr.s_addr = htons(INADDR_ANY); // use any interface we have available
+    myaddr.sin_addr.s_addr = htons(INADDR_ANY); // use any interface we have available (likely just 1 ip)
     myaddr.sin_family = AF_INET;
     myaddr.sin_port = htons(vcm->port); // bind OUR port to what the vcm file says (we receive and send from this port now)
     int rc = bind(sockfd, (struct sockaddr*) &myaddr, sizeof(myaddr));
@@ -159,6 +172,13 @@ RetType NetworkManager::Send() {
     ssize_t read = -1;
     read = mq_receive(mq, buffer, MAX_MSG_SIZE, NULL);
 
+    // device address has not been set (still zeroed)
+    if(0 == device_addr.sin_port) {
+        logger.log_message("Receiver has not yet sent a packet providing a port \
+                            and address, failed to send UDP message");
+        return FAILURE;
+    }
+
     // send the message from the mqueue out of the socket
     if(read != -1) {
         ssize_t sent = -1;
@@ -180,8 +200,8 @@ RetType NetworkManager::Receive() {
     socklen_t len = sizeof(device_addr);
 
     // MSG_DONTWAIT should be taken care of by O_NONBLOCK
-    // MSG_TRUNC is set so that we know if we have a size mismatch
-    n = recvfrom(sockfd, in_buffer, vcm->packet_size,
+    // MSG_TRUNC is set so that we know if we overran our buffer
+    n = recvfrom(sockfd, in_buffer, MAX_MSG_SIZE,
                 MSG_DONTWAIT | MSG_TRUNC, (struct sockaddr *) &device_addr, &len); // fill in device_addr with where the packet came from
 
     if(n == -1) { // timeout or error
@@ -189,7 +209,13 @@ RetType NetworkManager::Receive() {
         return FAILURE; // no packet
     }
 
-    in_size = n;
+    // set in size to the size of the buffer if we received too much data for our buffer
+    if(n > MAX_MSG_SIZE) {
+        in_size = MAX_MSG_SIZE;
+    } else {
+        in_size = n;
+    }
+
     return SUCCESS;
 }
 

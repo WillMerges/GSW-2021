@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
             } else { // only write the packet to shared mem if it's the correct size
                 write_to_shm((void*)net->in_buffer, net->in_size);
             }
-            plogger.log_packet((unsigned char*)net->in_buffer, net->in_size); // log the packet anyways
+            plogger.log_packet((unsigned char*)net->in_buffer, net->in_size); // log the packet either way
         }
     }
 }

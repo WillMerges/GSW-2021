@@ -4,6 +4,9 @@
 # if measurements have the same name the latest one's size is used (furthest down in the file)!
 
 # these need to be set at some point
+# these are the address and port the receiver will send packets TO on the ground station
+# it does not matter what port/addr the receiver sends from as long as multiple receivers have different addresses/ports
+# currently address doesn't do anything since the ground station doesn't determine it's ip (only one network card, may have multiple receivers)
 protocol = udp
 addr = 127.0.0.1
 port = 8081
@@ -11,7 +14,7 @@ port = 8081
 # device name
 name = sample_device
 
-# endianness (coming FROM the receiver, not of the platform) [big or little], if not set defaults to little endian
+# endianness (coming FROM the receiver, not of the ground station platform) [big or little], if not set defaults to little endian
 endianness = big
 
 # [measurement name] [total measurement size in bytes (including padding)] [most sig padding (bits)] [least sig (bits)] [optional type of int, float, or string] [optional signed or unsigned]
