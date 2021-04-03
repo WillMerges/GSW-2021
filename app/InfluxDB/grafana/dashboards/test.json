@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1612716665266,
+  "iteration": 1617487907929,
   "links": [],
   "panels": [
     {
@@ -77,7 +77,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT UPTIME FROM $vehicle",
+          "query": "SELECT UPTIME FROM $Vehicle",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -173,7 +173,7 @@
           "measurement": "sim_v1",
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT ALT, max(ALT) FROM $vehicle",
+          "query": "SELECT ALT, max(ALT) FROM sim_v1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -265,7 +265,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT ALT FROM $vehicle",
+          "query": "SELECT ALT FROM sim_v1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -404,7 +404,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT X_VELOCITY, Y_VELOCITY FROM $vehicle",
+          "query": "SELECT X_VELOCITY, Y_VELOCITY FROM sim_v1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -446,7 +446,6 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:578",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -455,7 +454,6 @@
           "show": true
         },
         {
-          "$$hashKey": "object:579",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -533,7 +531,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT TEMP FROM $vehicle",
+          "query": "SELECT TEMP FROM sim_v1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -575,7 +573,6 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:670",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -584,7 +581,6 @@
           "show": true
         },
         {
-          "$$hashKey": "object:671",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -662,7 +658,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT X_ACCEL, Y_ACCEL FROM $vehicle",
+          "query": "SELECT X_ACCEL, Y_ACCEL FROM sim_v1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -704,7 +700,6 @@
       },
       "yaxes": [
         {
-          "$$hashKey": "object:762",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -713,7 +708,6 @@
           "show": true
         },
         {
-          "$$hashKey": "object:763",
           "format": "short",
           "label": null,
           "logBase": 1,
@@ -743,7 +737,7 @@
         "error": null,
         "hide": 0,
         "label": null,
-        "name": "vehicle",
+        "name": "Vehicle",
         "options": [
           {
             "selected": true,
@@ -758,8 +752,8 @@
     ]
   },
   "time": {
-    "from": "2021-02-07T01:45:02.395Z",
-    "to": "2021-02-08T01:45:02.395Z"
+    "from": "now-6h",
+    "to": "now"
   },
   "timepicker": {
     "refresh_intervals": [
@@ -780,5 +774,5 @@
   "timezone": "",
   "title": "test",
   "uid": "Aprw1pLMk",
-  "version": 6
+  "version": 7
 }

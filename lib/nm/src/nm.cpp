@@ -172,15 +172,16 @@ RetType NetworkManager::Send() {
     ssize_t read = -1;
     read = mq_receive(mq, buffer, MAX_MSG_SIZE, NULL);
 
-    // device address has not been set (still zeroed)
-    if(0 == device_addr.sin_port) {
-        logger.log_message("Receiver has not yet sent a packet providing a port \
-                            and address, failed to send UDP message");
-        return FAILURE;
-    }
 
     // send the message from the mqueue out of the socket
     if(read != -1) {
+        // device address has not been set (still zeroed)
+        if(0 == device_addr.sin_port) {
+            logger.log_message("Receiver has not yet sent a packet providing a port \
+                            and address, failed to send UDP message");
+            return FAILURE;
+        }
+
         ssize_t sent = -1;
         sent = sendto(sockfd, buffer, read, 0,
             (struct sockaddr*)&device_addr, sizeof(device_addr)); // send to whatever we last received from
