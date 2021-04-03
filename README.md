@@ -34,3 +34,5 @@ note: do **not** alter or delete the *pidlist* file, it tracks what processes sh
 
 
 Other information --> https://wiki.rit.edu/display/ritlaunch/Walkthrough+-+GSW+2021
+
+Currently tested on Ubuntu 18.04 and GCC/G++ Version 7.5.0
