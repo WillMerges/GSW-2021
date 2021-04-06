@@ -19,3 +19,7 @@ chmod +x startup/select_current.sh
 (cd data; ./select_config.sh sample)
 
 make all
+
+# install grafana and InfluxDB for view applications
+sudo . app/InfluxDB/grafana/install.sh
+sudo . app/InfluxDB/run_influx/install.sh
