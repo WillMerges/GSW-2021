@@ -12,15 +12,15 @@ name = spica_v1
 endianness = big
 
 # uptime in ms
-UPTIME 4 0 0 int
+UPTIME 4 0 0 int unsigned
 
 # GPS measurements
 GPS_LAT  4 0 0 float
 GPS_LONG 4 0 0 float
 GPS_ALT  4 0 0 float
-GPS_TIME 4 0 0 int # ms since midnight
-GPS_FIX  2 0 0 int
-GPS_SATS 2 0 0 int
+GPS_TIME 4 0 0 int unsigned # ms since midnight
+GPS_FIX  2 0 0 int unsigned
+GPS_SATS 2 0 0 int unsigned
 
 # altimeter 1
 ALTITUDE_1 4 0 0 float

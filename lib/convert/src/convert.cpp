@@ -17,6 +17,8 @@ RetType convert::convert_str(VCM* vcm, measurement_info_t* measurement, const vo
     MsgLogger logger("CONVERT", "convert_str");
 
     switch(measurement->type) {
+        // all integer types, will try to put it a standard integer type of the same size or larger than the measurement size
+        // distinguishes between signed and unsigned
         case INT_TYPE: {
             if(measurement->size > (sizeof(long int))) {
                 logger.log_message("Measurement size too great to convert to integer");
@@ -49,7 +51,7 @@ RetType convert::convert_str(VCM* vcm, measurement_info_t* measurement, const vo
             }
             break;
 
-        // TODO maybe we need a double type
+        // encompasses 4-byte floats and 8-byte doubles
         case FLOAT_TYPE: {
             size_t convert_size = 0;
             if(measurement->size == sizeof(float)) {
@@ -63,7 +65,7 @@ RetType convert::convert_str(VCM* vcm, measurement_info_t* measurement, const vo
                 return FAILURE;
             }
 
-            unsigned char* val = (unsigned char*)malloc(convert_size); // always assume it's the biggest (don't care about a few bytes)
+            unsigned char* val = (unsigned char*)malloc(convert_size);
             memset(val, 0, convert_size);
 
             size_t addr = (size_t)measurement->addr;
