@@ -1,0 +1,37 @@
+# SPICA flight computer
+
+# use UDP protocol
+protocol = udp
+addr = 10.10.10.2
+port = 8080
+
+# device name
+name = spica_v1
+
+# endianess of the receiver
+endianness = big
+
+# uptime in ms
+UPTIME 4 0 0 int
+
+# GPS measurements
+GPS_LAT  4 0 0 float
+GPS_LONG 4 0 0 float
+GPS_ALT  4 0 0 float
+GPS_TIME 4 0 0 int # ms since midnight
+GPS_FIX  2 0 0 int
+GPS_SATS 2 0 0 int
+
+# altimeter 1
+ALTITUDE_1 4 0 0 float
+
+# IMU
+IMU_AX 4 0 0 float
+IMU_AY 4 0 0 float
+IMU_AZ 4 0 0 float
+IMU_GX 4 0 0 float
+IMU_GY 4 0 0 float
+IMU_GZ 4 0 0 float
+IMU_MX 4 0 0 float
+IMU_MY 4 0 0 float
+IMU_MZ 4 0 0 float
