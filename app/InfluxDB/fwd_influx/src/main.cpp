@@ -1,4 +1,6 @@
 // forwards packets from shared mem. to InfluxDB using UDP line protocol
+// run as ./fwd_influx [-f config_file]
+// if config file not specified with -f option, uses the default location
 
 #include <stdio.h>
 #include <string.h>
@@ -17,9 +19,6 @@
 #include "lib/convert/convert.h"
 #include "common/types.h"
 
-// view telemetry memory live
-// run as mem_view [-f path_to_config_file]
-
 // TODO
 // remove printfs? or add verbose mode
 
@@ -30,6 +29,8 @@ using namespace convert;
 
 #define INFLUXDB_UDP_PORT 8089
 #define INFLUXDB_ADDR "127.0.0.1"
+
+#define NANOSEC_PER_MILLISEC (10^6)
 
 int sockfd;
 unsigned char sock_open = 0;
@@ -118,6 +119,8 @@ int main(int argc, char* argv[]) {
 
     std::string msg;
     std::string val;
+    uint32_t timestamp = 0;
+    unsigned char use_timestamp = 0;
 
     // main loop
     while(1) {
@@ -134,44 +137,31 @@ int main(int argc, char* argv[]) {
         unsigned char first = 1;
 
         for(std::string meas : vcm->measurements) {
+            m_info = vcm->get_info(meas);
+            //addr = (size_t)m_info->addr;
+
+            if(meas == "UPTIME") {
+                if(SUCCESS == convert_uint(vcm, m_info, buff, &timestamp)) {
+                    use_timestamp = 1;
+                }
+            }
+
             if(!first) {
                 msg += ",";
             }
             first &= 0;
 
-            m_info = vcm->get_info(meas);
-            //addr = (size_t)m_info->addr;
 
             if(SUCCESS == convert_str(vcm, m_info, buff, &val)) {
                 msg += meas;
                 msg += "=";
                 msg += val;
             }
+        }
 
-            // // add data
-            // if(m_info->type == INT_TYPE) {
-            //     unsigned char val[sizeof(int)];
-            //     memset(val, 0, sizeof(int));
-            //     for(size_t i = 0; i < m_info->size; i++) {
-            //         val[m_info->size - i - 1] = buff[addr + i]; // assumes little endian
-            //     }
-            //
-            //     msg += meas;
-            //     msg += "=";
-            //     msg += std::to_string(*((int*)(val)));
-            // } else if(m_info->type == FLOAT_TYPE) {
-            //     unsigned char val[sizeof(float)];
-            //     memset(val, 0, sizeof(float));
-            //     for(size_t i = 0; i < m_info->size; i++) {
-            //         val[m_info->size - i - 1] = buff[addr + i]; // assumes little endian
-            //     }
-            //
-            //     msg += meas;
-            //     msg += "=";
-            //     msg += std::to_string(*((float*)(val)));
-            // } else {
-            //     // don't forward
-            // }
+        // we can add a timestamp in nano-seconds to the end of the line in Influx line protocol
+        if(use_timestamp) {
+            msg += std::to_string(timestamp * NANOSEC_PER_MILLISEC);
         }
 
         // send the message

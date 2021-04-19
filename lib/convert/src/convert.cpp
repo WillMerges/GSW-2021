@@ -11,8 +11,72 @@ char result[MAX_CONVERSION_SIZE];
 // TODO maybe have a fancy function with va_args, idk
 
 
+RetType convert::convert_uint(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const void* data, uint32_t* dst) {
+    MsgLogger logger("CONVERT", "convert_uint");
+
+    if(measurement->type != INT_TYPE || measurement->sign != UNSIGNED_TYPE) {
+        logger.log_message("Measurement must be an unsigned integer!");
+        return FAILURE;
+    }
+
+    if(measurement->size > sizeof(int32_t)) {
+        logger.log_message("measurement too large to fit into integer");
+        return FAILURE;
+    }
+
+    uint8_t val[sizeof(uint32_t)];
+    size_t addr = (size_t)measurement->addr;
+    const uint8_t* buff = (const uint8_t*)data;
+
+    if(vcm->recv_endianness != vcm->sys_endianness) {
+        for(size_t i = 0; i < measurement->size; i++) {
+            val[sizeof(uint32_t) - i - 1] = buff[addr + i];
+        }
+    } else {
+        for(size_t i = 0; i < measurement->size; i++) {
+            val[i] = buff[addr + i];
+        }
+    }
+
+    *dst = *((uint32_t*)val);
+    return SUCCESS;
+}
+
+RetType convert::convert_int(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const void* data, int32_t* dst) {
+    MsgLogger logger("CONVERT", "convert_int");
+
+    if(measurement->type != INT_TYPE || measurement->sign != UNSIGNED_TYPE) {
+        logger.log_message("Measurement must be an unsigned integer!");
+        return FAILURE;
+    }
+
+    if(measurement->size > sizeof(int32_t)) {
+        logger.log_message("measurement too large to fit into integer");
+        return FAILURE;
+    }
+
+    uint8_t val[sizeof(int32_t)];
+    size_t addr = (size_t)measurement->addr;
+    const uint8_t* buff = (const uint8_t*)data;
+
+    if(vcm->recv_endianness != vcm->sys_endianness) {
+        for(size_t i = 0; i < measurement->size; i++) {
+            val[sizeof(int32_t) - i - 1] = buff[addr + i];
+        }
+    } else {
+        for(size_t i = 0; i < measurement->size; i++) {
+            val[i] = buff[addr + i];
+        }
+    }
+
+    *dst = *((int32_t*)val);
+    return SUCCESS;
+}
+
+
 // NOTE: may be a problem if unsigned and signed ints aren't the same length
 //       but that would be weird to have them not the same length
+// TODO this function could use some cleaning, uses malloc when it doesnt need to, some unnecessary code from it being refactored so many times
 RetType convert::convert_str(VCM* vcm, measurement_info_t* measurement, const void* data, std::string* dst) {
     MsgLogger logger("CONVERT", "convert_str");
 
