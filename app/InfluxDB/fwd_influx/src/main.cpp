@@ -1,6 +1,10 @@
 // forwards packets from shared mem. to InfluxDB using UDP line protocol
 // run as ./fwd_influx [-f config_file]
 // if config file not specified with -f option, uses the default location
+//
+// if there is a measurement called "UPTIME" it will be used as a timestamp
+// "UPTIME" is expected to be in units of milliseconds
+// otherwise the InfluxDB server clock will be used as the timestamp
 
 #include <stdio.h>
 #include <string.h>
@@ -161,7 +165,8 @@ int main(int argc, char* argv[]) {
 
         // we can add a timestamp in nano-seconds to the end of the line in Influx line protocol
         if(use_timestamp) {
-            msg += std::to_string(timestamp * NANOSEC_PER_MILLISEC);
+            uint64_t nanosec_time = timestamp;
+            msg += std::to_string(nanosec_time * NANOSEC_PER_MILLISEC);
         }
 
         // send the message
