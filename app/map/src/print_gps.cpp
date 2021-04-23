@@ -12,7 +12,15 @@
 #include "common/types.h"
 
 // view telemetry memory live
-// run as mem_view [-f path_to_config_file]
+// run as printgps [-f path_to_config_file]
+// if config file path not specified will use the default
+
+// looks for measurements names GPS_LAT, GPS_LONG, and GPS_ALT
+// prints them to stdout separated by spaces in that order
+
+#define GPS_LAT "GPS_LAT"
+#define GPS_LONG "GPS_LONG"
+#define GPS_ALT "GPS_ALT"
 
 using namespace vcm;
 using namespace shm;
@@ -20,9 +28,9 @@ using namespace dls;
 using namespace convert;
 
 int main(int argc, char* argv[]) {
-    MsgLogger logger("val_view");
+    MsgLogger logger("print_gps");
 
-    logger.log_message("starting val_view");
+    logger.log_message("starting print_gps");
 
     std::string config_file = "";
 
@@ -62,49 +70,44 @@ int main(int argc, char* argv[]) {
         return FAILURE;
     }
 
-    int count = 0; // number of measurements
-
     unsigned char* buff = new unsigned char[vcm->packet_size];
     memset((void*)buff, 0, vcm->packet_size); // zero the buffer
 
-    unsigned int max_length = 0;
-    for(std::string it : vcm->measurements) {
-        count++;
-        if(it.length() > max_length) {
-            max_length = it.length();
-        }
+    measurement_info_t* lat_meas = vcm->get_info(GPS_LAT);
+    measurement_info_t* long_meas = vcm->get_info(GPS_LONG);
+    measurement_info_t* alt_meas = vcm->get_info(GPS_ALT);
+
+    if(!lat_meas || !long_meas || !alt_meas) {
+        logger.log_message("Missing GPS measurement");
+        exit(-1);
     }
 
-    // clear the screen
-    printf("\033[2J");
+    std::string lat;
+    std::string lon;
+    std::string alt;
 
-    measurement_info_t* m_info;
     while(1) {
-        for(std::string meas : vcm->measurements) {
-            m_info = vcm->get_info(meas);
-
-            printf("%s  ", meas.c_str());
-
-            // print extra spaces
-            for(size_t i = 0; i < max_length - meas.length(); i++) {
-                printf(" ");
-            }
-
-            std::string data = "ERR";
-            convert_str(vcm, m_info, buff, &data);
-            std::cout << data << "\n";
-        }
-
         // read from shared memoery
         if(FAILURE == read_from_shm_block((void*)buff, vcm->packet_size)) {
             logger.log_message("failed to read from shared memory");
-            printf("failed to read from shared memory\n");
             // ignore and continue
-        } else {
-            // clear the screen
-            printf("\033[2J");
+            continue;
         }
 
-        usleep(1000);
+        if(FAILURE == convert_str(vcm, lat_meas, buff, &lat)) {
+            continue;
+        }
+
+        if(FAILURE == convert_str(vcm, long_meas, buff, &lon)) {
+            continue;
+        }
+
+        if(FAILURE == convert_str(vcm, alt_meas, buff, &alt)) {
+            continue;
+        }
+
+        printf("%s %s %s\n", lat.c_str(), lon.c_str(), alt.c_str());
+
+        usleep(1000); // sleep for 1 ms
     }
 }

@@ -59,6 +59,7 @@ namespace vcm {
         VCM(std::string config_file);
         ~VCM();
 
+        // returns NULL if no measurement with that name exists
         measurement_info_t* get_info(std::string measurement); // get the info of a measurement
         std::vector<std::string> measurements; // list of measurement names
 
