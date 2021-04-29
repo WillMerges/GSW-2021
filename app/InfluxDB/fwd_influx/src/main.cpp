@@ -144,11 +144,13 @@ int main(int argc, char* argv[]) {
             m_info = vcm->get_info(meas);
             //addr = (size_t)m_info->addr;
 
+            /**
             if(meas == "UPTIME") {
                 if(SUCCESS == convert_uint(vcm, m_info, buff, &timestamp)) {
                     use_timestamp = 1;
                 }
             }
+            **/
 
             if(!first) {
                 msg += ",";
@@ -171,6 +173,7 @@ int main(int argc, char* argv[]) {
 
         // send the message
         ssize_t sent = -1;
+        // std::cout << msg << "\n";
         sent = sendto(sockfd, msg.c_str(), msg.length(), 0,
             (struct sockaddr*)&servaddr, sizeof(servaddr));
         if(sent == -1) {

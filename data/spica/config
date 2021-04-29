@@ -9,7 +9,7 @@ port = 8080
 name = spica_v1
 
 # endianess of the receiver
-endianness = big
+endianness = little 
 
 # uptime in ms
 UPTIME 4 0 0 int unsigned
