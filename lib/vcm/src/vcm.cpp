@@ -68,10 +68,13 @@ VCM::~VCM() {
         delete i.second;
     }
 
-    if(f->is_open()) {
-        f->close();
+    if(f) {
+        if(f->is_open()) {
+            f->close();
+        }
+
+        delete f;
     }
-    delete f;
 }
 
 measurement_info_t* VCM::get_info(std::string measurement) {

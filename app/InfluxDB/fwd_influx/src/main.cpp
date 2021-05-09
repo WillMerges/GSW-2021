@@ -123,8 +123,8 @@ int main(int argc, char* argv[]) {
 
     std::string msg;
     std::string val;
-    uint32_t timestamp = 0;
-    unsigned char use_timestamp = 0;
+    // uint32_t timestamp = 0;
+    // unsigned char use_timestamp = 0;
 
     // main loop
     while(1) {
@@ -166,10 +166,10 @@ int main(int argc, char* argv[]) {
         }
 
         // we can add a timestamp in nano-seconds to the end of the line in Influx line protocol
-        if(use_timestamp) {
-            uint64_t nanosec_time = timestamp;
-            msg += std::to_string(nanosec_time * NANOSEC_PER_MILLISEC);
-        }
+        //if(use_timestamp) {
+        //    uint64_t nanosec_time = timestamp;
+        //    msg += std::to_string(nanosec_time * NANOSEC_PER_MILLISEC);
+        //}
 
         // send the message
         ssize_t sent = -1;
