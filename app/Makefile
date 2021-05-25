@@ -6,6 +6,7 @@ all:
 	-$(MAKE) -C val_view all
 	-$(MAKE) -C InfluxDB all
 	-$(MAKE) -C map all
+	-$(MAKE) -C voice all
 
 clean:
 	-$(MAKE) -C view_log clean
@@ -13,3 +14,4 @@ clean:
 	-$(MAKE) -C val_view clean
 	-$(MAKE) -C InfluxDB clean
 	-$(MAKE) -C map clean
+	-$(MAKE) -C voice clean
