@@ -28,8 +28,8 @@
 // how many times altitude decreases before it's considered apogee
 #define ALT_NUM_DECR 3
 
-// how many milliseconds to wait before reporting last location
-#define LOCATION_TIMEOUT 10000
+// how many seconds to wait before reporting last location
+#define LOCATION_TIMEOUT 10
 
 // if altitude stays withing +/- resolution for LANDING_NUM_PACKETS the last location will be read
 #define LANDING_ALT_RESOLUTION 5 // in whatever units ALT measurement is
@@ -71,11 +71,27 @@ void report_apogee(float alt) {
 }
 
 void report_landing(float lat, float lon, float alt) {
-    // TODO
+    char buff[1024];
+    snprintf(buff, 1024, "landed at %f, %f, %.0f feet", lat, lon, alt);
+    std::string cmd = gsw_home;
+    cmd += TTS_COMMAND;
+    cmd += " \"";
+    cmd += buff;
+    cmd += "\"";
+    std::cout << cmd.c_str() << "\n";
+    system(cmd.c_str());
 }
 
 void report_loc(float lat, float lon, float alt) {
-    // TODO
+    char buff[1024];
+    snprintf(buff, 1024, "last known position was %f, %f, %.0f feet", lat, lon, alt);
+    std::string cmd = gsw_home;
+    cmd += TTS_COMMAND;
+    cmd += " \"";
+    cmd += buff;
+    cmd += "\"";
+    std::cout << cmd.c_str() << "\n";
+    system(cmd.c_str());
 }
 
 int main(int argc, char* argv[]) {
@@ -147,29 +163,48 @@ int main(int argc, char* argv[]) {
     float alt;
 
     // the next altitude to readout at
-    float next_alt = 0;
+    float next_alt = ALT_RESOLUTION;
 
     // whether we're ascending or descending
     uint8_t ascending = 1;
 
     float max_alt = 0;
     int num_decreases = 0;
+    float last_alt = 0;
+    int started = 0; // if we've left the pad
+
+    clock_t t;
+    t = clock();
+    clock_t elapsed;
 
     while(1) {
         // read from shared memoery
-        if(FAILURE == read_from_shm_block((void*)buff, vcm->packet_size)) {
-            logger.log_message("failed to read from shared memory");
-            // ignore and continue
+        if(FAILURE == read_from_shm_if_updated((void*)buff, vcm->packet_size)) {
+            if(started) {
+                // only check fot timeout if we've gotten any packets, dont want to prematurely report
+                elapsed = clock() - t;
+                if((((double)elapsed) / CLOCKS_PER_SEC) > LOCATION_TIMEOUT) {
+                    report_loc(lat, lon, alt);
+                    t = clock();
+                }
+            }
             continue;
+        } else {
+            // if we've gotten any packet, we've taken off
+            // TODO maybe check for leaving the pad?
+            started = 1;
+
+            // restart the clock
+            t = clock();
         }
 
-        // if(FAILURE == convert_float(vcm, lat_meas, buff, &lat)) {
-        //     continue;
-        // }
-        //
-        // if(FAILURE == convert_float(vcm, long_meas, buff, &lon)) {
-        //     continue;
-        // }
+        if(FAILURE == convert_float(vcm, lat_meas, buff, &lat)) {
+            // continue;
+        }
+
+        if(FAILURE == convert_float(vcm, long_meas, buff, &lon)) {
+            // continue;
+        }
 
         if(FAILURE == convert_float(vcm, alt_meas, buff, &alt)) {
             continue;
@@ -188,6 +223,7 @@ int main(int argc, char* argv[]) {
                 if(num_decreases > ALT_NUM_DECR) {
                     ascending = 0;
                     report_apogee(max_alt);
+                    last_alt = alt;
                 }
             }
         } else {
@@ -195,7 +231,16 @@ int main(int argc, char* argv[]) {
                 report_alt(next_alt);
                 next_alt -= ALT_RESOLUTION;
             }
+
+            if(alt > last_alt - LANDING_ALT_RESOLUTION && alt < last_alt + LANDING_ALT_RESOLUTION) {
+                num_decreases++;
+                if(num_decreases == LANDING_NUM_PACKETS) {
+                    report_landing(lat, lon, alt);
+                }
+            }
         }
+
+        // TODO check for timeout
 
     }
 }

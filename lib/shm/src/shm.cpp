@@ -229,7 +229,7 @@ namespace shm {
                 }
                 V(info->rmutex);
 
-                // we can guarantee no one changed the nonce so we can use a 'fake' lock
+                // we can guarantee no one changed the nonce so we can block until the nonce changes
                 // only the writer can change the nonce
                 // so block here
                 syscall(SYS_futex, &(info->nonce), FUTEX_WAIT, last_nonce, NULL, NULL, 0); // TODO check return
