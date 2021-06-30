@@ -11,8 +11,8 @@
 #include "lib/convert/convert.h"
 #include "common/types.h"
 
-// view telemetry memory live
-// run as mem_view [-f path_to_config_file]
+// view telemetry values live
+// run as val_view [-f path_to_config_file]
 
 using namespace vcm;
 using namespace shm;
@@ -57,8 +57,8 @@ int main(int argc, char* argv[]) {
     }
 
     if(FAILURE == attach_to_shm(vcm)) {
-        logger.log_message("unable to attach mem_view process to shared memory");
-        printf("unable to attach mem_view process to shared memory\n");
+        logger.log_message("unable to attach val_view process to shared memory");
+        printf("unable to attach val_view process to shared memory\n");
         return FAILURE;
     }
 

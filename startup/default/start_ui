@@ -1,1 +1,13 @@
 #!/bin/bash
+
+# start InfluxDB
+${GSW_HOME}/app/InfluxDB/run_influx/run_influx.sh -config ${GSW_HOME}/app/InfluxDB/run_influx/influxdb.conf &
+
+# clear InfluxDB
+${GSW_HOME}/app/InfluxDB/fwd_influx/clear_influx.sh &
+
+# start Grafana
+${GSW_HOME}/app/InfluxDB/grafana/start.sh &
+
+# start measurement forwarding to InfluxDB
+${GSW_HOME}/app/InfluxDB/fwd_influx/fwd_influx &

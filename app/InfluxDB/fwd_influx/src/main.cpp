@@ -110,8 +110,8 @@ int main(int argc, char* argv[]) {
 
     // attach to shmem
     if(FAILURE == attach_to_shm(vcm)) {
-        logger.log_message("unable to attach mem_view process to shared memory");
-        printf("unable to attach mem_view process to shared memory\n");
+        logger.log_message("unable to attach fwd_influx process to shared memory");
+        printf("unable to attach fwd_influx process to shared memory\n");
         return FAILURE;
     }
 
