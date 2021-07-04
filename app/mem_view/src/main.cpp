@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
         }
 
 
-        // read from shared memoery
+        // read from shared memory
         if(FAILURE == read_from_shm_block((void*)buff, vcm->packet_size)) {
             logger.log_message("failed to read from shared memory");
             printf("failed to read from shared memory\n");
