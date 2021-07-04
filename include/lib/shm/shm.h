@@ -13,7 +13,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include "lib/vcm/vcm.h"
+#include <semaphore.h>
 #include "common/types.h"
 
 namespace shm {
@@ -22,12 +22,12 @@ namespace shm {
     class SHM {
     public:
         // constructor
-        // 'key' is the unique shared memory key
+        // 'file' is a unique file location to use as a shared memory key
         // 'size' is the size in bytes of the shared memory block
-        SHM(std::string key, size_t size);
+        SHM(std::string file, size_t size);
 
         // default destructor
-        ~SHM();
+        virtual ~SHM() {}
 
         // get the size of the shared memory block
         size_t get_size();
@@ -44,7 +44,7 @@ namespace shm {
 
         // write to shared memory
         // returns failure if not all bytes were able to be written
-        RetType write_to_shm(void* src, size_t size, size_t offset = 0);
+        RetType write_to_shm(void* src, size_t size, uint32_t write_id = 0, size_t offset = 0);
 
         // read from shared memory, size is max size to read
         // doesn't care how recent the read was
@@ -62,7 +62,7 @@ namespace shm {
         RetType create_shm();
 
         // set all shared memory to 'value'
-        RetType clear_shm(uint8_t val = 0x0);
+        RetType clear_shm(uint8_t val = 0x0, uint32_t write_id = 0);
 
     private:
         // used for generating shm id
@@ -94,8 +94,8 @@ namespace shm {
         // size of shared memory
         size_t shm_size;
 
-        // unique key of the shared memory
-        std::string key_str;
+        // unique file location to use as key of the shared memory block
+        std::string file_key;
 
     };
 

@@ -57,10 +57,12 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
 
+    SHM mem(vcm->config_file, vcm->packet_size);
+
     if(on) {
         printf("creating shared memory\n");
         logger.log_message("creating shared memory");
-        if(FAILURE == create_shm(vcm)) {
+        if(FAILURE == mem.create_shm()) {
             printf("Failed to create shared memory\n");
             logger.log_message("Failed to create shared memory");
             return FAILURE;
@@ -69,11 +71,11 @@ int main(int argc, char* argv[]) {
     } else if(off) {
         printf("destroying shared memory\n");
         logger.log_message("destroying shared memory");
-        if(FAILURE == attach_to_shm(vcm)) {
+        if(FAILURE == mem.attach_to_shm()) {
             printf("Shared memory not created, nothing to destroy\n");
             logger.log_message("Shared memory not created, nothing to destroy");
         }
-        if(FAILURE == destroy_shm()) {
+        if(FAILURE == mem.destroy_shm()) {
             printf("Failed to destroy shared memory\n");
             logger.log_message("Failed to destroy shared memory");
             return FAILURE;

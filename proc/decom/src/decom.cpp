@@ -56,14 +56,17 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    // create shared memory
+    SHM mem(vcm->config_file, vcm->packet_size);
+
     // attach to shared memory
-    if(FAILURE == attach_to_shm(vcm)) {
+    if(FAILURE == mem.attach_to_shm()) {
         logger.log_message("unable to attach to shared memory");
         return FAILURE;
     }
 
     // clear shared memory
-    if(FAILURE == clear_shm()) {
+    if(FAILURE == mem.clear_shm()) {
         logger.log_message("unable to clear shared memory");
         return FAILURE;
     }
@@ -80,7 +83,7 @@ int main(int argc, char** argv) {
                 logger.log_message("Packet size mismatch, " + std::to_string(vcm->packet_size) +
                                    " != " + std::to_string(net->in_size) + " (received)");
             } else { // only write the packet to shared mem if it's the correct size
-                write_to_shm((void*)net->in_buffer, net->in_size);
+                mem.write_to_shm((void*)net->in_buffer, net->in_size);
             }
             plogger.log_packet((unsigned char*)net->in_buffer, net->in_size); // log the packet either way
         }

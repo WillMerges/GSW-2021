@@ -49,20 +49,19 @@ using namespace dls;
 using namespace shm;
 
 
-SHM::SHM(std::string key, size_t size) {
+SHM::SHM(std::string file, size_t size) {
     last_nonce = 0;
     info = NULL;
     info_shmid = -1;
     shmem = NULL;
     shmid = -1;
     shm_size = size;
-    key_str = key;
+    file_key = file;
 }
-
 
 // reading and writing is done with *writers-preference*
 // https://en.wikipedia.org/wiki/Readers%E2%80%93writers_problem
-RetType SHM::write_to_shm(void* src, size_t size, size_t offset) {
+RetType SHM::write_to_shm(void* src, size_t size, uint32_t write_id, size_t offset) {
     MsgLogger logger("SHM", "write_to_shm");
 
     if(!shmem || !info) {
@@ -86,6 +85,7 @@ RetType SHM::write_to_shm(void* src, size_t size, size_t offset) {
 
     memcpy((unsigned char*)shmem + offset, src, size);
     info->nonce++; // update the nonce
+    info->write_id = write_id; // update the write id
     syscall(SYS_futex, &(info->nonce), FUTEX_WAKE, INT_MAX, NULL, NULL, 0); // TODO check return
 
     V(info->resource);
@@ -237,7 +237,7 @@ RetType SHM::read_from_shm_block(void* dst, size_t size, size_t offset) {
 }
 
 // locking works the same as write
-RetType SHM::clear_shm(uint8_t val) {
+RetType SHM::clear_shm(uint8_t val, uint32_t write_id) {
     MsgLogger logger("SHM", "clear_shm");
 
     if(!shmem || !info) {
@@ -255,6 +255,7 @@ RetType SHM::clear_shm(uint8_t val) {
 
     memset(shmem, val, shm_size);
     info->nonce++; // update the nonce
+    info->write_id = write_id; // update the write id
     syscall(SYS_futex, &(info->nonce), FUTEX_WAKE, INT_MAX, NULL, NULL, 0); // TODO check return
 
     V(info->resource);
@@ -277,7 +278,7 @@ RetType SHM::create_shm() {
     MsgLogger logger("SHM", "create_shm");
 
     // create info shmem
-    key_t info_key = ftok(key_str.c_str(), info_id);
+    key_t info_key = ftok(file_key.c_str(), info_id);
     if(info_key == (key_t) -1) {
         logger.log_message("ftok failure, no key generated for info shmem");
         return FAILURE;
@@ -319,7 +320,7 @@ RetType SHM::create_shm() {
     info = NULL;
 
     // set up shmem
-    key_t key = ftok(key_str.c_str(), id);
+    key_t key = ftok(file_key.c_str(), id);
     if(key == (key_t) -1) {
         logger.log_message("ftok failure, no key generated");
         return FAILURE;
@@ -338,7 +339,7 @@ RetType SHM::create_shm() {
 RetType SHM::attach_to_shm() {
     MsgLogger logger("SHM", "attach_to_shm");
 
-    key_t info_key = ftok(key_str.c_str(), info_id);
+    key_t info_key = ftok(file_key.c_str(), info_id);
     if(info_key == (key_t) -1) {
         logger.log_message("ftok failure, no key generated for info shmem");
         return FAILURE;
@@ -357,7 +358,7 @@ RetType SHM::attach_to_shm() {
         return FAILURE;
     }
 
-    key_t key = ftok(key_str.c_str(), id);
+    key_t key = ftok(file_key.c_str(), id);
     if(key == (key_t) -1) {
         logger.log_message("ftok failure, no key generated");
         return FAILURE;
