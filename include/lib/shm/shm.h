@@ -42,6 +42,7 @@ namespace shm {
         RetType create();
 
         // pointer to shared memory block
+        // NULL when not attached
         uint8_t* data;
 
         // size of shared memory block

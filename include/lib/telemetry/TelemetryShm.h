@@ -12,7 +12,9 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <semaphore.h>
 #include "lib/vcm/vcm.h"
+#include "lib/shm/shm.h"
 #include "common/types.h"
 
 /*
@@ -23,16 +25,21 @@
 * There will also be a 'master block' containing locking information for the whole vehicle
 */
 
+using namespace shm;
+using namespace vcm;
+
 class TelemetryShm {
 public:
     // constructor
-    Shm(vcm::VCM vcm);
+    TelemetryShm();
 
     // destructor
-    virtual ~Shm();
+    virtual ~TelemetryShm();
 
-    // attach to all shared memory blocks corresponding to a vehicle
-    // shared memory blocks must already exist, this will simply attach to them
+    // initialize the object using 'vcm'
+    RetType init(VCM vcm);
+
+    // initialize the object using the default vcm config file
     RetType init();
 
     // open shared memory
@@ -42,27 +49,32 @@ public:
     RetType close();
 
     // create all shared memory for a vehicle
+    // NOTE: does not attach!
     RetType create();
 
     // destroy all shared memory for a vehicle
+    // NOTE: must be attached already!
     RetType destroy();
 
-    // write 'len' bytes from 'data' to telemetry block number 'packet_id'
+    // write the packet size bytes from 'data' to telemetry block number 'packet_id'
+    // does not do any size check, data must be at least as large as the packet size
     // if any bytes fail to write FAILURE is returned
     // NOTE: this is a blocking operation
-    RetType write(unsigned int packet_id, uint8_t* data, size_t len);
+    RetType write(unsigned int packet_id, uint8_t* data);
 
     // clear telemetry block corresponding to 'packet_id' with value 'val'
     // returns FAULURE if any bytes fail to clear
     // NOTE: this is a blocking operation
     RetType clear(unsigned int packet_id, uint8_t val = 0x0);
 
-    // read 'len' bytes into 'buff' from telemetry block number 'packet_id'
-    // the number of bytes actually read is placed into 'read'
+    // lock the shared memory for a packet as a reader (e.g. dont allow any writers)
     // different read modes are able to be set with set_read_mode
     // if any bytes fail to read FAILURE is returned
     // read may return BLOCKED depending on the read mode
-    RetType read(unsigned int packet_id, uint8_t buff, size_t len);
+    RetType read_lock(unsigned int packet_id);
+
+    // unlock the shared memory for a packet as a writer
+    RetType read_unlock(unsigned int packet_id);
 
     // reading modes
     typedef enum {
@@ -75,9 +87,24 @@ public:
     void set_read_mode(read_mode_t mode);
 
 private:
-    bool open;
+    // info block for locking main shared memory
+    typedef struct {
+        uint32_t nonce; // nonce that updates every write
+        uint32_t readers;
+        uint32_t writers;
+        sem_t rmutex;
+        sem_t wmutex;
+        sem_t readTry;
+        sem_t resource;
+    } shm_info_t;
 
-    // TODO other stuff
+    read_mode_t read_mode;
+
+    size_t num_packets;
+    uint32_t* last_nonces;
+    Shm** packet_blocks;
+    Shm** info_blocks;
+    Shm* master_block; // holds a single block
 };
 
 #endif
