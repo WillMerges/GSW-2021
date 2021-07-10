@@ -3,7 +3,8 @@
 
 typedef enum {
     SUCCESS = 0,
-    FAILURE = -1
+    FAILURE = -1,
+    BLOCKED = 1
 } RetType;
 
 #endif
