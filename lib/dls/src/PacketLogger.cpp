@@ -14,6 +14,7 @@ PacketLogger::PacketLogger(std::string device_name):
 // | [timestamp] | <device_name> | size of packet | packet data |
 RetType PacketLogger::log_packet(unsigned char* buffer, size_t size) {
     gettimeofday(&curr_time, NULL);
+    // TODO log in milliseconds, not seconds
     std::string header = "[" + std::to_string(curr_time.tv_sec) + "]";
 
     header += "<" + device_name + ">";
