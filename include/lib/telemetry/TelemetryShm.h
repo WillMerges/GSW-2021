@@ -11,7 +11,6 @@
 #define TELSHM_H
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <semaphore.h>
 #include "lib/vcm/vcm.h"
 #include "lib/shm/shm.h"
@@ -67,14 +66,16 @@ public:
     // NOTE: this is a blocking operation
     RetType clear(unsigned int packet_id, uint8_t val = 0x0);
 
-    // lock the shared memory for a packet as a reader (e.g. dont allow any writers)
+    // lock the shared memory for packets as a reader (e.g. dont allow any writers)
+    // pass packets to read as a list of 'num_packet' packet ids
     // different read modes are able to be set with set_read_mode
     // if any bytes fail to read FAILURE is returned
     // read may return BLOCKED depending on the read mode
-    RetType read_lock(unsigned int packet_id);
+    RetType read_lock(unsigned int* packet_ids, size_t num_packets);
 
     // unlock the shared memory for a packet as a writer
-    RetType read_unlock(unsigned int packet_id);
+    // pass packets to read as a list of 'num_packet' packet ids
+    RetType read_unlock(unsigned int* packet_ids, size_t num_packets);
 
     // reading modes
     typedef enum {
@@ -103,8 +104,13 @@ private:
     size_t num_packets;
     uint32_t* last_nonces;
     Shm** packet_blocks;
-    Shm** info_blocks;
-    Shm* master_block; // holds a single block
+    // Shm** info_blocks; // not currently used, all locking is done on the master block
+    Shm* master_block; // holds a single shm_info_t
+
+    uint32_t dummy_zero;
+
+    RetType read_lock(unsigned int packet_id);
+    RetType read_unlock(unsigned int packet_id);
 };
 
 #endif
