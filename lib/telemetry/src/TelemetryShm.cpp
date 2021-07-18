@@ -344,6 +344,7 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
         uint32_t bitset = 0;
         uint32_t* nonce;
         unsigned int id;
+        bool block = true; // whether or not we block
         for(size_t i = 0; i < num; i++) {
             bitset |= (1 << i);
 
@@ -352,9 +353,14 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
             nonce = (uint32_t*)(info_blocks[id]->data);
             if(*nonce != last_nonces[id]) {
                 // we found a nonce that changed!
-                // last_nonces[id] = *nonce; // actually update this in read_unlock
-                return SUCCESS;
+                // important to not just return here since we may have other stored nonces to update
+                last_nonces[id] = *nonce;
+                block = false;;
             }
+        }
+
+        if(!block) {
+            return SUCCESS;
         }
 
         // if we made it here none of our nonces changed :(
@@ -372,6 +378,8 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
 // TODO packet nonces aren't being updated here which may cause problems
 // see about updating all nonces in read_unlock?? (maybe except master nonce since it's needed for locking)
 // ^^^ did the above, check if that's correct...
+// I THINK IT'S WRONG then next time you call lock and it was technically updated it blocks...
+// so they should probably all be updated here and only the ones being checked in the other version
 RetType TelemetryShm::read_lock() {
     if(info_blocks == NULL || master_block == NULL) {
         // not open
@@ -414,6 +422,11 @@ RetType TelemetryShm::read_lock() {
         }
     }
 
+    // update all the stored packet nonces
+    for(size_t i = 0; i < num_packets; i++) {
+        last_nonces[i] = *((uint32_t*)(info_blocks[i]->data));
+    }
+
     return SUCCESS;
 }
 
@@ -431,11 +444,6 @@ RetType TelemetryShm::read_unlock() {
         // TODO sys message
         // something isn't attached
         return FAILURE;
-    }
-
-    // update all the stored packet nonces
-    for(size_t i = 0; i < num_packets; i++) {
-        last_nonces[i] = *((uint32_t*)(info_blocks[i]->data));
     }
 
     // exit as a reader
