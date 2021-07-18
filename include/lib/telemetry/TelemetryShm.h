@@ -18,10 +18,22 @@
 
 /*
 * Telemetry shared memory is per-vehicle
-* Each vehicle can have multiple telemetry packets that are updated at varying rates
+* Each vehicle can have multiple telemetry packets stored in shared memory
 * Each telemetry packet will get it's own shared memory block to be stored in
-* Each telemetry block will have a corresponding info shared memory block to facilitate access control
-* There will also be a 'master block' containing locking information for the whole vehicle
+* Each telemetry block will have a corresponding nonce stored in shared memory
+* There is also be a 'master block' containing locking information for the whole vehicle
+*
+* Currently locking is vehicle-wide
+* Regardless of which packet(s) are being read/written there is one lock
+* e.g. even if two writers are writing to different packets only one can write at a time
+*
+* The above limitation can be solved by storing an entire info block for each
+* packet rather than just a nonce. To block on multiple packets would require
+* creating a thread for each packet and blocking on that packets nonce from the
+* info block. The overhead for creating and cleaning up several threads is likely
+* too high to make this method better than sharing a single lock for a small number
+* of packets. The master nonce could still be updated and used as a way to block
+* until any packet has changed.
 */
 
 using namespace shm;
