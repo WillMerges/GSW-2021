@@ -48,7 +48,7 @@ public:
     virtual ~TelemetryShm();
 
     // initialize the object using 'vcm'
-    RetType init(VCM vcm);
+    RetType init(VCM* vcm);
 
     // initialize the object using the default vcm config file
     RetType init();
@@ -83,15 +83,25 @@ public:
     // if read mode is set to STANDARD_READ, returns regardless the data changed since the last read
     // if read mode is set to BLOCKING_READ, if the data has not changed since the last read the process will sleep until it changes
     // if read mode is set to NONBLOCKING_READ, returns BLOCKED if the data has not changed since the last read
+    // returns FAILURE if already locked
     RetType read_lock(unsigned int* packet_ids, size_t num);
 
     // lock all shared memory for all packets
     // functionally no different from other read_lock for STANDARD_READ mode
     // BLOCKING_READ and NONBLOCKING_READ work identically assuming all packets are to be locked
+    // returns FAILURE if already locked
     RetType read_lock();
 
     // unlock the shared memory, not packet specific
+    // returns FAILURE if not locked currently
     RetType read_unlock();
+
+    // set 'updated' to true if packet corresponding to 'packet_id' was updated at the last read
+    // after calling read_lock this will not change since no writers may update the packets when shm is read locked
+    // MUST be called after read_lock
+    // returns FAILURE if shm is not currently read locked
+    // otherwise returns SUCCESS
+    RetType packet_updated(unsigned int packet_id, bool* updated);
 
     // reading modes
     typedef enum {
@@ -116,13 +126,15 @@ private:
     } shm_info_t;
 
     read_mode_t read_mode;
+    bool read_locked; // if the shm is currently locked for a reader
 
     size_t num_packets;
     uint32_t last_nonce; // last master nonce
     uint32_t* last_nonces; // list of previous nonces for all packets
     Shm** packet_blocks; // list of blocks holding raw telemetry data
-    Shm** info_blocks; // list of blocks holding uint32_t nonces
+    Shm** info_blocks; // list of blocks holding uint32_t nonces TODO rename this to something better lol
     Shm* master_block; // holds a single shm_info_t for locking
+
 };
 
 #endif

@@ -68,9 +68,10 @@ TelemetryShm::~TelemetryShm() {
     }
 }
 
-RetType TelemetryShm::init(VCM vcm) {
+RetType TelemetryShm::init(VCM* vcm) {
+    //TODO set num_packets according the vcm
 
-    // creates and zero last_nonces, TODO after num_packets is set
+    // creates and zero last_nonces
     last_nonces = (uint32_t*)malloc(num_packets * sizeof(uint32_t));
     memset(last_nonces, 0, num_packets * sizeof(uint32_t));
 
@@ -82,7 +83,7 @@ RetType TelemetryShm::init(VCM vcm) {
 
 RetType TelemetryShm::init() {
     VCM vcm; // leave this on stack to be discarded after return
-    return init(vcm);
+    return init(&vcm);
 }
 
 RetType TelemetryShm::open() {
@@ -187,7 +188,7 @@ RetType TelemetryShm::destroy() {
 }
 
 RetType TelemetryShm::write(unsigned int packet_id, uint8_t* data) {
-    if(packet_id > num_packets) {
+    if(packet_id >= num_packets) {
         // TODO sys message
         return FAILURE;
     }
@@ -240,7 +241,7 @@ RetType TelemetryShm::write(unsigned int packet_id, uint8_t* data) {
 }
 
 RetType TelemetryShm::clear(unsigned int packet_id, uint8_t val) {
-    if(packet_id > num_packets) {
+    if(packet_id >= num_packets) {
         // TODO sys message
         return FAILURE;
     }
@@ -295,6 +296,11 @@ RetType TelemetryShm::clear(unsigned int packet_id, uint8_t val) {
 }
 
 RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
+    if(read_locked) {
+        // already locked
+        return FAILURE;
+    }
+
     if(info_blocks == NULL || master_block == NULL) {
         // not open
         // TODO sys message
@@ -325,20 +331,19 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
         V(info->rmutex);
         V(info->readTry);
 
+        // update the stored master nonce
+        last_nonce = info->nonce;
+
         // if reading in standard mode we never block so don't check
         if(read_mode == STANDARD_READ) {
             return SUCCESS;
         }
-
-        // update the stored master nonce
-        last_nonce = info->nonce;
 
         // check to see if any nonce has changed for the packets we're locking
         // if any nonce has changed we don't need to block
         uint32_t bitset = 0;
         uint32_t* nonce;
         unsigned int id;
-        bool block = true; // whether or not to block
         for(size_t i = 0; i < num; i++) {
             bitset |= (1 << i);
 
@@ -347,15 +352,9 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
             nonce = (uint32_t*)(info_blocks[id]->data);
             if(*nonce != last_nonces[id]) {
                 // we found a nonce that changed!
-                // important to not just return here since we need to update stored nonces
-                last_nonces[id] = *nonce;
-                block = false;
+                // last_nonces[id] = *nonce; // actually update this in read_unlock
+                return SUCCESS;
             }
-        }
-
-        // we found a changed nonce so we can return
-        if(!block) {
-            return SUCCESS;
         }
 
         // if we made it here none of our nonces changed :(
@@ -370,6 +369,9 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
     }
 }
 
+// TODO packet nonces aren't being updated here which may cause problems
+// see about updating all nonces in read_unlock?? (maybe except master nonce since it's needed for locking)
+// ^^^ did the above, check if that's correct...
 RetType TelemetryShm::read_lock() {
     if(info_blocks == NULL || master_block == NULL) {
         // not open
@@ -431,6 +433,11 @@ RetType TelemetryShm::read_unlock() {
         return FAILURE;
     }
 
+    // update all the stored packet nonces
+    for(size_t i = 0; i < num_packets; i++) {
+        last_nonces[i] = *((uint32_t*)(info_blocks[i]->data));
+    }
+
     // exit as a reader
     P(info->rmutex);
     info->readers--;
@@ -438,6 +445,23 @@ RetType TelemetryShm::read_unlock() {
         V(info->resource);
     }
     V(info->rmutex);
+
+    return SUCCESS;
+}
+
+RetType TelemetryShm::packet_updated(unsigned int packet_id, bool* updated) {
+    if(!read_locked) {
+        // TODO sysm, not read locked
+        return FAILURE;
+    }
+
+    if(packet_id >= num_packets) {
+        // TODO sysm
+        return FAILURE;
+    }
+
+    uint32_t* nonce = (uint32_t*)(info_blocks[packet_id]->data);
+    *updated = (last_nonces[packet_id] == *nonce);
 
     return SUCCESS;
 }
