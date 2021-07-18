@@ -67,15 +67,19 @@ public:
     RetType clear(unsigned int packet_id, uint8_t val = 0x0);
 
     // lock the shared memory for packets as a reader (e.g. dont allow any writers)
-    // pass packets to read as a list of 'num_packet' packet ids
-    // different read modes are able to be set with set_read_mode
-    // if any bytes fail to read FAILURE is returned
-    // read may return BLOCKED depending on the read mode
-    RetType read_lock(unsigned int* packet_ids, size_t num_packets);
+    // pass packets to read as a list of 'num' packet ids
+    // if read mode is set to STANDARD_READ, returns regardless the data changed since the last read
+    // if read mode is set to BLOCKING_READ, if the data has not changed since the last read the process will sleep until it changes
+    // if read mode is set to NONBLOCKING_READ, returns BLOCKED if the data has not changed since the last read
+    RetType read_lock(unsigned int* packet_ids, size_t num);
 
-    // unlock the shared memory for a packet as a writer
-    // pass packets to read as a list of 'num_packet' packet ids
-    RetType read_unlock(unsigned int* packet_ids, size_t num_packets);
+    // lock all shared memory for all packets
+    // functionally no different from other read_lock for STANDARD_READ mode
+    // BLOCKING_READ and NONBLOCKING_READ work identically assuming all packets are to be locked
+    RetType read_lock();
+
+    // unlock the shared memory, not packet specific
+    RetType read_unlock();
 
     // reading modes
     typedef enum {
@@ -102,15 +106,11 @@ private:
     read_mode_t read_mode;
 
     size_t num_packets;
-    uint32_t* last_nonces;
-    Shm** packet_blocks;
-    // Shm** info_blocks; // not currently used, all locking is done on the master block
-    Shm* master_block; // holds a single shm_info_t
-
-    uint32_t dummy_zero;
-
-    RetType read_lock(unsigned int packet_id);
-    RetType read_unlock(unsigned int packet_id);
+    uint32_t last_nonce; // last master nonce
+    uint32_t* last_nonces; // list of previous nonces for all packets
+    Shm** packet_blocks; // list of blocks holding raw telemetry data
+    Shm** info_blocks; // list of blocks holding uint32_t nonces
+    Shm* master_block; // holds a single shm_info_t for locking
 };
 
 #endif
