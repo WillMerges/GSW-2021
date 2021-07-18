@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <sys/mman.h>
 #include "lib/shm/shm.h"
 #include "lib/dls/dls.h"
 #include "common/types.h"
@@ -72,6 +73,16 @@ RetType Shm::attach() {
         data = NULL;
         logger.log_message("shmat failure, cannot attach to shmem");
         return FAILURE;
+    }
+
+    // everyone who attaches should attempt to lock the shared pages into RAM
+    // this avoids delays with page faults
+    // technically only one process needs to call this lock, but the pages are
+    // automatically unlocked upon termination of the process so each attached process
+    // should lock the pages
+    if(mlock(data, size) == -1) {
+        logger.log_message("mlock failure, failed to lock shared memory pages into RAM");
+        return FAILURE; // should this be a failure?
     }
 
     return SUCCESS;
