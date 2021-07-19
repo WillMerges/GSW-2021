@@ -9,7 +9,7 @@
 # currently address doesn't do anything since the ground station doesn't determine it's ip (only one network card, may have multiple receivers)
 protocol = udp
 addr = 127.0.0.1
-port = 8081
+#port = 8081
 
 # device name
 name = sample_device
@@ -21,3 +21,17 @@ endianness = big
 # signed/unsigned cannot be specified without a type
 TEST 4 0 0 int signed
 TEST2 2 0 0 float unsigned
+
+# telemetry packets, number is the port
+8081 {
+TEST
+TEST2
+}
+
+8082 {
+TEST
+}
+
+8083 {
+TEST2
+}
