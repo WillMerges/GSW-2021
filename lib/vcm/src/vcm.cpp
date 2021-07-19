@@ -174,6 +174,7 @@ RetType VCM::init() {
 
             bool done = false;
             // we don't allow comments or empty lines after starting a packet
+            // BUT we don't check for anything following a measurement name, we only look at the first token
             for(std::string line; std::getline(*f,line); ) {
                 std::istringstream ss(line);
                 std::string token;
