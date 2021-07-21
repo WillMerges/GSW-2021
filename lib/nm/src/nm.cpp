@@ -124,6 +124,7 @@ RetType NetworkManager::Open() {
     //device_addr.sin_port = htons(vcm->port);
     //device_addr.sin_addr.s_addr = htons(vcm->addr);
 
+    // TODO maybe don't call bind unless the user says to specifically
     struct sockaddr_in myaddr;
     myaddr.sin_addr.s_addr = htons(INADDR_ANY); // use any interface we have available (likely just 1 ip)
     myaddr.sin_family = AF_INET;

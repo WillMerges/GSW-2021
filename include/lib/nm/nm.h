@@ -18,6 +18,7 @@ namespace nm {
     // should only have ONE of these per vehicle (per vcm file)
     class NetworkManager {
     public:
+        // TODO make this take a buffer size (or use a default), and a port to listen to / send from
         NetworkManager(vcm::VCM* vcm);
         ~NetworkManager();
         RetType Open();

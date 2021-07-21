@@ -78,11 +78,14 @@ namespace vcm {
         measurement_info_t* get_info(std::string measurement); // get the info of a measurement
         std::vector<std::string> measurements; // list of measurement names
 
-        size_t packet_size; // bytes, size of packet after padding is added
+        std::vector<packet_info_t*> packets; // list of packets
+
+        // size_t packet_size; // bytes, size of packet after padding is added
         // size_t compressed_size; // bits, size of packet before padding added
 
         // TODO maybe put addr and port in another subclass
-        uint32_t addr; // address and port (only for UDP right now)
+        // TODO maybe get rid of addr altogether, it isn't currently used anywhere
+        uint32_t addr; // address and port (only for UDP right now) ACTUALLY each packet specifies a port but the address of the ground computer doesn't change
         // int port;
         protocol_t protocol;
         std::string config_file;
@@ -96,7 +99,6 @@ namespace vcm {
         // local vars
         std::ifstream* f;
         std::unordered_map<std::string, measurement_info_t*> addr_map;
-        std::vector<packet_info_t*> packets;
     };
 }
 

@@ -7,6 +7,11 @@ using namespace vcm;
 int main() {
     VCM vcm;
 
+    if(vcm.init() == FAILURE) {
+        std::cout << "Failed to initialize VCM\n";
+        exit(-1);
+    }
+
     std::cout << "device id: " << vcm.device << '\n';
 
     std::cout << "receiver endianness: ";
@@ -21,6 +26,14 @@ int main() {
         std::cout << "little endian\n";
     } else if(vcm.sys_endianness == GSW_BIG_ENDIAN) {
         std::cout << "big endian\n";
+    }
+
+    std::cout << "\npackets: \n";
+    int i = 0;
+    for(packet_info_t* packet : vcm.packets) {
+        std::cout << i++ << ": ";
+        std::cout << "size: " << packet->size << " ";
+        std::cout << "port: " << packet->port << "\n";
     }
 
     std::cout << '\n';
@@ -45,6 +58,12 @@ int main() {
                     std::cout << "string";
                     break;
             }
+            std::cout << "  [ ";
+            for(location_info_t loc : info->locations) {
+                std::cout << loc.packet_index << ":" << loc.offset << " ";
+            }
+            std::cout << "]";
+
             std::cout << '\n';
         }
 

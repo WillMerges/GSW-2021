@@ -165,10 +165,10 @@ RetType VCM::init() {
             // get the network port for this packet
             // this is the port the packet is sent TO
             try {
-                    packet->port = std::stoi(fst, NULL, 10);
+                packet->port = std::stoi(fst, NULL, 10);
             } catch(std::invalid_argument& ia) {
-                    logger.log_message("Invalid port in line: " + line);
-                    return FAILURE;
+                logger.log_message("Invalid port in line: " + line);
+                return FAILURE;
             }
 
 
@@ -196,6 +196,7 @@ RetType VCM::init() {
                     loc.offset = packet->size;
                     loc.packet_index = num_packets;
                     meas->locations.push_back(loc); // copy struct in, less memory to track and it's small
+                    packet->size += meas->size;
                 }
             }
 
