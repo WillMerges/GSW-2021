@@ -9,9 +9,11 @@
 #include "lib/vcm/vcm.h"
 #include "common/types.h"
 
+#define NM_MAX_MSG_SIZE 4096
+
 namespace nm {
 
-    static const size_t MAX_Q_SIZE = 2048;
+    // static const size_t MAX_MSG_SIZE = 2048;
 
     // checks an mqueue of name /name for messages to send over UDP
     // checks the UDP socket for incoming messages and writes them to 'in_buffer'
@@ -58,7 +60,7 @@ namespace nm {
         size_t rx_size;
         size_t rx_timeout;
 
-        uint8_t tx_buffer[4096];
+        uint8_t tx_buffer[NM_MAX_MSG_SIZE];
 
         bool open;
     };

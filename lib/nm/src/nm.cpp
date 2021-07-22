@@ -16,7 +16,7 @@ using namespace dls;
 using namespace shm;
 using namespace vcm;
 
-#define MAX_MSG_SIZE 4096
+// #define MAX_MSG_SIZE 4096
 // #define RECV_DEFAULT_TIMEOUT 100000 // 100ms
 
 NetworkManager::NetworkManager(uint16_t port, const char* name, uint8_t* buffer, size_t size, size_t rx_timeout) {
@@ -76,7 +76,7 @@ RetType NetworkManager::Open() {
     struct mq_attr attr;
     attr.mq_flags = 0;
     attr.mq_maxmsg = 10;
-    attr.mq_msgsize = MAX_MSG_SIZE; // this limits how many bytes we can send
+    attr.mq_msgsize = NM_MAX_MSG_SIZE; // this limits how many bytes we can send
     attr.mq_curmsgs = 0;
 
     mq = mq_open(mqueue_name.c_str(), O_RDONLY|O_NONBLOCK|O_CREAT, 0644, &attr);
@@ -175,7 +175,7 @@ RetType NetworkManager::Send() {
 
     // check the mqueue
     ssize_t read = -1;
-    read = mq_receive(mq, (char*)tx_buffer, MAX_MSG_SIZE, NULL);
+    read = mq_receive(mq, (char*)tx_buffer, NM_MAX_MSG_SIZE, NULL);
 
 
     // send the message from the mqueue out of the socket
@@ -207,7 +207,7 @@ RetType NetworkManager::Receive(size_t* received) {
 
     // MSG_DONTWAIT should be taken care of by O_NONBLOCK
     // MSG_TRUNC is set so that we know if we overran our buffer
-    n = recvfrom(sockfd, (char*)rx_buffer, MAX_MSG_SIZE,
+    n = recvfrom(sockfd, (char*)rx_buffer, NM_MAX_MSG_SIZE,
         MSG_DONTWAIT | MSG_TRUNC, (struct sockaddr *) &device_addr, &len); // fill in device_addr with where the packet came from
 
     if(n == -1) { // timeout or error
@@ -260,6 +260,7 @@ RetType NetworkInterface::Close() {
     MsgLogger logger("NetworkInterface", "Close");
 
     if(!open) {
+        logger.log_message("Network Interface not open");
         return SUCCESS;
     }
 
@@ -274,20 +275,25 @@ RetType NetworkInterface::Close() {
 }
 
 RetType NetworkInterface::QueueUDPMessage(const char* msg, size_t size) {
+    MsgLogger logger("NetworkInterface", "QueueUDPMessage");
+
     if(!open) {
+        logger.log_message("Network Interface not open");
         return FAILURE;
     }
 
-    if(size > MAX_MSG_SIZE){
+    if(size > NM_MAX_MSG_SIZE) {
+        logger.log_message("Message too large");
         return FAILURE;
     }
 
     if(0 > mq_send(mq, msg, size, 0)) {
+        logger.log_message("Failed to queue message");
         return FAILURE;
     }
 
     return SUCCESS;
 }
 
-#undef MAX_MSG_SIZE
-#undef RECV_TIMEOUT
+// #undef MAX_MSG_SIZE
+// #undef RECV_TIMEOUT
