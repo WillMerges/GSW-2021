@@ -10,6 +10,7 @@
 #include <string>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 
 using namespace dls;
 using namespace vcm;
@@ -177,7 +178,20 @@ int main(int argc, char** argv) {
 
     ignore_kill = false;
 
-    // TODO wait loop here
+    // monitor children processes in case they die
+    while(1) {
+        pid = wait(NULL);
+        if(pid == -1) { // error
+            if(errno == ECHILD) { // no more children left to wait for
+                logger.log_message("all decom sub-process children have died, exiting unexpectedly");
+                return -1;
+            }
+        }
 
-    return 1;
+        logger.log_message("decom sub-process child with PID: " + std::to_string(pid) + " died unexpectedly");
+        // continue and keep monitoring other children
+    }
+
+    // should never get here
+    return -1;
 }
