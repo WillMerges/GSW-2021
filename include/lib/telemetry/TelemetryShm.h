@@ -96,6 +96,10 @@ public:
     // returns FAILURE if not locked currently
     RetType read_unlock();
 
+    // get the buffer to read from for a packet
+    // returns NULL on error
+    const uint8_t* get_buffer(unsigned int packet_id);
+
     // set 'updated' to true if packet corresponding to 'packet_id' was updated at the last read
     // after calling read_lock this will not change since no writers may update the packets when shm is read locked
     // MUST be called after read_lock

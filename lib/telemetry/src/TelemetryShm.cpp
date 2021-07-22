@@ -15,6 +15,8 @@
 #include <limits.h>
 #include "lib/telemetry/TelemetryShm.h"
 
+// TODO make packet ids be uint32_ts to match VCM
+
 // locking is done with writers preference
 // https://en.wikipedia.org/wiki/Readers%E2%80%93writers_problem
 
@@ -455,6 +457,20 @@ RetType TelemetryShm::read_unlock() {
     V(info->rmutex);
 
     return SUCCESS;
+}
+
+const uint8_t* TelemetryShm::get_buffer(unsigned int packet_id) {
+    if(packet_id >= num_packets) {
+        // TODO sysm
+        return NULL;
+    }
+
+    if(packet_blocks == NULL) {
+        // TODO sysm
+        return NULL;
+    }
+
+    return packet_blocks[packet_id]->data;
 }
 
 RetType TelemetryShm::packet_updated(unsigned int packet_id, bool* updated) {
