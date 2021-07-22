@@ -106,8 +106,12 @@ void execute(size_t packet_id, packet_info_t* packet) {
     // main loop
     size_t n = 0;
     while(1) {
+        // TODO this should go somewhere else, in a single network process? (uplink?)
+        // it should basically only call net->Send repeatedly/block on the mqueue read
+        // maybe add a block bool to Send
+        // how to determine what port/addr to send to? before we just stripped it from the packet, idk now (maybe use VCM file)
         // send any outgoing messages
-        net->Send(); // don't care about the return
+        // net->Send(); // don't care about the return
 
         // read any incoming message and write it to shared memory
         if(SUCCESS == net->Receive(&n)) {
@@ -128,6 +132,8 @@ void execute(size_t packet_id, packet_info_t* packet) {
 }
 
 int main(int argc, char** argv) {
+    MsgLogger logger("DECOM", "main");
+
     // interpret the 1st argument as a config_file location if available
     std::string config_file = "";
     if(argc > 1) {
@@ -147,7 +153,12 @@ int main(int argc, char** argv) {
         veh = new VCM(config_file); // use specified config file
     }
 
-    MsgLogger logger("DECOM", "main");
+    // init VCM
+    if(veh->init() == FAILURE) {
+        logger.log_message("failed to initialize VCM");
+        return -1;
+    }
+
     logger.log_message("starting decom sub-processes");
 
     // according to packets in vcm, spawn a bunch of processes
