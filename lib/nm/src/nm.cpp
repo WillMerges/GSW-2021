@@ -17,7 +17,7 @@ using namespace shm;
 using namespace vcm;
 
 #define MAX_MSG_SIZE 4096
-#define RECV_TIMEOUT 100000 // 100ms
+// #define RECV_DEFAULT_TIMEOUT 100000 // 100ms
 
 NetworkManager::NetworkManager(uint16_t port, const char* name, uint8_t* buffer, size_t size, size_t rx_timeout) {
     mqueue_name = "/";
