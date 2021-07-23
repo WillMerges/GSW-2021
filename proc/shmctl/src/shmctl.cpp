@@ -5,6 +5,7 @@
 #include "lib/vcm/vcm.h"
 #include "lib/shm/shm.h"
 #include "lib/dls/dls.h"
+#include "lib/telemetry/TelemetryShm.h"
 #include "common/types.h"
 
 // run as shmctl -on or shmctl -off to create and destroy shared memory
@@ -57,12 +58,23 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
 
-    SHM mem(vcm->config_file, vcm->packet_size);
+    if(vcm->init() == FAILURE) {
+        printf("failed to initialize vehicle configuration manager\n");
+        logger.log_message("failed to initialize vehicle configuration manager");
+        return FAILURE;
+    }
+
+    TelemetryShm mem;
+    if(mem.init(vcm) == FAILURE) {
+        printf("failed to initialize telemetry shm controller\n");
+        logger.log_message("failed to initialize telemetry shm controller");
+        return FAILURE;
+    }
 
     if(on) {
         printf("creating shared memory\n");
         logger.log_message("creating shared memory");
-        if(FAILURE == mem.create_shm()) {
+        if(FAILURE == mem.create()) {
             printf("Failed to create shared memory\n");
             logger.log_message("Failed to create shared memory");
             return FAILURE;
@@ -71,11 +83,11 @@ int main(int argc, char* argv[]) {
     } else if(off) {
         printf("destroying shared memory\n");
         logger.log_message("destroying shared memory");
-        if(FAILURE == mem.attach_to_shm()) {
+        if(FAILURE == mem.open()) {
             printf("Shared memory not created, nothing to destroy\n");
             logger.log_message("Shared memory not created, nothing to destroy");
         }
-        if(FAILURE == mem.destroy_shm()) {
+        if(FAILURE == mem.destroy()) {
             printf("Failed to destroy shared memory\n");
             logger.log_message("Failed to destroy shared memory");
             return FAILURE;

@@ -147,8 +147,21 @@ RetType TelemetryShm::create() {
             return FAILURE;
         }
 
+        // attach first
+        if(info_blocks[i]->attach() == FAILURE) {
+            // TODO sysm
+            return FAILURE;
+        }
+
         // 'info blocks' are single nonces now, so just zero them
         *((uint32_t*)info_blocks[i]->data) = 0x0;
+
+        // we should unatach after setting the default
+        // although we technically still could stay attached and be okay
+        if(info_blocks[i]->detach() == FAILURE) {
+            // TODO sysm
+            return FAILURE;
+        }
 
         // shm_info_t* info = (shm_info_t*)info_blocks[i]->data;
         //
@@ -168,6 +181,13 @@ RetType TelemetryShm::create() {
     }
 
     if(SUCCESS != master_block->create()) {
+        // TODO sysm
+        return FAILURE;
+    }
+
+    // need to attach in order to preset data
+    if(SUCCESS != master_block->attach()) {
+        // TODO sysm
         return FAILURE;
     }
 
@@ -185,6 +205,13 @@ RetType TelemetryShm::create() {
 
     // start the master nonce at 0
     info->nonce = 0;
+
+    // we should detach to be later attached
+    // if this fails it's not the end of the world? but its still bad and shouldn't fail
+    if(SUCCESS != master_block->detach()) {
+        // TODO sysm
+        return FAILURE;
+    }
 
     return SUCCESS;
 }
