@@ -27,9 +27,10 @@ namespace nm {
         // this name must match any associated network interfaces
         // binds to 'port' (e.g. received packets dst = port, sent packets src = port)
         // places received data in 'buffer' of 'size' bytes
-        // a receive attempt will timeout after 'rx_timeout' milliseconds (default of 100ms)
+        // a receive attempt will timeout after 'rx_timeout' milliseconds
+        // if 'rx_timeout' is set to -1 (or anything less than 0), all calls to receive will be blocking
         NetworkManager(uint16_t port, const char* name, uint8_t* buffer,
-                    size_t size, size_t rx_timeout = 100000);
+                    size_t size, ssize_t rx_timeout = -1);
 
         // destructor
         ~NetworkManager();
@@ -58,7 +59,7 @@ namespace nm {
 
         uint8_t* rx_buffer;
         size_t rx_size;
-        size_t rx_timeout;
+        ssize_t rx_timeout;
 
         uint8_t tx_buffer[NM_MAX_MSG_SIZE];
 

@@ -74,15 +74,20 @@ int main(int argc, char* argv[]) {
     if(on) {
         printf("creating shared memory\n");
         logger.log_message("creating shared memory");
+
         if(FAILURE == mem.create()) {
             printf("Failed to create shared memory\n");
             logger.log_message("Failed to create shared memory");
             return FAILURE;
         }
+
+        printf("created shared memory\n");
+        logger.log_message("created shared memory");
         return SUCCESS;
     } else if(off) {
         printf("destroying shared memory\n");
         logger.log_message("destroying shared memory");
+
         if(FAILURE == mem.open()) {
             printf("Shared memory not created, nothing to destroy\n");
             logger.log_message("Shared memory not created, nothing to destroy");
@@ -92,6 +97,9 @@ int main(int argc, char* argv[]) {
             logger.log_message("Failed to destroy shared memory");
             return FAILURE;
         }
+
+        printf("destroyed shared memory\n");
+        logger.log_message("destroyed shared memory");
         return SUCCESS;
     }
 }

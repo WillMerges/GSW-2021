@@ -19,7 +19,7 @@ using namespace vcm;
 // #define MAX_MSG_SIZE 4096
 // #define RECV_DEFAULT_TIMEOUT 100000 // 100ms
 
-NetworkManager::NetworkManager(uint16_t port, const char* name, uint8_t* buffer, size_t size, size_t rx_timeout) {
+NetworkManager::NetworkManager(uint16_t port, const char* name, uint8_t* buffer, size_t size, ssize_t rx_timeout) {
     mqueue_name = "/";
     mqueue_name += name;
 
@@ -86,10 +86,18 @@ RetType NetworkManager::Open() {
     }
 
     // set up the socket
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { // ipv4, UDP
-       logger.log_message("socket creation failed");
-       return FAILURE;
+    if(rx_timeout < 0) { // blocking mode
+        if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { // ipv4, UDP
+           logger.log_message("socket creation failed");
+           return FAILURE;
+        }
+    } else { // non-blocking
+        if ((sockfd = socket(AF_INET, SOCK_DGRAM | O_NONBLOCK, 0)) < 0 ) { // ipv4, UDP
+           logger.log_message("socket creation failed");
+           return FAILURE;
+        }
     }
+
 
     // at this point we need to close the socket regardless
     open = true;
@@ -108,15 +116,18 @@ RetType NetworkManager::Open() {
         return FAILURE;
     }
 
-    // set the timeout
-    struct timeval tv;
-    tv.tv_sec = 0;
-    tv.tv_usec = rx_timeout;
-    if(setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
-        logger.log_message("failed to set timeout on socket");
-        return FAILURE;
+    // set the timeout if there is one, -1 means no timeout
+    if(rx_timeout >= 0) {
+        struct timeval tv;
+        tv.tv_sec = 0;
+        tv.tv_usec = rx_timeout;
+        if(setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+            logger.log_message("failed to set timeout on socket");
+            return FAILURE;
+        }
     }
 
+    // zero address struct for the device (NOT the ground station)
     memset(&device_addr, 0, sizeof(device_addr));
 
     device_addr.sin_family = AF_INET;
@@ -205,10 +216,10 @@ RetType NetworkManager::Receive(size_t* received) {
     int n = -1;
     socklen_t len = sizeof(device_addr);
 
-    // MSG_DONTWAIT should be taken care of by O_NONBLOCK
+    // MSG_DONTWAIT should be taken care of by O_NONBLOCK (so actually don't use it anymore incase we are in blocking mode)
     // MSG_TRUNC is set so that we know if we overran our buffer
     n = recvfrom(sockfd, (char*)rx_buffer, NM_MAX_MSG_SIZE,
-        MSG_DONTWAIT | MSG_TRUNC, (struct sockaddr *) &device_addr, &len); // fill in device_addr with where the packet came from
+        MSG_TRUNC, (struct sockaddr *) &device_addr, &len); // fill in device_addr with where the packet came from
 
     if(n == -1) { // timeout or error
         received = 0;

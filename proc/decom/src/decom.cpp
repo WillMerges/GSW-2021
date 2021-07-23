@@ -12,6 +12,19 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+/*
+*   This executable runs the "decom master process"
+*   The master process reads the VCM file, and for each telemetry packet described
+*   in the VCM file, forks itself into a child decom process. Each child process
+*   listens to the specified port of the telemetry packet and if it writes each
+*   packet it receives to that telemetry packet's block in shared memory.
+*
+*   When the decom master process is killed, it kills each child process as well.
+*   If a child process dies unexpectedly, either due to error or being manually
+*   sent a kill signal, the master process will report it through the message log.
+*/
+
+
 using namespace dls;
 using namespace vcm;
 using namespace nm;
@@ -21,7 +34,7 @@ using namespace shm;
 VCM* veh = NULL;
 
 NetworkManager* net = NULL;
-std::string decom_id = "main"; // id for each decom proc spawned
+std::string decom_id = "DECOM[master]"; // id for each decom proc spawned
 
 bool child_proc = false;
 std::vector<pid_t> pids;
@@ -30,29 +43,33 @@ bool ignore_kill = false;
 
 
 void sighandler(int signum) {
-    MsgLogger logger("DECOM");
+    MsgLogger logger(decom_id.c_str(), "sighandler");
 
     if(ignore_kill) {
-        logger.log_message("attempt to kill decom " + decom_id + ", ignoring");
+        logger.log_message("attempt to kill ignored");
         return; // ignored
     }
 
-    logger.log_message("decom " + decom_id + " killed, cleaning up resources");
-
-    if(net) {
-        delete net; // this also calls close
-    }
 
     if(!child_proc) { // if we're the main process, kill all the children :(
+        logger.log_message("reaping children sub-processes");
+        size_t i = 0;
         for(pid_t pid : pids) {
             if(-1 == kill(pid, SIGTERM)) {
-                logger.log_message("Failed to kill child with PID: " + std::to_string(pid));
+                logger.log_message("failed to kill DECOM[" + std::to_string(i) +
+                                    "] child with PID: " + std::to_string(pid));
                 // ignore and kill the other children
+            } else {
+                logger.log_message("killed DECOM[" + std::to_string(i) +
+                                    "] child with PID: " + std::to_string(pid));
             }
+            i++;
         }
+        logger.log_message("killed all children, exiting");
     } else { // if we're a child we need to clean up our mess
+        logger.log_message("killed, cleaning up resources");
         if(net) { // it's possible we get killed before we can create out network manager
-            delete net;
+            delete net; // this also calls close
         }
     }
 
@@ -62,12 +79,10 @@ void sighandler(int signum) {
 // main logic for each sub process to run
 // only exit if something bad happens
 void execute(size_t packet_id, packet_info_t* packet) {
-    std::string decom_id = std::to_string(packet_id);
+    decom_id = "DECOM[" + std::to_string(packet_id) + "]";
 
     // create message logger
-    std::string func_name = "execute: ";
-    func_name += decom_id;
-    MsgLogger logger("DECOM", func_name.c_str());
+    MsgLogger logger(decom_id.c_str(), "execute");
 
     // set packet name to use for logging messages and network manager name
     std::string packet_name = veh->device + "[" + std::to_string(packet_id) + "]";
@@ -98,6 +113,7 @@ void execute(size_t packet_id, packet_info_t* packet) {
     // clear our packet's shared memory
     if(shmem.clear(packet_id) == FAILURE) {
         logger.log_message("failed to clear telemetry shared memory");
+        return;
     }
 
     // create packet logger
@@ -132,7 +148,8 @@ void execute(size_t packet_id, packet_info_t* packet) {
 }
 
 int main(int argc, char** argv) {
-    MsgLogger logger("DECOM", "main");
+    MsgLogger logger(decom_id.c_str(), "main");
+    logger.log_message("starting decom master process");
 
     // interpret the 1st argument as a config_file location if available
     std::string config_file = "";
@@ -182,7 +199,8 @@ int main(int argc, char** argv) {
         }
 
         // otherwise we're the parent, keep going
-        logger.log_message("started decom sub-process " + std::to_string(i));
+        logger.log_message("started decom sub-process [" + std::to_string(i) +
+                                            "] with PID: " + std::to_string(pid));
         i++;
         pids.push_back(pid);
     }

@@ -304,7 +304,7 @@ RetType TelemetryShm::clear(unsigned int packet_id, uint8_t val) {
     uint32_t* packet_nonce = (uint32_t*)info_blocks[packet_id]->data;
     shm_info_t* info = (shm_info_t*)master_block->data;
 
-    if(packet == NULL || info == NULL || packet_nonce) {
+    if(packet == NULL || info == NULL || packet_nonce == NULL) {
         // TODO sys message
         // something isn't attached
         return FAILURE;
