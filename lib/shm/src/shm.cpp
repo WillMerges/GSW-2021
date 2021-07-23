@@ -95,17 +95,20 @@ RetType Shm::detach() {
         if(shmdt(data) == 0) {
             data = NULL;
             return SUCCESS;
+        } else {
+            logger.log_message("shmdt failure");
         }
+    } else {
+        logger.log_message("process is not attached");
     }
 
-    logger.log_message("shmdt failure");
     return FAILURE;
 }
 
 RetType Shm::destroy() {
     MsgLogger logger("SHM", "destroy");
 
-    if(shmid == -1) {
+    if(data == NULL) {
         logger.log_message("No shmem to destroy");
         return FAILURE;
     }

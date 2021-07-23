@@ -39,6 +39,7 @@ namespace shm {
         RetType destroy();
 
         // create shared memory block
+        // NOTE: does not attach the process
         RetType create();
 
         // pointer to shared memory block
