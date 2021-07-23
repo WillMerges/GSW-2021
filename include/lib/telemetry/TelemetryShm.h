@@ -100,7 +100,7 @@ public:
     // returns NULL on error
     const uint8_t* get_buffer(unsigned int packet_id);
 
-    // set 'updated' to true if packet corresponding to 'packet_id' was updated at the last read
+    // set 'updated' to true if packet corresponding to 'packet_id' was updated before the last call to 'read_lock'
     // after calling read_lock this will not change since no writers may update the packets when shm is read locked
     // MUST be called after read_lock
     // returns FAILURE if shm is not currently read locked
