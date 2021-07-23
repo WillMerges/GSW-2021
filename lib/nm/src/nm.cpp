@@ -16,9 +16,6 @@ using namespace dls;
 using namespace shm;
 using namespace vcm;
 
-// #define MAX_MSG_SIZE 4096
-// #define RECV_DEFAULT_TIMEOUT 100000 // 100ms
-
 NetworkManager::NetworkManager(uint16_t port, const char* name, uint8_t* buffer, size_t size, ssize_t rx_timeout) {
     mqueue_name = "/";
     mqueue_name += name;
@@ -257,7 +254,7 @@ RetType NetworkInterface::Open() {
     }
 
     // turned non blocking on so if the queue is full it won't be logged (could be a potential issue if messages are being dropped)
-    mq = mq_open(mqueue_name.c_str(), O_WRONLY|O_NONBLOCK); // TODO consider adding O_CREAT here, or should it fail if the network manager doesnt exist?
+    mq = mq_open(mqueue_name.c_str(), O_WRONLY|O_NONBLOCK); // TODO consider adding O_CREAT here, or actually should it fail if the network manager doesnt exist?
     if((mqd_t)-1 == mq) {
         logger.log_message("unable to open mqueue");
         return FAILURE;

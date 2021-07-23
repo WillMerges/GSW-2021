@@ -12,17 +12,16 @@
 #define NM_MAX_MSG_SIZE 4096
 
 namespace nm {
-
-    // static const size_t MAX_MSG_SIZE = 2048;
-
-    // checks an mqueue of name /name for messages to send over UDP
-    // checks the UDP socket for incoming messages and writes them to 'in_buffer'
+    // checks an mqueue of name /'name' for messages to send over UDP
+    // checks the UDP socket with 'port' for incoming messages and writes them
+    // to passed in 'buffer' of 'size' bytes
+    // receiving can be blocking or non-blocking depending on how 'rx_timeout' is set
 
     // likely use is for receiving telemetry packets, should have one NetworkManager
     // per telemetry packet
     class NetworkManager {
     public:
-        // constructor
+        
         // construct a network manager named 'name'
         // this name must match any associated network interfaces
         // binds to 'port' (e.g. received packets dst = port, sent packets src = port)
