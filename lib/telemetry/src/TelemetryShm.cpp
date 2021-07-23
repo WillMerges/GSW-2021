@@ -71,16 +71,31 @@ TelemetryShm::~TelemetryShm() {
 }
 
 RetType TelemetryShm::init(VCM* vcm) {
-    //TODO set num_packets according the vcm
+    num_packets = vcm->num_packets;
 
     // creates and zero last_nonces
     last_nonces = (uint32_t*)malloc(num_packets * sizeof(uint32_t));
     memset(last_nonces, 0, num_packets * sizeof(uint32_t));
 
-    // TODO setup shm block objects in list
-    // need to create a list of Shm object pointers stored in packet_blocks
-    // should be num_packets many blocks of the correct size according to the vcm file
-    return FAILURE;
+    packet_blocks = new Shm*[num_packets];
+    info_blocks = new Shm*[num_packets];
+
+    // create Shm objects for each telemetry packet
+    packet_info_t* packet;
+    size_t i;
+    for(i = 0; i < num_packets; i++) {
+        packet = vcm->packets[i];
+        // for shmem id use (i+1)*2 for packets (always even) and (2*i)+1 for info blocks (always odd)
+        // guarantees all blocks can use the same file but different ids to make a key
+        packet_blocks[i] = new Shm(vcm->config_file.c_str(), 2*(i+1), packet->size);
+        info_blocks[i] = new Shm(vcm->config_file.c_str(), (2*i)+1, sizeof(uint32_t)); // holds one nonce
+    }
+
+    // create master Shm object
+    // use an id guaranteed unused so we can use the same file name for master block as well
+    master_block = new Shm(vcm->config_file.c_str(), 2*(i+1), sizeof(shm_info_t));
+
+    return SUCCESS;
 }
 
 RetType TelemetryShm::init() {
@@ -132,21 +147,24 @@ RetType TelemetryShm::create() {
             return FAILURE;
         }
 
-        shm_info_t* info = (shm_info_t*)info_blocks[i]->data;
+        // 'info blocks' are single nonces now, so just zero them
+        *((uint32_t*)info_blocks[i]->data) = 0x0;
 
-        // initialize info block
-        // init semaphores
-        INIT(info->rmutex, 1);
-        INIT(info->wmutex, 1);
-        INIT(info->readTry, 1);
-        INIT(info->resource, 1);
-
-        // init reader/writer counts to 0
-        info->readers = 0;
-        info->writers = 0;
-
-        // start the nonce at 0
-        info->nonce = 0;
+        // shm_info_t* info = (shm_info_t*)info_blocks[i]->data;
+        //
+        // // initialize info block
+        // // init semaphores
+        // INIT(info->rmutex, 1);
+        // INIT(info->wmutex, 1);
+        // INIT(info->readTry, 1);
+        // INIT(info->resource, 1);
+        //
+        // // init reader/writer counts to 0
+        // info->readers = 0;
+        // info->writers = 0;
+        //
+        // // start the nonce at 0
+        // info->nonce = 0;
     }
 
     if(SUCCESS != master_block->create()) {
