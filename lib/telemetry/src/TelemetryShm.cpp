@@ -270,7 +270,7 @@ RetType TelemetryShm::write(unsigned int packet_id, uint8_t* data) {
     memcpy((unsigned char*)packet->data, data, packet->size);
     info->nonce++; // update the master nonce
 
-    (*packet_nonce)++; // update the packet nonce
+    (*packet_nonce) = info->nonce; // update the packet nonce to equal the new master nonce
 
     // wakeup anyone blocked on this packet (or any packet with an equivalen id mod 32)
     syscall(SYS_futex, &(info->nonce), FUTEX_WAKE_BITSET, INT_MAX, NULL, NULL, 1 << (packet_id % 32)); // TODO check return
@@ -323,7 +323,7 @@ RetType TelemetryShm::clear(unsigned int packet_id, uint8_t val) {
     memset((unsigned char*)packet->data, val, packet->size);
     info->nonce++; // update the master nonce
 
-    (*packet_nonce)++; // update the packet nonce
+    (*packet_nonce) = info->nonce; // update the packet nonce to equal the new master nonce
 
     // wakeup anyone blocked on this packet
     // technically we can only block on up to 32 packets, but we mod the packet id so that
@@ -533,6 +533,31 @@ RetType TelemetryShm::packet_updated(unsigned int packet_id, bool* updated) {
 
     uint32_t* nonce = (uint32_t*)(info_blocks[packet_id]->data);
     *updated = (last_nonces[packet_id] == *nonce);
+
+    return SUCCESS;
+}
+
+RetType TelemetryShm::more_recent_packet(unsigned int* packet_ids, size_t num, unsigned int* recent) {
+    uint32_t best_diff = UINT_MAX;
+    uint32_t master_nonce = *((uint32_t*)((shm_info_t*)master_block->data));
+
+    unsigned int id;
+    long int diff;
+    for(size_t i = 0; i < num; i++) {
+        id = packet_ids[i];
+        if(id >= num_packets) {
+            // invalid packet id
+            // TODO sysm
+            return FAILURE;
+        }
+
+        // we can't just take the biggest nonce as the most recent since it could have overflowed and wrapped around
+        // instead we find the nonce with the smallest absolute value different from the master nonce (guaranteed to change every update)
+        diff = abs((int)(master_nonce - last_nonces[i]));
+        if(diff < best_diff) {
+            *recent = i;
+        }
+    }
 
     return SUCCESS;
 }

@@ -109,6 +109,12 @@ public:
     // otherwise returns SUCCESS
     RetType packet_updated(unsigned int packet_id, bool* updated);
 
+    // check a list of 'num' packet ids for which was updated more recently
+    // sets 'recent' to the more recently updated packet_id
+    // must be read locked before calling this function, returns FAILURE otherwise
+    // NOTE: if FAILURE is returned 'recent' may still have been updated
+    RetType more_recent_packet(unsigned int* packet_ids, size_t num, unsigned int* recent);
+
     // reading modes
     typedef enum {
         STANDARD_READ,   // read no matter what, regardless if the data updated since the last read
