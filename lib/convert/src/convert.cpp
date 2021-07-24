@@ -11,6 +11,37 @@ char result[MAX_CONVERSION_SIZE];
 // TODO maybe have a fancy function with va_args, idk
 
 
+RetType convert::convert_double(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const void* data, double* dst) {
+    MsgLogger logger("CONVERT", "convert_double");
+
+    if(measurement->type != FLOAT_TYPE) {
+        logger.log_message("Measurement must be a float type!");
+        return FAILURE;
+    }
+
+    if(measurement->size != sizeof(double)) {
+        logger.log_message("measurement is not the size of a double!");
+        return FAILURE;
+    }
+
+    uint8_t val[sizeof(double)];
+    size_t addr = (size_t)measurement->addr;
+    const uint8_t* buff = (const uint8_t*)data;
+
+    if(vcm->recv_endianness != vcm->sys_endianness) {
+        for(size_t i = 0; i < measurement->size; i++) {
+            val[sizeof(uint32_t) - i - 1] = buff[addr + i];
+        }
+    } else {
+        for(size_t i = 0; i < measurement->size; i++) {
+            val[i] = buff[addr + i];
+        }
+    }
+
+    *dst = *((double*)val);
+    return SUCCESS;
+}
+
 RetType convert::convert_float(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const void* data, float* dst) {
     MsgLogger logger("CONVERT", "convert_float");
 

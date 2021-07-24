@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# trys to receive a UDP message from udpserv.py using the OS options the decom proc uses
+
 import socket
 import time
 

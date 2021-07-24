@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Name: TelemetryShm.cpp
+* Name: TelemetryShm.h
 *
 * Purpose: Telemetry shared memory access and control for readers and writers
 *

@@ -16,6 +16,7 @@ namespace convert {
     RetType convert_uint(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const void* data, uint32_t* dst);
     RetType convert_int(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const void* data, int32_t* dst);
     RetType convert_float(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const void* data, float* dst);
+    RetType convert_double(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const void* data, double* dst);
 }
 
 #endif
