@@ -382,9 +382,10 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
         last_nonce = info->nonce;
 
         // if reading in standard mode we never block so don't check
-        if(read_mode == STANDARD_READ) {
-            return SUCCESS;
-        }
+        // actually we want to update our last nonces so keep going for now
+        // if(read_mode == STANDARD_READ) {
+        //     return SUCCESS;
+        // }
 
         // check to see if any nonce has changed for the packets we're locking
         // if any nonce has changed we don't need to block
@@ -406,7 +407,8 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
             }
         }
 
-        if(!block) {
+        // in standard read mode we don't care if the packet updated
+        if(!block || read_mode == STANDARD_READ) {
             return SUCCESS;
         }
 
@@ -533,6 +535,10 @@ RetType TelemetryShm::packet_updated(unsigned int packet_id, bool* updated) {
     *updated = (last_nonces[packet_id] == *nonce);
 
     return SUCCESS;
+}
+
+void TelemetryShm::set_read_mode(read_mode_t mode) {
+    read_mode = mode;
 }
 
 #undef P
