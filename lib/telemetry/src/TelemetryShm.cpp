@@ -537,6 +537,26 @@ RetType TelemetryShm::packet_updated(unsigned int packet_id, bool* updated) {
     return SUCCESS;
 }
 
+
+RetType TelemetryShm::update_value(unsigned int packet_id, uint32_t* value) {
+    if(!read_locked) {
+        // TODO sysm, not read locked
+        return FAILURE;
+    }
+
+    if(packet_id >= num_packets) {
+        // TODO sysm
+        return FAILURE;
+    }
+
+    // technically 'abs' returns a long int, but since we're only ever subtracting
+    // uin32_t's we'll never get a difference bigger than a uint32_t
+    uint32_t master_nonce = *((uint32_t*)((shm_info_t*)master_block->data));
+    *value = labs((long int)(master_nonce - last_nonces[packet_id]));
+
+    return SUCCESS;
+}
+
 RetType TelemetryShm::more_recent_packet(unsigned int* packet_ids, size_t num, unsigned int* recent) {
     uint32_t best_diff = UINT_MAX;
     uint32_t master_nonce = *((uint32_t*)((shm_info_t*)master_block->data));
@@ -553,7 +573,7 @@ RetType TelemetryShm::more_recent_packet(unsigned int* packet_ids, size_t num, u
 
         // we can't just take the biggest nonce as the most recent since it could have overflowed and wrapped around
         // instead we find the nonce with the smallest absolute value different from the master nonce (guaranteed to change every update)
-        diff = abs((int)(master_nonce - last_nonces[i]));
+        diff = labs((long int)(master_nonce - last_nonces[i]));
         if(diff < best_diff) {
             *recent = i;
         }

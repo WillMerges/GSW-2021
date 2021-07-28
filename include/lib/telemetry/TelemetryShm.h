@@ -26,7 +26,7 @@
 * Currently locking is vehicle-wide
 * Regardless of which packet(s) are being read/written there is one lock
 * e.g. even if two writers are writing to different packets only one can write at a time
-*
+*unsigned int* packet_id, size_t* offset
 * The above limitation can be solved by storing an entire info block for each
 * packet rather than just a nonce. To block on multiple packets would require
 * creating a thread for each packet and blocking on that packets nonce from the
@@ -114,6 +114,13 @@ public:
     // must be read locked before calling this function, returns FAILURE otherwise
     // NOTE: if FAILURE is returned 'recent' may still have been updated
     RetType more_recent_packet(unsigned int* packet_ids, size_t num, unsigned int* recent);
+
+    // get the update value of a packet
+    // this is an unsigned number representing how recently the packet was updated
+    // the smaller the number, the more recent the update (the most recent should have a value of 0)
+    // the actual value does not mean much, but each packets value can be compared
+    // and the smallest value is more recently updated
+    RetType update_value(unsigned int packet_id, uint32_t* value);
 
     // reading modes
     typedef enum {
