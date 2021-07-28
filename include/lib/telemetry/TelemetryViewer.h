@@ -64,9 +64,9 @@ public:
     RetType get_double(std::string measurement, double* val);
     RetType get_int(std::string measurement, int* val);
     RetType get_uint(std::string measurement, unsigned int* val);
-    // place up to 'size' bytes into 'data'
-    // returns the actual size of the measurement, or -1 if the measurement is larger than 'size'
-    ssize_t get_raw(std::string measurement, uint8_t* data, size_t size);
+    // place up to 'size' bytes into 'buffer'
+    // returns the actual size of the measurement, or -1 if the measurement is larger than 'size' or error
+    ssize_t get_raw(std::string measurement, uint8_t* buffer, size_t size);
 
 private:
     TelemetryShm shm;

@@ -249,8 +249,128 @@ RetType TelemetryViewer::get_str(std::string measurement, std::string* val) {
         return FAILURE;
     }
 
-    // call convert library with 'data'
+    if(convert_str(vcm, meas, data, val) == FAILURE) {
+        logger.log_message("failed to convert measurement " + measurement + "to string");
+        return FAILURE;
+    }
 
     return SUCCESS;
+}
 
+RetType TelemetryViewer::get_float(std::string measurement, float* val) {
+    MsgLogger logger("TelemetryViewer", "get_float");
+
+    measurement_info_t* meas = vcm->get_info(measurement);
+    if(meas == NULL) {
+        logger.log_message("measurement " + measurement + " was not found");
+        return FAILURE;
+    }
+
+    uint8_t* data;
+    if(latest_data(meas, &data) == FAILURE) {
+        logger.log_message("failed to locate latest data for measurement " + measurement);
+        return FAILURE;
+    }
+
+    if(convert_float(vcm, meas, data, val) == FAILURE) {
+        logger.log_message("failed to convert measurement " + measurement + "to float");
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
+RetType TelemetryViewer::get_double(std::string measurement, double* val) {
+    MsgLogger logger("TelemetryViewer", "get_double");
+
+    measurement_info_t* meas = vcm->get_info(measurement);
+    if(meas == NULL) {
+        logger.log_message("measurement " + measurement + " was not found");
+        return FAILURE;
+    }
+
+    uint8_t* data;
+    if(latest_data(meas, &data) == FAILURE) {
+        logger.log_message("failed to locate latest data for measurement " + measurement);
+        return FAILURE;
+    }
+
+    if(convert_double(vcm, meas, data, val) == FAILURE) {
+        logger.log_message("failed to convert measurement " + measurement + "to double");
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
+RetType TelemetryViewer::get_int(std::string measurement, int* val) {
+    MsgLogger logger("TelemetryViewer", "get_int");
+
+    measurement_info_t* meas = vcm->get_info(measurement);
+    if(meas == NULL) {
+        logger.log_message("measurement " + measurement + " was not found");
+        return FAILURE;
+    }
+
+    uint8_t* data;
+    if(latest_data(meas, &data) == FAILURE) {
+        logger.log_message("failed to locate latest data for measurement " + measurement);
+        return FAILURE;
+    }
+
+    if(convert_int(vcm, meas, data, val) == FAILURE) {
+        logger.log_message("failed to convert measurement " + measurement + "to int");
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
+RetType TelemetryViewer::get_uint(std::string measurement, unsigned int* val) {
+    MsgLogger logger("TelemetryViewer", "get_uint");
+
+    measurement_info_t* meas = vcm->get_info(measurement);
+    if(meas == NULL) {
+        logger.log_message("measurement " + measurement + " was not found");
+        return FAILURE;
+    }
+
+    uint8_t* data;
+    if(latest_data(meas, &data) == FAILURE) {
+        logger.log_message("failed to locate latest data for measurement " + measurement);
+        return FAILURE;
+    }
+
+    if(convert_uint(vcm, meas, data, val) == FAILURE) {
+        logger.log_message("failed to convert measurement " + measurement + "to uint");
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
+ssize_t TelemetryViewer::get_raw(std::string measurement, uint8_t* buffer, size_t size) {
+    MsgLogger logger("TelemetryViewer", "get_raw");
+
+    measurement_info_t* meas = vcm->get_info(measurement);
+    if(meas == NULL) {
+        logger.log_message("measurement " + measurement + " was not found");
+        return -1;
+    }
+
+    if(meas->size > size) {
+        logger.log_message("buffer too small to fit measurement " + measurement);
+        return -1;
+    }
+
+    uint8_t* data;
+    if(latest_data(meas, &data) == FAILURE) {
+        logger.log_message("failed to locate latest data for measurement " + measurement);
+        return FAILURE;
+    }
+
+    // copy the data out
+    memcpy(buffer, data, meas->size);
+
+    return meas->size;
 }
