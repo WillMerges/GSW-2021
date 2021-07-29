@@ -13,7 +13,10 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <limits.h>
+#include "lib/dls/dls.h"
 #include "lib/telemetry/TelemetryShm.h"
+
+using namespace dls;
 
 // TODO make packet ids be uint32_ts to match VCM
 
@@ -408,7 +411,8 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
         }
 
         // in standard read mode we don't care if the packet updated
-        if(!block || read_mode == STANDARD_READ) {
+        if(!block || (read_mode == STANDARD_READ)) {
+            read_locked = true;
             return SUCCESS;
         }
 
@@ -539,27 +543,24 @@ RetType TelemetryShm::packet_updated(unsigned int packet_id, bool* updated) {
 
 
 RetType TelemetryShm::update_value(unsigned int packet_id, uint32_t* value) {
-    if(!read_locked) {
-        // TODO sysm, not read locked
-        return FAILURE;
-    }
+    MsgLogger logger("TelemetryShm", "update_value");
 
     if(packet_id >= num_packets) {
-        // TODO sysm
+        logger.log_message("invalid packet id");
         return FAILURE;
     }
 
     // technically 'abs' returns a long int, but since we're only ever subtracting
     // uin32_t's we'll never get a difference bigger than a uint32_t
-    uint32_t master_nonce = *((uint32_t*)((shm_info_t*)master_block->data));
-    *value = labs((long int)(master_nonce - last_nonces[packet_id]));
+    // uint32_t master_nonce = *((uint32_t*)((shm_info_t*)master_block->data));
+    *value = labs((long int)(last_nonce - last_nonces[packet_id]));
 
     return SUCCESS;
 }
 
 RetType TelemetryShm::more_recent_packet(unsigned int* packet_ids, size_t num, unsigned int* recent) {
     uint32_t best_diff = UINT_MAX;
-    uint32_t master_nonce = *((uint32_t*)((shm_info_t*)master_block->data));
+    // uint32_t master_nonce = *((uint32_t*)((shm_info_t*)master_block->data));
 
     unsigned int id;
     long int diff;
@@ -573,7 +574,7 @@ RetType TelemetryShm::more_recent_packet(unsigned int* packet_ids, size_t num, u
 
         // we can't just take the biggest nonce as the most recent since it could have overflowed and wrapped around
         // instead we find the nonce with the smallest absolute value different from the master nonce (guaranteed to change every update)
-        diff = labs((long int)(master_nonce - last_nonces[i]));
+        diff = labs((long int)(last_nonce - last_nonces[i]));
         if(diff < best_diff) {
             *recent = i;
         }

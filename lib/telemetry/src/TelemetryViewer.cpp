@@ -67,6 +67,7 @@ RetType TelemetryViewer::init(VCM* vcm) {
     this->vcm = vcm;
 
     packet_ids = new unsigned int[vcm->num_packets];
+    packet_sizes = new size_t[vcm->num_packets];
     packet_buffers = new uint8_t*[vcm->num_packets];
 
     return SUCCESS;
@@ -120,6 +121,7 @@ RetType TelemetryViewer::add(unsigned int packet_id) {
         packet_ids[num_packets] = packet_id;
         packet_sizes[packet_id] = vcm->packets[packet_id]->size;
         packet_buffers[packet_id] = new uint8_t[packet_sizes[packet_id]];
+        memset(packet_buffers[packet_id], 0, packet_sizes[packet_id]); // zero buffer
         num_packets++;
 
         return SUCCESS;
@@ -168,7 +170,7 @@ RetType TelemetryViewer::update() {
             // need to check that one of our packets did actually update if we're in blocking mode
             // with less than 32 packets we can skip this since we can guarantee we were awoken for our packet
             // this is because our packet index isn't equivalent to another packet modulo 32 and the lock only allows 32 bits
-            if(update_mode == BLOCKING_UPDATE && vcm->num_packets > 32) {
+            if((update_mode == BLOCKING_UPDATE) && (vcm->num_packets > 32)) {
                 bool updated = false;
                 for(size_t i = 0; i < num_packets && !updated; i++) {
                     if(FAILURE == shm.packet_updated(packet_ids[i], &updated)) {
@@ -349,28 +351,29 @@ RetType TelemetryViewer::get_uint(std::string measurement, unsigned int* val) {
     return SUCCESS;
 }
 
-ssize_t TelemetryViewer::get_raw(std::string measurement, uint8_t* buffer, size_t size) {
+RetType TelemetryViewer::get_raw(measurement_info_t* meas, uint8_t* buffer) {
     MsgLogger logger("TelemetryViewer", "get_raw");
 
-    measurement_info_t* meas = vcm->get_info(measurement);
-    if(meas == NULL) {
-        logger.log_message("measurement " + measurement + " was not found");
-        return -1;
-    }
+    // measurement_info_t* meas = vcm->get_info(measurement);
+    // if(meas == NULL) {
+    //     logger.log_message("measurement " + measurement + " was not found");
+    //     return FAILURE;
+    // }
 
-    if(meas->size > size) {
-        logger.log_message("buffer too small to fit measurement " + measurement);
-        return -1;
-    }
+    // if(meas->size > size) {
+    //     logger.log_message("buffer too small to fit measurement " + measurement);
+    //     return -1;
+    // }
 
     uint8_t* data;
     if(latest_data(meas, &data) == FAILURE) {
-        logger.log_message("failed to locate latest data for measurement " + measurement);
+        logger.log_message("failed to locate latest data for measurement");
         return FAILURE;
     }
 
     // copy the data out
     memcpy(buffer, data, meas->size);
 
-    return meas->size;
+    // return meas->size;
+    return SUCCESS;
 }

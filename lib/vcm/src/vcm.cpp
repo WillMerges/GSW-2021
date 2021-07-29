@@ -89,7 +89,7 @@ VCM::~VCM() {
     }
 }
 
-measurement_info_t* VCM::get_info(std::string measurement) {
+measurement_info_t* VCM::get_info(std::string& measurement) {
     if(addr_map.count(measurement)) {
         return addr_map.at(measurement);
     } else {

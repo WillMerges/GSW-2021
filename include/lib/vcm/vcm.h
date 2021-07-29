@@ -75,7 +75,7 @@ namespace vcm {
         RetType init();
 
         // returns NULL if no measurement with that name exists
-        measurement_info_t* get_info(std::string measurement); // get the info of a measurement
+        measurement_info_t* get_info(std::string& measurement); // get the info of a measurement
         std::vector<std::string> measurements; // list of measurement names
 
         std::vector<packet_info_t*> packets; // list of packets
