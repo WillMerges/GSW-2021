@@ -89,6 +89,7 @@ int main(int argc, char* argv[]) {
         if(it.length() > max_length) {
             max_length = it.length();
         }
+
         measurement_info_t* info = vcm->get_info(it);
         // assuming info isn't NULL since it's in the vcm list
         if(info->size > max_size) {
@@ -97,7 +98,7 @@ int main(int argc, char* argv[]) {
     }
 
     // clear the screen
-    printf("\033[2J");
+    // printf("\033[2J");
 
     measurement_info_t* m_info;
     unsigned char* buff = new unsigned char[max_size]; // TODO maybe just make this a big fixed array of the largest possible measurement size
@@ -114,7 +115,7 @@ int main(int argc, char* argv[]) {
                 printf(" ");
             }
 
-            // buff = new unsigned char[m_info->size];
+            buff = new unsigned char[m_info->size];
             if(FAILURE == tlm.get_raw(m_info, (uint8_t*)buff)) {
                 logger.log_message("failed to get raw telemetry value");
                 printf("failed to get raw telemetry value\n");
@@ -125,7 +126,7 @@ int main(int argc, char* argv[]) {
                 printf("0x%02X ", buff[i]);
             }
 
-            // free(buff);
+            free(buff);
             printf("\n");
         }
 
@@ -143,6 +144,7 @@ int main(int argc, char* argv[]) {
             // ignore and continue
         } else {
             // clear the screen
+            // printf("update\n");
             printf("\033[2J");
         }
 

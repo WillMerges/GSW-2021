@@ -27,6 +27,8 @@ TelemetryViewer::TelemetryViewer() {
 }
 
 TelemetryViewer::~TelemetryViewer() {
+    shm.read_unlock();
+
     if(packet_ids != NULL) {
         delete packet_ids;
     }
@@ -174,6 +176,12 @@ RetType TelemetryViewer::update() {
                 bool updated = false;
                 for(size_t i = 0; i < num_packets && !updated; i++) {
                     if(FAILURE == shm.packet_updated(packet_ids[i], &updated)) {
+                        // unlock shared mem
+                        if(FAILURE == shm.read_unlock()) {
+                            logger.log_message("failed to unlock shared memory");
+                            return FAILURE;
+                        }
+
                         logger.log_message("failed to determine if packet was updated");
                         return FAILURE;
                     }

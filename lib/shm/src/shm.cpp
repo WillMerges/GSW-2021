@@ -80,9 +80,14 @@ RetType Shm::attach() {
     // technically only one process needs to call this lock, but the pages are
     // automatically unlocked upon termination of the process so each attached process
     // should lock the pages
-    if(mlock(data, size) == -1) {
-        logger.log_message("mlock failure, failed to lock shared memory pages into RAM");
-        return FAILURE; // should this be a failure?
+    // if(mlock(data, size) == -1) {
+    //     logger.log_message("mlock failure, failed to lock shared memory pages into RAM");
+    //     return FAILURE; // should this be a failure?
+    // }
+    if(shmctl(shmid, SHM_LOCK, NULL) == -1) {
+        logger.log_message("failed to lock shared memory pages into RAM");
+        // non-critical, don't fail
+        // TODO or should this fail
     }
 
     return SUCCESS;

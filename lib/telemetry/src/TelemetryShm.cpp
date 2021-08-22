@@ -49,6 +49,7 @@ TelemetryShm::TelemetryShm() {
     last_nonces = NULL;
     last_nonce = 0;
     read_mode = STANDARD_READ;
+    read_locked = false;
 }
 
 TelemetryShm::~TelemetryShm() {
@@ -277,6 +278,8 @@ RetType TelemetryShm::write(unsigned int packet_id, uint8_t* data) {
 
     // wakeup anyone blocked on this packet (or any packet with an equivalen id mod 32)
     syscall(SYS_futex, &(info->nonce), FUTEX_WAKE_BITSET, INT_MAX, NULL, NULL, 1 << (packet_id % 32)); // TODO check return
+    // syscall(SYS_futex, &(info->nonce), FUTEX_WAKE, INT_MAX, NULL, NULL, NULL); // TODO check return
+
 
     V(info->resource);
 
@@ -347,7 +350,7 @@ RetType TelemetryShm::clear(unsigned int packet_id, uint8_t val) {
 
 RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
     if(read_locked) {
-        // already locked
+        // TODO sysm, already locked
         return FAILURE;
     }
 
@@ -418,7 +421,9 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
 
         // if we made it here none of our nonces changed :(
         // time to block
+        read_locked = true;
         read_unlock();
+        read_locked = false;
 
         if(read_mode == BLOCKING_READ) {
             syscall(SYS_futex, info->nonce, FUTEX_WAIT_BITSET, last_nonce, NULL, NULL, bitset);
@@ -434,6 +439,11 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
 // I THINK IT'S WRONG then next time you call lock and it was technically updated it blocks...
 // so they should probably all be updated here and only the ones being checked in the other version
 RetType TelemetryShm::read_lock() {
+    if(read_locked) {
+        // TODO sysm, already locked
+        return FAILURE;
+    }
+
     if(info_blocks == NULL || master_block == NULL) {
         // not open
         // TODO sys message
@@ -448,49 +458,66 @@ RetType TelemetryShm::read_lock() {
         return FAILURE;
     }
 
-    // enter as a reader
-    P(info->readTry);
-    P(info->rmutex);
-    info->readers++;
-    if(info->readers == 1) {
-        P(info->resource);
-    }
-    V(info->rmutex);
-    V(info->readTry);
-
-    // if reading in standard mode we never block so don't check
-    if(read_mode == STANDARD_READ) {
-        // update the master nonce and leave
-        last_nonce = info->nonce;
-        return SUCCESS;
-    }
-
-    if(last_nonce == info->nonce) { // nothing changed, block
-        if(read_mode == BLOCKING_READ) {
-            // wait for any packet to be updated
-            // we don't need to loop here and check if it was our packet that updated since we don't care which packet updated
-            syscall(SYS_futex, info->nonce, FUTEX_WAIT_BITSET, last_nonce, NULL, NULL, 0xFF);
-        } else {
-            return BLOCKED;
+    while(1) {
+        // enter as a reader
+        P(info->readTry);
+        P(info->rmutex);
+        info->readers++;
+        if(info->readers == 1) {
+            P(info->resource);
         }
-    }
+        V(info->rmutex);
+        V(info->readTry);
 
-    // update all the stored packet nonces
-    for(size_t i = 0; i < num_packets; i++) {
-        last_nonces[i] = *((uint32_t*)(info_blocks[i]->data));
-    }
+        // if reading in standard mode we never block so don't check
+        if(read_mode == STANDARD_READ) {
+            // update the master nonce and leave
+            last_nonce = info->nonce;
+            read_locked = true;
+            return SUCCESS;
+        }
 
-    return SUCCESS;
+        if(last_nonce == info->nonce) { // nothing changed, block
+            read_locked = true;
+            read_unlock();
+            read_locked = false;
+
+            if(read_mode == BLOCKING_READ) {
+                // wait for any packet to be updated
+                // we don't need to loop here and check if it was our packet that updated since we don't care which packet updated
+                syscall(SYS_futex, info->nonce, FUTEX_WAIT_BITSET, last_nonce, NULL, NULL, 0xFF);
+                // syscall(SYS_futex, info->nonce, FUTEX_WAKE, last_nonce, NULL, NULL, NULL);
+            } else {
+                return BLOCKED;
+            }
+        } else {
+            // update all the stored packet nonces
+            for(size_t i = 0; i < num_packets; i++) {
+                last_nonces[i] = *((uint32_t*)(info_blocks[i]->data));
+            }
+
+            // update the master nonce
+            last_nonce = info->nonce;
+
+            read_locked = true;
+            return SUCCESS;
+        }
+
+    }
 }
 
 RetType TelemetryShm::read_unlock() {
+    if(!read_locked) {
+        // TODO sysm, not locked
+        return FAILURE;
+    }
+
     if(info_blocks == NULL || master_block == NULL) {
         // not open
         // TODO sys message
         return FAILURE;
     }
 
-    // packet_id is an index
     shm_info_t* info = (shm_info_t*)master_block->data;
 
     if(info == NULL) {
@@ -507,6 +534,7 @@ RetType TelemetryShm::read_unlock() {
     }
     V(info->rmutex);
 
+    read_locked = false;
     return SUCCESS;
 }
 
