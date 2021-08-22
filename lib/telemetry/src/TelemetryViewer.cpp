@@ -96,7 +96,7 @@ RetType TelemetryViewer::add_all() {
     return SUCCESS;
 }
 
-RetType TelemetryViewer::add(std::string measurement) {
+RetType TelemetryViewer::add(std::string& measurement) {
     MsgLogger logger("TelemetryViewer", "add");
 
     measurement_info_t* info = vcm->get_info(measurement);

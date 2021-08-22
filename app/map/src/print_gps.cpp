@@ -6,7 +6,8 @@
 #include <stdint.h>
 #include <unistd.h>
 #include "lib/vcm/vcm.h"
-#include "lib/shm/shm.h"
+// #include "lib/shm/shm.h"
+#include "lib/telemetry/TelemetryViewer.h"
 #include "lib/dls/dls.h"
 #include "lib/convert/convert.h"
 #include "common/types.h"
@@ -15,8 +16,10 @@
 // run as printgps [-f path_to_config_file]
 // if config file path not specified will use the default
 
-// looks for measurements names GPS_LAT, GPS_LONG, and GPS_ALT
+// looks for measurements named GPS_LAT, GPS_LONG, and GPS_ALT
 // prints them to stdout separated by spaces in that order
+
+// TODO perhaps make the measurement names command line arguments?
 
 #define GPS_LAT "GPS_LAT"
 #define GPS_LONG "GPS_LONG"
@@ -53,29 +56,47 @@ int main(int argc, char* argv[]) {
     }
 
     VCM* vcm;
-    try {
-        if(config_file == "") {
-            vcm = new VCM(); // use default config file
-        } else {
-            vcm = new VCM(config_file); // use specified config file
-        }
-    } catch (const std::runtime_error& e) {
-        std::cout << e.what() << '\n';
+    if(config_file == "") {
+        vcm = new VCM(); // use default config file
+    } else {
+        vcm = new VCM(config_file); // use specified config file
+    }
+
+    if(FAILURE == vcm->init()) {
+        logger.log_message("failed to initialize VCM");
+        printf("failed to initialize VCM\n");
         exit(-1);
     }
 
-    if(FAILURE == attach_to_shm(vcm)) {
-        logger.log_message("unable to attach mem_view process to shared memory");
-        printf("unable to attach mem_view process to shared memory\n");
-        return FAILURE;
+    TelemetryViewer tlm;
+    if(FAILURE == tlm.init(vcm)) {
+        logger.log_message("failed to initialize telemetry viewer");
+        printf("failed to initialize telemetry viewer\n");
+        exit(-1);
     }
 
-    unsigned char* buff = new unsigned char[vcm->packet_size];
-    memset((void*)buff, 0, vcm->packet_size); // zero the buffer
+    std::string gps_lat = GPS_LAT;
+    std::string gps_long = GPS_LONG;
+    std::string gps_alt = GPS_ALT;
 
-    measurement_info_t* lat_meas = vcm->get_info(GPS_LAT);
-    measurement_info_t* long_meas = vcm->get_info(GPS_LONG);
-    measurement_info_t* alt_meas = vcm->get_info(GPS_ALT);
+    if(FAILURE == tlm.add(gps_lat)) {
+        logger.log_message("failed to add " + gps_lat + " to telemetry viewer");
+        exit(-1);
+    }
+    if(FAILURE == tlm.add(gps_long)) {
+        logger.log_message("failed to add " + gps_long + " to telemetry viewer");
+        exit(-1);
+    }
+    if(FAILURE == tlm.add(gps_alt)) {
+        logger.log_message("failed to add " + gps_alt + " to telemetry viewer");
+        exit(-1);
+    }
+
+    tlm.set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
+
+    measurement_info_t* lat_meas = vcm->get_info(gps_lat);
+    measurement_info_t* long_meas = vcm->get_info(gps_long);
+    measurement_info_t* alt_meas = vcm->get_info(gps_alt);
 
     if(!lat_meas || !long_meas || !alt_meas) {
         logger.log_message("Missing GPS measurement");
@@ -87,22 +108,23 @@ int main(int argc, char* argv[]) {
     std::string alt;
 
     while(1) {
-        // read from shared memoery
-        if(FAILURE == read_from_shm_block((void*)buff, vcm->packet_size)) {
-            logger.log_message("failed to read from shared memory");
+        // update telemetry
+        if(FAILURE == tlm.update()) {
+            logger.log_message("failed to update telemetry");
+            printf("failed to update telemetry\n");
             // ignore and continue
             continue;
         }
 
-        if(FAILURE == convert_str(vcm, lat_meas, buff, &lat)) {
+        if(FAILURE == tlm.get_str(lat_meas, &lat)) {
             continue;
         }
 
-        if(FAILURE == convert_str(vcm, long_meas, buff, &lon)) {
+        if(FAILURE == tlm.get_str(long_meas, &lon)) {
             continue;
         }
 
-        if(FAILURE == convert_str(vcm, alt_meas, buff, &alt)) {
+        if(FAILURE == tlm.get_str(alt_meas, &alt)) {
             continue;
         }
 

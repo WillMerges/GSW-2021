@@ -38,7 +38,7 @@ public:
 
     // add a single measurement to be viewable
     // NOTE: this will also add other measurements in the same packet
-    RetType add(std::string measurement);
+    RetType add(std::string& measurement);
 
     // add all the measurements in a single telemetry packet to be viewable
     RetType add(unsigned int packet_id);

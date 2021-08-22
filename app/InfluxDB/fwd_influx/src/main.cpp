@@ -133,6 +133,7 @@ int main(int argc, char* argv[]) {
             logger.log_message("failed to update telemetry");
             printf("failed to update telemetry\n");
             // ignore and continue
+            continue;
         }
 
         // construct the message
