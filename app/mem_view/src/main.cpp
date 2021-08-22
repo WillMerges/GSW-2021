@@ -44,15 +44,10 @@ int main(int argc, char* argv[]) {
     }
 
     VCM* vcm;
-    try {
-        if(config_file == "") {
-            vcm = new VCM(); // use default config file
-        } else {
-            vcm = new VCM(config_file); // use specified config file
-        }
-    } catch (const std::runtime_error& e) {
-        std::cout << e.what() << '\n';
-        exit(-1);
+    if(config_file == "") {
+        vcm = new VCM(); // use default config file
+    } else {
+        vcm = new VCM(config_file); // use specified config file
     }
 
     if(FAILURE == vcm->init()) {
@@ -71,21 +66,9 @@ int main(int argc, char* argv[]) {
     tlm.add_all();
     tlm.set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
 
-    // if(FAILURE == attach_to_shm(vcm)) {
-    //     logger.log_message("unable to attach mem_view process to shared memory");
-    //     printf("unable to attach mem_view process to shared memory\n");
-    //     return FAILURE;
-    // }
-
-    int count = 0; // number of measurements
-
-    // unsigned char* buff = new unsigned char[vcm->packet_size];
-    // memset((void*)buff, 0, vcm->packet_size); // zero the buffer
-
     unsigned int max_length = 0;
     size_t max_size = 0;
     for(std::string it : vcm->measurements) {
-        count++;
         if(it.length() > max_length) {
             max_length = it.length();
         }
@@ -98,7 +81,7 @@ int main(int argc, char* argv[]) {
     }
 
     // clear the screen
-    // printf("\033[2J");
+    printf("\033[2J");
 
     measurement_info_t* m_info;
     unsigned char* buff = new unsigned char[max_size]; // TODO maybe just make this a big fixed array of the largest possible measurement size
@@ -106,7 +89,6 @@ int main(int argc, char* argv[]) {
     while(1) {
         for(std::string meas : vcm->measurements) {
             m_info = vcm->get_info(meas);
-            // addr = (size_t)m_info->addr;
 
             printf("%s  ", meas.c_str());
 
@@ -130,13 +112,6 @@ int main(int argc, char* argv[]) {
             printf("\n");
         }
 
-
-        // read from shared memory
-        // if(FAILURE == read_from_shm_block((void*)buff, vcm->packet_size)) {
-        //     logger.log_message("failed to read from shared memory");
-        //     printf("failed to read from shared memory\n");
-        //     // ignore and continue
-
         // update telemetry
         if(FAILURE == tlm.update()) {
             logger.log_message("failed to update telemetry");
@@ -144,10 +119,9 @@ int main(int argc, char* argv[]) {
             // ignore and continue
         } else {
             // clear the screen
-            // printf("update\n");
             printf("\033[2J");
         }
 
-        // usleep(1000);
+        usleep(1000);
     }
 }

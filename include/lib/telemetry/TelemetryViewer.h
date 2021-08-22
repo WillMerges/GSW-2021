@@ -59,11 +59,11 @@ public:
     // set 'val' to the value of a telemetry measurement
     // converts raw telemetry data into usable types
     // returns FAILURE if type conversion is impossible
-    RetType get_str(std::string measurement, std::string* val);
-    RetType get_float(std::string measurement, float* val);
-    RetType get_double(std::string measurement, double* val);
-    RetType get_int(std::string measurement, int* val);
-    RetType get_uint(std::string measurement, unsigned int* val);
+    RetType get_str(measurement_info_t* meas, std::string* val);
+    RetType get_float(measurement_info_t* meas, float* val);
+    RetType get_double(measurement_info_t* meas, double* val);
+    RetType get_int(measurement_info_t* meas, int* val);
+    RetType get_uint(measurement_info_t* meas, unsigned int* val);
     // place up to meas->size bytes into 'buffer'
     RetType get_raw(measurement_info_t* meas, uint8_t* buffer);
 
