@@ -153,14 +153,17 @@ int main(int argc, char* argv[]) {
 
     if(FAILURE == tlm.add(gps_lat)) {
         logger.log_message("failed to add " + gps_lat + " to telemetry viewer");
+        printf("failed to add %s to telemetry viewer", gps_lat.c_str());
         exit(-1);
     }
     if(FAILURE == tlm.add(gps_long)) {
         logger.log_message("failed to add " + gps_long + " to telemetry viewer");
+        printf("failed to add %s to telemetry viewer", gps_long.c_str());
         exit(-1);
     }
     if(FAILURE == tlm.add(gps_alt)) {
         logger.log_message("failed to add " + gps_alt + " to telemetry viewer");
+        printf("failed to add %s to telemetry viewer", gps_alt.c_str());
         exit(-1);
     }
 
@@ -171,7 +174,8 @@ int main(int argc, char* argv[]) {
     measurement_info_t* alt_meas = vcm->get_info(gps_alt);
 
     if(!lat_meas || !long_meas || !alt_meas) {
-        logger.log_message("Missing measurement");
+        logger.log_message("Missing measurement, cannot continue");
+        printf("Missing measurement, cannot continue");
         exit(-1);
     }
 
