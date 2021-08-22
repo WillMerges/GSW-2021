@@ -7,7 +7,8 @@
 #include <unistd.h>
 #include <float.h>
 #include "lib/vcm/vcm.h"
-#include "lib/shm/shm.h"
+// #include "lib/shm/shm.h"
+#include "lib/telemetry/TelemetryViewer.h"
 #include "lib/dls/dls.h"
 #include "lib/convert/convert.h"
 #include "common/types.h"
@@ -127,31 +128,47 @@ int main(int argc, char* argv[]) {
     gsw_home = env;
 
     VCM* vcm;
-    try {
-        if(config_file == "") {
-            vcm = new VCM(); // use default config file
-        } else {
-            vcm = new VCM(config_file); // use specified config file
-        }
-    } catch (const std::runtime_error& e) {
-        std::cout << e.what() << '\n';
+    if(config_file == "") {
+        vcm = new VCM(); // use default config file
+    } else {
+        vcm = new VCM(config_file); // use specified config file
+    }
+
+    if(FAILURE == vcm->init()) {
+        logger.log_message("failed to initialize VCM");
+        printf("failed to initialize VCM\n");
         exit(-1);
     }
 
-    if(FAILURE == attach_to_shm(vcm)) {
-        logger.log_message("unable to attach mem_view process to shared memory");
-        printf("unable to attach mem_view process to shared memory\n");
-        return FAILURE;
+    TelemetryViewer tlm;
+    if(FAILURE == tlm.init(vcm)) {
+        logger.log_message("failed to initialize telemetry viewer");
+        printf("failed to initialize telemetry viewer\n");
+        exit(-1);
     }
 
-    unsigned char* buff = new unsigned char[vcm->packet_size];
-    memset((void*)buff, 0, vcm->packet_size); // zero the buffer
+    std::string gps_lat = LAT;
+    std::string gps_long = LONG;
+    std::string gps_alt = ALT;
 
-    // measurement_info_t* lat_meas = vcm->get_info(LAT);
-    // measurement_info_t* long_meas = vcm->get_info(LONG);
-    measurement_info_t* lat_meas = vcm->get_info(ALT);
-    measurement_info_t* long_meas = vcm->get_info(ALT);
-    measurement_info_t* alt_meas = vcm->get_info(ALT);
+    if(FAILURE == tlm.add(gps_lat)) {
+        logger.log_message("failed to add " + gps_lat + " to telemetry viewer");
+        exit(-1);
+    }
+    if(FAILURE == tlm.add(gps_long)) {
+        logger.log_message("failed to add " + gps_long + " to telemetry viewer");
+        exit(-1);
+    }
+    if(FAILURE == tlm.add(gps_alt)) {
+        logger.log_message("failed to add " + gps_alt + " to telemetry viewer");
+        exit(-1);
+    }
+
+    tlm.set_update_mode(TelemetryViewer::NONBLOCKING_UPDATE);
+
+    measurement_info_t* lat_meas = vcm->get_info(gps_lat);
+    measurement_info_t* long_meas = vcm->get_info(gps_long);
+    measurement_info_t* alt_meas = vcm->get_info(gps_alt);
 
     if(!lat_meas || !long_meas || !alt_meas) {
         logger.log_message("Missing measurement");
@@ -178,8 +195,8 @@ int main(int argc, char* argv[]) {
     clock_t elapsed;
 
     while(1) {
-        // read from shared memoery
-        if(FAILURE == read_from_shm_if_updated((void*)buff, vcm->packet_size)) {
+        // update telemetry
+        if(SUCCESS != tlm.update()) {
             if(started) {
                 // only check fot timeout if we've gotten any packets, dont want to prematurely report
                 elapsed = clock() - t;
@@ -198,15 +215,18 @@ int main(int argc, char* argv[]) {
             t = clock();
         }
 
-        if(FAILURE == convert_float(vcm, lat_meas, buff, &lat)) {
-            // continue;
+        if(FAILURE == tlm.get_float(lat_meas, &lat)) {
+            logger.log_message("failed to get latitude telemetry");
+            continue;
         }
 
-        if(FAILURE == convert_float(vcm, long_meas, buff, &lon)) {
-            // continue;
+        if(FAILURE == tlm.get_float(long_meas, &lon)) {
+            logger.log_message("failed to get longitude telemetry");
+            continue;
         }
 
-        if(FAILURE == convert_float(vcm, alt_meas, buff, &alt)) {
+        if(FAILURE == tlm.get_float(alt_meas, &alt)) {
+            logger.log_message("failed to get altitude telemetry");
             continue;
         }
 
@@ -239,8 +259,5 @@ int main(int argc, char* argv[]) {
                 }
             }
         }
-
-        // TODO check for timeout
-
     }
 }
