@@ -84,8 +84,7 @@ int main(int argc, char* argv[]) {
     printf("\033[2J");
 
     measurement_info_t* m_info;
-    unsigned char* buff = new unsigned char[max_size]; // TODO maybe just make this a big fixed array of the largest possible measurement size
-    // size_t addr = 0;
+    unsigned char* buff = new unsigned char[max_size];
     while(1) {
         for(std::string meas : vcm->measurements) {
             m_info = vcm->get_info(meas);
@@ -97,7 +96,6 @@ int main(int argc, char* argv[]) {
                 printf(" ");
             }
 
-            buff = new unsigned char[m_info->size];
             if(FAILURE == tlm.get_raw(m_info, (uint8_t*)buff)) {
                 logger.log_message("failed to get raw telemetry value");
                 printf("failed to get raw telemetry value\n");
@@ -108,7 +106,6 @@ int main(int argc, char* argv[]) {
                 printf("0x%02X ", buff[i]);
             }
 
-            free(buff);
             printf("\n");
         }
 

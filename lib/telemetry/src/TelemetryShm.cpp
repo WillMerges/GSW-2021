@@ -143,17 +143,21 @@ RetType TelemetryShm::close() {
 
 // NOTE: does not attach!
 RetType TelemetryShm::create() {
+    MsgLogger logger("TelemetryShm", "create");
+
     for(size_t i = 0; i < num_packets; i++) {
         if(SUCCESS != packet_blocks[i]->create()) {
+            logger.log_message("failed to create packet block");
             return FAILURE;
         }
         else if(SUCCESS != info_blocks[i]->create()) {
+            logger.log_message("failed to create info block");
             return FAILURE;
         }
 
         // attach first
         if(info_blocks[i]->attach() == FAILURE) {
-            // TODO sysm
+            logger.log_message("failed to attach to shared memory block");
             return FAILURE;
         }
 
@@ -163,10 +167,11 @@ RetType TelemetryShm::create() {
         // we should unatach after setting the default
         // although we technically still could stay attached and be okay
         if(info_blocks[i]->detach() == FAILURE) {
-            // TODO sysm
+            logger.log_message("failed to detach from shared memory block");
             return FAILURE;
         }
 
+        // info blocks are just nonces now, only one lock stored in the master block
         // shm_info_t* info = (shm_info_t*)info_blocks[i]->data;
         //
         // // initialize info block
@@ -185,13 +190,13 @@ RetType TelemetryShm::create() {
     }
 
     if(SUCCESS != master_block->create()) {
-        // TODO sysm
+        logger.log_message("failed to create master block");
         return FAILURE;
     }
 
     // need to attach in order to preset data
     if(SUCCESS != master_block->attach()) {
-        // TODO sysm
+        logger.log_message("failed to attach to master block");
         return FAILURE;
     }
 
@@ -213,7 +218,7 @@ RetType TelemetryShm::create() {
     // we should detach to be later attached
     // if this fails it's not the end of the world? but its still bad and shouldn't fail
     if(SUCCESS != master_block->detach()) {
-        // TODO sysm
+        logger.log_message("failed to detach from master block");
         return FAILURE;
     }
 
@@ -222,16 +227,21 @@ RetType TelemetryShm::create() {
 
 // NOTE: must be attached already!
 RetType TelemetryShm::destroy() {
+    MsgLogger logger("TelemetryShm", "destroy");
+
     for(size_t i = 0; i < num_packets; i++) {
         if(SUCCESS != packet_blocks[i]->destroy()) {
+            logger.log_message("failed to destroy packet block");
             return FAILURE;
         }
         else if(SUCCESS != info_blocks[i]->destroy()) {
+            logger.log_message("failed to destroy info block");
             return FAILURE;
         }
     }
 
     if(SUCCESS != master_block->destroy()) {
+        logger.log_message("failed to destroy master block");
         return FAILURE;
     }
 
@@ -239,14 +249,16 @@ RetType TelemetryShm::destroy() {
 }
 
 RetType TelemetryShm::write(unsigned int packet_id, uint8_t* data) {
+    MsgLogger logger("TelemetryShm", "write");
+
     if(packet_id >= num_packets) {
-        // TODO sys message
+        logger.log_message("invalid packet id");
         return FAILURE;
     }
 
     if(packet_blocks == NULL || info_blocks == NULL || master_block == NULL) {
         // not open
-        // TODO sys message
+        logger.log_message("object not open");
         return FAILURE;
     }
 
@@ -256,7 +268,7 @@ RetType TelemetryShm::write(unsigned int packet_id, uint8_t* data) {
     shm_info_t* info = (shm_info_t*)master_block->data;
 
     if(packet == NULL || info == NULL || packet_nonce == NULL) {
-        // TODO sys message
+        logger.log_message("shared memory block is null");
         // something isn't attached
         return FAILURE;
     }
@@ -294,14 +306,16 @@ RetType TelemetryShm::write(unsigned int packet_id, uint8_t* data) {
 }
 
 RetType TelemetryShm::clear(unsigned int packet_id, uint8_t val) {
+    MsgLogger logger("TelemetryShm", "clear");
+
     if(packet_id >= num_packets) {
-        // TODO sys message
+        logger.log_message("invalid packet id");
         return FAILURE;
     }
 
     if(packet_blocks == NULL || info_blocks == NULL || master_block == NULL) {
         // not open
-        // TODO sys message
+        logger.log_message("object not open");
         return FAILURE;
     }
 
@@ -311,7 +325,7 @@ RetType TelemetryShm::clear(unsigned int packet_id, uint8_t val) {
     shm_info_t* info = (shm_info_t*)master_block->data;
 
     if(packet == NULL || info == NULL || packet_nonce == NULL) {
-        // TODO sys message
+        logger.log_message("shared memory block is null");
         // something isn't attached
         return FAILURE;
     }
@@ -349,22 +363,24 @@ RetType TelemetryShm::clear(unsigned int packet_id, uint8_t val) {
 }
 
 RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
+    MsgLogger logger("TelemetryShm", "read_lock(2 args)");
+
     if(read_locked) {
-        // TODO sysm, already locked
+        logger.log_message("shared memory already locked");
         return FAILURE;
     }
 
     if(info_blocks == NULL || master_block == NULL) {
         // not open
-        // TODO sys message
+        logger.log_message("object not open");
         return FAILURE;
     }
 
     shm_info_t* info = (shm_info_t*)master_block->data;
 
     if(info == NULL) {
-        // TODO sys message
         // something isn't attached
+        logger.log_message("shared memory block is null");
         return FAILURE;
     }
 
@@ -439,21 +455,23 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
 // I THINK IT'S WRONG then next time you call lock and it was technically updated it blocks...
 // so they should probably all be updated here and only the ones being checked in the other version
 RetType TelemetryShm::read_lock() {
+    MsgLogger logger("TelemetryShm", "read_lock(no args)");
+
     if(read_locked) {
-        // TODO sysm, already locked
+        logger.log_message("shared memory already locked");
         return FAILURE;
     }
 
     if(info_blocks == NULL || master_block == NULL) {
         // not open
-        // TODO sys message
+        logger.log_message("object not open");
         return FAILURE;
     }
 
     shm_info_t* info = (shm_info_t*)master_block->data;
 
     if(info == NULL) {
-        // TODO sys message
+        logger.log_message("shared memory block is null");
         // something isn't attached
         return FAILURE;
     }
@@ -507,21 +525,23 @@ RetType TelemetryShm::read_lock() {
 }
 
 RetType TelemetryShm::read_unlock() {
+    MsgLogger logger("TelemetryShm", "read_unlock");
+
     if(!read_locked) {
-        // TODO sysm, not locked
+        logger.log_message("shared memory is not locked");
         return FAILURE;
     }
 
     if(info_blocks == NULL || master_block == NULL) {
         // not open
-        // TODO sys message
+        logger.log_message("object not open");
         return FAILURE;
     }
 
     shm_info_t* info = (shm_info_t*)master_block->data;
 
     if(info == NULL) {
-        // TODO sys message
+        logger.log_message("shared memory block is null");
         // something isn't attached
         return FAILURE;
     }
@@ -539,13 +559,15 @@ RetType TelemetryShm::read_unlock() {
 }
 
 const uint8_t* TelemetryShm::get_buffer(unsigned int packet_id) {
+    MsgLogger logger("TelemtryShm", "get_buffer");
+
     if(packet_id >= num_packets) {
-        // TODO sysm
+        logger.log_message("invalid packet id");
         return NULL;
     }
 
     if(packet_blocks == NULL) {
-        // TODO sysm
+        logger.log_message("shared memory block is null");
         return NULL;
     }
 
@@ -553,13 +575,15 @@ const uint8_t* TelemetryShm::get_buffer(unsigned int packet_id) {
 }
 
 RetType TelemetryShm::packet_updated(unsigned int packet_id, bool* updated) {
+    MsgLogger logger("TelemetryShm", "packet_updated");
+
     if(!read_locked) {
-        // TODO sysm, not read locked
+        logger.log_message("not read locked");
         return FAILURE;
     }
 
     if(packet_id >= num_packets) {
-        // TODO sysm
+        logger.log_message("invalid packet id");
         return FAILURE;
     }
 
@@ -587,6 +611,8 @@ RetType TelemetryShm::update_value(unsigned int packet_id, uint32_t* value) {
 }
 
 RetType TelemetryShm::more_recent_packet(unsigned int* packet_ids, size_t num, unsigned int* recent) {
+    MsgLogger logger("TelemetryShm", "more_recent_packet");
+
     uint32_t best_diff = UINT_MAX;
     // uint32_t master_nonce = *((uint32_t*)((shm_info_t*)master_block->data));
 
@@ -596,7 +622,7 @@ RetType TelemetryShm::more_recent_packet(unsigned int* packet_ids, size_t num, u
         id = packet_ids[i];
         if(id >= num_packets) {
             // invalid packet id
-            // TODO sysm
+            logger.log_message("invalid packet id");
             return FAILURE;
         }
 

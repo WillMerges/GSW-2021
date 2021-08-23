@@ -149,7 +149,7 @@ RetType convert::convert_str(VCM* vcm, measurement_info_t* measurement, const ui
         case INT_TYPE: {
             if(measurement->size > (sizeof(long int))) {
                 logger.log_message("Measurement size too great to convert to integer");
-                return FAILURE; // TODO add logging
+                return FAILURE;
             }
 
             // assume unsigned and signed are the same size (potential problem)
@@ -218,7 +218,8 @@ RetType convert::convert_str(VCM* vcm, measurement_info_t* measurement, const ui
         case STRING_TYPE: {
             // -1 is for room for a null terminator
             if(measurement->size > MAX_CONVERSION_SIZE - 1) {
-                return FAILURE; // TODO add logging
+                logger.log_message("string too large to parse");
+                return FAILURE;
             }
             // size_t addr = (size_t)measurement->addr;
             // const unsigned char* buff = (const unsigned char*)data;

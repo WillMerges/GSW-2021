@@ -61,11 +61,13 @@ RetType NetworkManager::Open() {
     // in our buffer, in_size will be set to MAX_MSG_SIZE. If packet_size == MAX_MSG_SIZE
     // then we can't tell if we have a truncated packets or a valid one. If packet_size
     // is too large we can't store the whole packet regardless.
-    // if(vcm->packet_size >= MAX_MSG_SIZE) {
-    //     logger.log_message("VCM packet size is greater than equal to max message \
-    //                         size, cannot fit packet in allocated buffer");
-    //     return FAILURE;
-    // }
+    /*
+    if(vcm->packet_size >= MAX_MSG_SIZE) {
+        logger.log_message("VCM packet size is greater than equal to max message \
+                            size, cannot fit packet in allocated buffer");
+        return FAILURE;
+    }
+    */
     // new change: this is totally fine, since the bufer is passed in now it's guaranteed to be the correct size
     // actually, this never made sense since our receiving buffer is dynamically allocated
 
