@@ -6,7 +6,8 @@
 #include <sstream>
 #include <exception>
 #include <unordered_map>
-#include "endian.h"
+#include <endian.h>
+#include <arpa/inet.h>
 
 using namespace dls;
 using namespace vcm;
@@ -15,9 +16,11 @@ VCM::VCM() {
     MsgLogger logger("VCM", "Constructor");
 
     // default values
-    addr = port = -1;
+    // addr = port = -1;
+    addr = 0; // 0.0.0.0 is an invalid address
     protocol = PROTOCOL_NOT_SET;
-    packet_size = 0;
+    // packet_size = 0;
+    num_packets = 0;
     device = "";
     recv_endianness = GSW_LITTLE_ENDIAN; // default is little endian
 
@@ -41,31 +44,40 @@ VCM::VCM() {
     config_file += DEFAULT_CONFIG_FILE;
 
     // init
-    if(init() != SUCCESS) {
-        throw new std::runtime_error("Error in VCM init");
-    }
+    // NEW CHANGE: user has to call init themself
+    // if(init() != SUCCESS) {
+    //     throw new std::runtime_error("Error in VCM init");
+    // }
 }
 
 VCM::VCM(std::string config_file) {
     this->config_file = config_file;
 
     // default values
-    addr = port = -1;
+    // addr = port = -1;
+    addr = 0; // 0.0.0.0 is an invalid address
     protocol = PROTOCOL_NOT_SET;
-    packet_size = 0;
+    // packet_size = 0;
+    num_packets = 0;
     // compressed_size = 0;
     device = "";
 
     // init
-    if(init() != SUCCESS) {
-        throw new std::runtime_error("Error in VCM init");
-    }
+    // NEW CHANGE: user has to call init themself
+    // if(init() != SUCCESS) {
+    //     throw new std::runtime_error("Error in VCM init");
+    // }
 }
 
 VCM::~VCM() {
     // free all pointers in addr_map
     for(auto i : addr_map) {
         delete i.second;
+    }
+
+    // free all pointers in packets
+    for(auto i : packets) {
+        delete i;
     }
 
     if(f) {
@@ -77,7 +89,7 @@ VCM::~VCM() {
     }
 }
 
-measurement_info_t* VCM::get_info(std::string measurement) {
+measurement_info_t* VCM::get_info(std::string& measurement) {
     if(addr_map.count(measurement)) {
         return addr_map.at(measurement);
     } else {
@@ -114,18 +126,19 @@ RetType VCM::init() {
         if(snd == "=") {
             if(fst == "addr") {
                 try {
-                    addr = std::stoi(third, NULL, 10);
+                    // addr = std::stoi(third, NULL, 10);
+                    inet_pton(AF_INET, third.c_str(), &addr);
                 } catch(std::invalid_argument& ia) {
                     logger.log_message("Invalid addr in line: " + line);
                     return FAILURE;
                 }
-            } else if(fst == "port") {
-                try {
-                    port = std::stoi(third, NULL, 10);
-                } catch(std::invalid_argument& ia) {
-                    logger.log_message("Invalid port in line: " + line);
-                    return FAILURE;
-                }
+            // } else if(fst == "port") {
+            //     try {
+            //         port = std::stoi(third, NULL, 10);
+            //     } catch(std::invalid_argument& ia) {
+            //         logger.log_message("Invalid port in line: " + line);
+            //         return FAILURE;
+            //     }
             } else if(fst == "protocol") {
                 if(third == "udp") {
                     protocol = UDP;
@@ -145,6 +158,55 @@ RetType VCM::init() {
                     return FAILURE;
                 }
             }
+        } else if(snd == "{") { // start of a telemetry packet
+            packet_info_t* packet = new packet_info_t;
+            packet->size = 0;
+
+            // get the network port for this packet
+            // this is the port the packet is sent TO
+            try {
+                packet->port = std::stoi(fst, NULL, 10);
+            } catch(std::invalid_argument& ia) {
+                logger.log_message("Invalid port in line: " + line);
+                return FAILURE;
+            }
+
+
+            bool done = false;
+            // we don't allow comments or empty lines after starting a packet
+            // BUT we don't check for anything following a measurement name, we only look at the first token
+            for(std::string line; std::getline(*f,line); ) {
+                std::istringstream ss(line);
+                std::string token;
+                ss >> token;
+
+                if(token == "}") { // end of packet
+                    done = true;
+                    break;
+                } else { // token is a measurement!
+                    measurement_info_t* meas;
+                    if(addr_map.count(token)) {
+                        meas = addr_map.at(token);
+                    } else {
+                        logger.log_message("Measurement " + token + " does not exist");
+                        return FAILURE;
+                    }
+
+                    location_info_t loc;
+                    loc.offset = packet->size;
+                    loc.packet_index = num_packets;
+                    meas->locations.push_back(loc); // copy struct in, less memory to track and it's small
+                    packet->size += meas->size;
+                }
+            }
+
+            if(done) {
+                packets.push_back(packet);
+                num_packets++;
+            } else {
+                logger.log_message("Reached end of file before end of packet");
+                return FAILURE;
+            }
         } else {
             std::string fourth;
             ss >> fourth;
@@ -159,7 +221,7 @@ RetType VCM::init() {
             }
 
             measurement_info_t* entry = new measurement_info_t;
-            entry->addr = (void*)packet_size;
+            // entry->addr = (void*)packet_size;
             try {
                 entry->size = (size_t)(std::stoi(snd, NULL, 10));
                 entry->l_padding = (size_t)(std::stoi(third, NULL, 10));
@@ -168,7 +230,7 @@ RetType VCM::init() {
                 logger.log_message("Invalid measurement size: " + line);
                 return FAILURE;
             }
-            packet_size += entry->size;
+            // packet_size += entry->size;
             // compressed_size += (entry->size*sizeof(unsigned char)) - (entry->l_padding + entry->r_padding);
 
 
@@ -208,8 +270,10 @@ RetType VCM::init() {
     if(protocol == PROTOCOL_NOT_SET) {
         logger.log_message("Config file missing protocol: " + config_file);
         return FAILURE;
-    } else if(protocol == UDP && (addr == -1 || port == -1)) {
-        logger.log_message("Config file missing port or addr for UDP protocol: " + config_file);
+    // } else if(protocol == UDP && (addr == -1 || port == -1)) {
+    } else if(protocol == UDP && addr == 0) { // 0.0.0.0 is an invalid address (and the default)
+        // logger.log_message("Config file missing port or addr for UDP protocol: " + config_file);
+        logger.log_message("Config file missing addr for UDP protocol: " + config_file);
         return FAILURE;
     }
 

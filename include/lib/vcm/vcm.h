@@ -45,7 +45,19 @@ namespace vcm {
     } protocol_t;
 
     typedef struct {
-        void* addr; // offset into shmem
+        size_t size;
+        uint32_t timeout; // time before packet is considered stale (in milliseconds) TODO implement this
+        uint16_t port; // in host order (NOT network order)
+    } packet_info_t;
+
+    typedef struct {
+        size_t offset; // offset into packet
+        uint32_t packet_index; // which packet
+    } location_info_t;
+
+    typedef struct {
+        // void* addr; // offset into shmem
+        std::vector<location_info_t> locations; // locations of this measurement
         size_t size; // bytes
         size_t l_padding; // bits of left padding (most significant bits)
         size_t r_padding; // bits of right padding (least significant bits)
@@ -59,29 +71,34 @@ namespace vcm {
         VCM(std::string config_file);
         ~VCM();
 
+        // initialize
+        RetType init();
+
         // returns NULL if no measurement with that name exists
-        measurement_info_t* get_info(std::string measurement); // get the info of a measurement
+        measurement_info_t* get_info(std::string& measurement); // get the info of a measurement
         std::vector<std::string> measurements; // list of measurement names
 
-        size_t packet_size; // bytes, size of packet after padding is added
+        std::vector<packet_info_t*> packets; // list of packets
+
+        // size_t packet_size; // bytes, size of packet after padding is added
         // size_t compressed_size; // bits, size of packet before padding added
 
         // TODO maybe put addr and port in another subclass
-        int addr; // address and port (only for UDP right now)
-        int port;
+        // TODO maybe get rid of addr altogether, it isn't currently used anywhere
+        uint32_t addr; // address and port (only for UDP right now) ACTUALLY each packet specifies a port but the address of the ground computer doesn't change
+        // int port; // specified per telemetry packet now
         protocol_t protocol;
         std::string config_file;
         std::string device;
 
         endianness_t recv_endianness; // endianness of the receiver
         endianness_t sys_endianness; // endianness of the system GSW is running on
+
+        uint32_t num_packets; // number of telemetry packets
     private:
         // local vars
         std::ifstream* f;
         std::unordered_map<std::string, measurement_info_t*> addr_map;
-
-        // helper method(s)
-        RetType init();
     };
 }
 

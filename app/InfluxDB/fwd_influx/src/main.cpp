@@ -18,7 +18,8 @@
 #include <arpa/inet.h>
 #include <csignal>
 #include "lib/vcm/vcm.h"
-#include "lib/shm/shm.h"
+// #include "lib/shm/shm.h"
+#include "lib/telemetry/TelemetryViewer.h"
 #include "lib/dls/dls.h"
 #include "lib/convert/convert.h"
 #include "common/types.h"
@@ -73,15 +74,16 @@ int main(int argc, char* argv[]) {
     }
 
     VCM* vcm;
-    try {
-        if(config_file == "") {
-            vcm = new VCM(); // use default config file
-        } else {
-            vcm = new VCM(config_file); // use specified config file
-        }
-    } catch (const std::runtime_error& e) {
-        std::cout << e.what() << '\n';
-        return FAILURE;
+    if(config_file == "") {
+        vcm = new VCM(); // use default config file
+    } else {
+        vcm = new VCM(config_file); // use specified config file
+    }
+
+    if(FAILURE == vcm->init()) {
+        logger.log_message("failed to initialize VCM");
+        printf("failed to initialize VCM\n");
+        exit(-1);
     }
 
     // add signal handlers to close the socket if opened
@@ -108,19 +110,17 @@ int main(int argc, char* argv[]) {
     servaddr.sin_port = htons(INFLUXDB_UDP_PORT);
     servaddr.sin_addr.s_addr = inet_addr(INFLUXDB_ADDR);
 
-    // attach to shmem
-    if(FAILURE == attach_to_shm(vcm)) {
-        logger.log_message("unable to attach fwd_influx process to shared memory");
-        printf("unable to attach fwd_influx process to shared memory\n");
-        return FAILURE;
+    TelemetryViewer tlm;
+    if(FAILURE == tlm.init(vcm)) {
+        logger.log_message("failed to initialize telemetry viewer");
+        printf("failed to initialize telemetry viewer\n");
+        exit(-1);
     }
 
-    unsigned char* buff = new unsigned char[vcm->packet_size];
-    memset((void*)buff, 0, vcm->packet_size); // zero the buffer
+    tlm.add_all();
+    tlm.set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
 
     measurement_info_t* m_info;
-    // size_t addr = 0;
-
     std::string msg;
     std::string val;
     // uint32_t timestamp = 0;
@@ -128,10 +128,12 @@ int main(int argc, char* argv[]) {
 
     // main loop
     while(1) {
-        // read from shared memoery
-        if(FAILURE == read_from_shm_block((void*)buff, vcm->packet_size)) {
-            logger.log_message("failed to read from shared memory");
+        // update telemetry
+        if(FAILURE == tlm.update()) {
+            logger.log_message("failed to update telemetry");
+            printf("failed to update telemetry\n");
             // ignore and continue
+            continue;
         }
 
         // construct the message
@@ -142,7 +144,6 @@ int main(int argc, char* argv[]) {
 
         for(std::string meas : vcm->measurements) {
             m_info = vcm->get_info(meas);
-            //addr = (size_t)m_info->addr;
 
             /**
             if(meas == "UPTIME") {
@@ -158,7 +159,7 @@ int main(int argc, char* argv[]) {
             first &= 0;
 
 
-            if(SUCCESS == convert_str(vcm, m_info, buff, &val)) {
+            if(SUCCESS == tlm.get_str(m_info, &val)) {
                 msg += meas;
                 msg += "=";
                 msg += val;

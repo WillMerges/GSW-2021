@@ -3,36 +3,69 @@
 #include <stdio.h>
 #include <unistd.h>
 #include "lib/vcm/vcm.h"
-#include "lib/shm/shm.h"
+#include "lib/telemetry/TelemetryShm.h"
 
 using namespace vcm;
 using namespace std;
 using namespace shm;
 
-// shmctl should NOT be turned on before this
+// shmctl should create shared memory before running this tool
+// reads all measurements from shared memory
 
 int main() {
-    VCM vcm;
-    //vcm.packet_size = 4; // this is bad, just changing for testing purposes
+    VCM vcm; //default vcm
 
-    if(FAILURE == attach_to_shm(&vcm)) {
-        printf("Failed to attach to shared memory\n");
+    if(vcm.init() == FAILURE) {
+        printf("failed to initialize VCM");
         return -1;
     }
 
-    char b[4];
+    TelemetryShm mem;
 
-    while(1) {
-        // NOTE: 3 different ways to read, using the blocking method currently (hardest to test)
-        if(SUCCESS == read_from_shm_block(b, 4)) {
-        // if(SUCCESS == read_from_shm_if_updated(b, 4)) {
-        // if(SUCCESS == read_from_shm(b,4)) {
-            cout << b << '\n';
-        }
+    if(mem.init(&vcm) == FAILURE) {
+        printf("failed to init telemetry shm");
+        return -1;
     }
 
-    if(FAILURE == detach_from_shm()) {
-         printf("Failed to detach from shared memory\n");
-         return -1;
+    if(mem.open() == FAILURE) {
+        printf("failed to attach to shared memory");
+        return -1;
+    }
+
+    mem.set_read_mode(TelemetryShm::BLOCKING_READ);
+
+    // lock all packets
+    if(mem.read_lock() != SUCCESS) {
+        printf("failed to lock shared memory");
+        return -1;
+    }
+
+    measurement_info_t* info;
+    const uint8_t* buffer;
+    for(std::string meas : vcm.measurements) {
+        printf("%s: ", meas.c_str());
+
+        info = vcm.get_info(meas);
+        if(info == NULL) {
+            printf("failed to get info for measurement %s, "
+                    "likely a problem in VCM", meas.c_str());
+            return -1;
+        }
+
+        for(location_info_t loc : info->locations) {
+            buffer = mem.get_buffer(loc.packet_index);
+            for(size_t i = 0; i < info->size; i++) {
+                printf("%02x", buffer[i + loc.offset]);
+            }
+            printf("\t");
+        }
+
+        printf("\n");
+    }
+
+    // unlock all the packets
+    if(mem.read_unlock() == FAILURE) {
+        printf("failed to unlock shared memory");
+        return -1;
     }
 }

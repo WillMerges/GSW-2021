@@ -8,6 +8,7 @@ build:
 	-$(MAKE) -C shm all
 	-$(MAKE) -C nm all
 	-$(MAKE) -C convert all
+	-$(MAKE) -C telemetry all
 
 copy:
 	rm -rf bin || true > /dev/null
@@ -21,4 +22,5 @@ clean:
 	-$(MAKE) -C shm clean
 	-$(MAKE) -C nm clean
 	-$(MAKE) -C convert clean
+	-$(MAKE) -C telemetry clean
 	rm -r bin

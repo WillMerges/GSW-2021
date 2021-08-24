@@ -40,3 +40,6 @@ log/*/*.log
 
 # package files
 *.deb
+
+# old files
+*.old

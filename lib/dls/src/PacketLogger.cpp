@@ -14,7 +14,8 @@ PacketLogger::PacketLogger(std::string device_name):
 // | [timestamp] | <device_name> | size of packet | packet data |
 RetType PacketLogger::log_packet(unsigned char* buffer, size_t size) {
     gettimeofday(&curr_time, NULL);
-    std::string header = "[" + std::to_string(curr_time.tv_sec) + "]";
+    std::string header = "[" + std::to_string(curr_time.tv_sec) + "." +
+                               std::to_string(curr_time.tv_usec) + "]";
 
     header += "<" + device_name + ">";
     uint32_t len = strlen(header.c_str()) * sizeof(char); // want to get actual # of bytes
