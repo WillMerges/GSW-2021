@@ -24,3 +24,6 @@ clean:
 	-$(MAKE) -C convert clean
 	-$(MAKE) -C telemetry clean
 	rm -r bin
+
+python:
+	g++ -shared vcm/src/*.o dls/src/*.o nm/src/*.o shm/src/*.o convert/src/*.o telemetry/src/*.o -o bin/libpython.so -lrt
