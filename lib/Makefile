@@ -1,6 +1,6 @@
 ### Make libraries in subdirs ###
 
-all: build copy
+all: build copy python
 
 build:
 	-$(MAKE) -C vcm all
@@ -23,7 +23,11 @@ clean:
 	-$(MAKE) -C nm clean
 	-$(MAKE) -C convert clean
 	-$(MAKE) -C telemetry clean
+	-$(MAKE) -C python clean
 	rm -r bin
 
-python:
-	g++ -shared vcm/src/*.o dls/src/*.o nm/src/*.o shm/src/*.o convert/src/*.o telemetry/src/*.o -o bin/libpython.so -lrt
+# build special library used by Python ctypes
+# library is every lib object module in a single lib with additional c bindings
+python: build copy
+	-$(MAKE) -C python
+	g++ -shared python/bindings.o vcm/src/*.o dls/src/*.o nm/src/*.o shm/src/*.o convert/src/*.o telemetry/src/*.o -o bin/libpython.so -lrt

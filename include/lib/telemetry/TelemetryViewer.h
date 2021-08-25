@@ -66,6 +66,14 @@ public:
     RetType get_uint(measurement_info_t* meas, unsigned int* val);
     // place up to meas->size bytes into 'buffer'
     RetType get_raw(measurement_info_t* meas, uint8_t* buffer);
+    
+    // slightly slower functions that use strings as measurement parameters
+    RetType get_str(std::string& meas, std::string* val);
+    RetType get_float(std::string& meas, float* val);
+    RetType get_double(std::string& meas, double* val);
+    RetType get_int(std::string& meas, int* val);
+    RetType get_uint(std::string& meas, unsigned int* val);
+    RetType get_raw(std::string& meas, uint8_t* buffer);
 
 private:
     TelemetryShm shm;

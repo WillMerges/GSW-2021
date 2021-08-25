@@ -16,15 +16,6 @@
 using namespace dls;
 using namespace convert;
 
-extern "C" {
-    TelemetryViewer* new_tv() { 
-        return new TelemetryViewer(); 
-    }
-    
-    RetType init(TelemetryViewer* tv) {
-        return tv->init();
-    }
-}
 
 TelemetryViewer::TelemetryViewer() {
     update_mode = STANDARD_UPDATE;
@@ -59,16 +50,16 @@ TelemetryViewer::~TelemetryViewer() {
 
 RetType TelemetryViewer::init() {
     MsgLogger logger("TelemetryViewer", "init");
-    
-    VCM vcm; // default VCM, leave on stack after init
 
-    if(FAILURE == vcm.init() )
+    VCM* vcm = new VCM();
+
+    if(FAILURE == vcm->init() )
     {
         logger.log_message("Failed to init default VCM");
         return FAILURE;
     }
 
-    return init(&vcm);
+    return init(vcm);
 }
 
 RetType TelemetryViewer::init(VCM* vcm) {
@@ -365,4 +356,76 @@ RetType TelemetryViewer::get_raw(measurement_info_t* meas, uint8_t* buffer) {
 
     // return meas->size;
     return SUCCESS;
+}
+
+RetType TelemetryViewer::get_str(std::string& meas, std::string* val) {
+    MsgLogger logger("TelemetryViewer", "get_str");
+
+    measurement_info_t* m_info = vcm->get_info(meas);
+    if(m_info == NULL) {
+        logger.log_message("Measurement not found: " + meas);
+        return FAILURE;
+    }
+
+    return get_str(m_info, val);
+}
+
+RetType TelemetryViewer::get_float(std::string& meas, float* val) {
+    MsgLogger logger("TelemetryViewer", "get_float");
+
+    measurement_info_t* m_info = vcm->get_info(meas);
+    if(m_info == NULL) {
+        logger.log_message("Measurement not found: " + meas);
+        return FAILURE;
+    }
+
+    return get_float(m_info, val);
+}
+
+RetType TelemetryViewer::get_double(std::string& meas, double* val) {
+    MsgLogger logger("TelemetryViewer", "get_double");
+
+    measurement_info_t* m_info = vcm->get_info(meas);
+    if(m_info == NULL) {
+        logger.log_message("Measurement not found: " + meas);
+        return FAILURE;
+    }
+
+    return get_double(m_info, val);
+}
+
+RetType TelemetryViewer::get_int(std::string& meas, int* val) {
+    MsgLogger logger("TelemetryViewer", "get_int");
+
+    measurement_info_t* m_info = vcm->get_info(meas);
+    if(m_info == NULL) {
+        logger.log_message("Measurement not found: " + meas);
+        return FAILURE;
+    }
+
+    return get_int(m_info, val);
+}
+
+RetType TelemetryViewer::get_uint(std::string& meas, unsigned int* val) {
+    MsgLogger logger("TelemetryViewer", "get_uint");
+
+    measurement_info_t* m_info = vcm->get_info(meas);
+    if(m_info == NULL) {
+        logger.log_message("Measurement not found: " + meas);
+        return FAILURE;
+    }
+
+    return get_uint(m_info, val);
+}
+
+RetType TelemetryViewer::get_raw(std::string& meas, uint8_t* buffer) {
+    MsgLogger logger("TelemetryViewer", "get_raw");
+
+    measurement_info_t* m_info = vcm->get_info(meas);
+    if(m_info == NULL) {
+        logger.log_message("Measurement not found: " + meas);
+        return FAILURE;
+    }
+
+    return get_raw(m_info, buffer);
 }
