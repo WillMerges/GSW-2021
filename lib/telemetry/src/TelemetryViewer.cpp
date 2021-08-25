@@ -16,6 +16,15 @@
 using namespace dls;
 using namespace convert;
 
+extern "C" {
+    TelemetryViewer* new_tv() { 
+        return new TelemetryViewer(); 
+    }
+    
+    RetType init(TelemetryViewer* tv) {
+        return tv->init();
+    }
+}
 
 TelemetryViewer::TelemetryViewer() {
     update_mode = STANDARD_UPDATE;
@@ -49,7 +58,16 @@ TelemetryViewer::~TelemetryViewer() {
 }
 
 RetType TelemetryViewer::init() {
+    MsgLogger logger("TelemetryViewer", "init");
+    
     VCM vcm; // default VCM, leave on stack after init
+
+    if(FAILURE == vcm.init() )
+    {
+        logger.log_message("Failed to init default VCM");
+        return FAILURE;
+    }
+
     return init(&vcm);
 }
 
