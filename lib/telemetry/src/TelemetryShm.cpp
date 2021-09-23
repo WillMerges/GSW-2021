@@ -18,6 +18,40 @@
 
 using namespace dls;
 
+// how locking works right now (for individual packet):
+//  lock master block
+//  check each packet nonce against last saved nonces
+//      during this check save all the new nonces if any changed
+//
+//  if a nonce changed, return
+//  if a nonce didn't change and need to block
+//      unlock master block
+//      futex wait bitset on master nonce
+//      when wake up, check all the nonces again and repeat
+//
+//  why is this bad? one lock for all readers/writers even if working on different packet
+//      also, overflow isn't detected when looking for packet updates
+
+// potential other way:
+//  store the master nonce locally
+//      if it changes after the individual packet nonces are checked, we should recheck them
+//      only want to do this if we need to sleep the process
+//  check each packet nonce against last saved nonces
+//      don't need to lock here since if they change while we check, that's actually good
+//
+//  if a nonce changed
+//      lock individual locks for each packet
+//      return
+//
+//  if a nonce didn't change
+//      futex bitset on the master nonce we stored before and the master nonce
+//          writers should just change this every write so it knows to wake people up
+//
+//  why is this bad? still no way to tell who was updated more recently, I think each nonce should just get incremented and check for overflow, resetting the others if it happens
+//      locking all packets may be a bit harder actually, need to lock a lot of individual blocks
+//      could keep a master lock? i have absolutely no idea how that would work
+
+
 // TODO make packet ids be uint32_ts to match VCM
 
 // locking is done with writers preference
@@ -654,6 +688,7 @@ RetType TelemetryShm::more_recent_packet(unsigned int* packet_ids, size_t num, u
 
         // we can't just take the biggest nonce as the most recent since it could have overflowed and wrapped around
         // instead we find the nonce with the smallest absolute value different from the master nonce (guaranteed to change every update)
+        // this actually does NOT catch overflow, idk what I was thinking
         diff = labs((long int)(last_nonce - last_nonces[i]));
         if(diff < best_diff) {
             *recent = i;
