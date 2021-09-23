@@ -78,6 +78,7 @@ RetType NetworkManager::Open() {
     attr.mq_msgsize = NM_MAX_MSG_SIZE; // this limits how many bytes we can send
     attr.mq_curmsgs = 0;
 
+    // TODO we may want to block on this
     mq = mq_open(mqueue_name.c_str(), O_RDONLY|O_NONBLOCK|O_CREAT, 0644, &attr);
     if((mqd_t)-1 == mq) {
         logger.log_message("unable to open mqueue");
