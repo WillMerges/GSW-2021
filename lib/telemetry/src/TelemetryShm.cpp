@@ -524,10 +524,10 @@ RetType TelemetryShm::read_lock() {
     }
 }
 
-RetType TelemetryShm::read_unlock() {
+RetType TelemetryShm::read_unlock(bool force) {
     MsgLogger logger("TelemetryShm", "read_unlock");
 
-    if(!read_locked) {
+    if(!read_locked && !force) {
         logger.log_message("shared memory is not locked");
         return FAILURE;
     }

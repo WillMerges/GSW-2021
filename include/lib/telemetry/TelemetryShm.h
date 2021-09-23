@@ -95,8 +95,8 @@ public:
     RetType read_lock();
 
     // unlock the shared memory, not packet specific
-    // returns FAILURE if not locked currently
-    RetType read_unlock();
+    // returns FAILURE if not locked currently, unless 'force' is set to true
+    RetType read_unlock(bool force = false);
 
     // get the buffer to read from for a packet
     // returns NULL on error
