@@ -166,18 +166,18 @@ void TelemetryViewer::set_update_mode(update_mode_t mode) {
     shm.set_read_mode(shm_mode);
 }
 
-RetType TelemetryViewer::update() {
+RetType TelemetryViewer::update(int timeout) {
     MsgLogger logger("TelemetryViewer", "update");
 
     RetType status;
     if(check_all) {
-        status = shm.read_lock();
+        status = shm.read_lock(timeout);
         if(status != SUCCESS) {
             return status; // could be BLOCKED or FAILURE
         }
     } else {
         while(1) {
-            status = shm.read_lock(packet_ids, num_packets);
+            status = shm.read_lock(packet_ids, num_packets, timeout);
             if(status != SUCCESS) {
                 return status; // could be BLOCKED or FAILURE
             }

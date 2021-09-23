@@ -362,7 +362,7 @@ RetType TelemetryShm::clear(unsigned int packet_id, uint8_t val) {
     return SUCCESS;
 }
 
-RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
+RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, int timeout) {
     MsgLogger logger("TelemetryShm", "read_lock(2 args)");
 
     if(read_locked) {
@@ -383,6 +383,17 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
         logger.log_message("shared memory block is null");
         return FAILURE;
     }
+
+    // set timeout if there is one
+    struct timespec* timespec = NULL;
+
+    if(timeout > 0) {
+        struct timespec time;
+        time.tv_sec = timeout / 1000;
+        time.tv_nsec = (timeout % 1000) * 1000000;
+        timespec = &time;
+    }
+
 
     // if we block, keep looping since we can't guarantee just because we were awoken our packet changed
     // this is due to having only 32 bits in the bitset but arbitrarily many packets
@@ -442,7 +453,10 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
         read_locked = false;
 
         if(read_mode == BLOCKING_READ) {
-            syscall(SYS_futex, info->nonce, FUTEX_WAIT_BITSET, last_nonce, NULL, NULL, bitset);
+            if(-1 == syscall(SYS_futex, info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, bitset)) {
+                // timed out or error
+                return FAILURE;
+            } // otherwise we've been woken up
         } else { // NONBLOCKING_READ
             return BLOCKED;
         }
@@ -454,7 +468,7 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num) {
 // ^^^ did the above, check if that's correct...
 // I THINK IT'S WRONG then next time you call lock and it was technically updated it blocks...
 // so they should probably all be updated here and only the ones being checked in the other version
-RetType TelemetryShm::read_lock() {
+RetType TelemetryShm::read_lock(int timeout) {
     MsgLogger logger("TelemetryShm", "read_lock(no args)");
 
     if(read_locked) {
@@ -474,6 +488,16 @@ RetType TelemetryShm::read_lock() {
         logger.log_message("shared memory block is null");
         // something isn't attached
         return FAILURE;
+    }
+
+    // set timeout if there is one
+    struct timespec* timespec = NULL;
+
+    if(timeout > 0) {
+        struct timespec time;
+        time.tv_sec = timeout / 1000;
+        time.tv_nsec = (timeout % 1000) * 1000000;
+        timespec = &time;
     }
 
     while(1) {
@@ -503,8 +527,10 @@ RetType TelemetryShm::read_lock() {
             if(read_mode == BLOCKING_READ) {
                 // wait for any packet to be updated
                 // we don't need to loop here and check if it was our packet that updated since we don't care which packet updated
-                syscall(SYS_futex, info->nonce, FUTEX_WAIT_BITSET, last_nonce, NULL, NULL, 0xFF);
-                // syscall(SYS_futex, info->nonce, FUTEX_WAKE, last_nonce, NULL, NULL, NULL);
+                if(-1 == syscall(SYS_futex, info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, 0xFF)) {
+                    // timeout or error
+                    return FAILURE;
+                } // otherwise we've been woken up
             } else {
                 return BLOCKED;
             }

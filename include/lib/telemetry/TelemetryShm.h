@@ -82,17 +82,19 @@ public:
 
     // lock the shared memory for packets as a reader (e.g. dont allow any writers)
     // pass packets to read as a list of 'num' packet ids
+    // return FAILURE if 'timeout' milliseconds have passed without being able to obtain lock
+    // set 'timeout' to a value 0 or less to wait forever
     // if read mode is set to STANDARD_READ, returns regardless the data changed since the last read
     // if read mode is set to BLOCKING_READ, if the data has not changed since the last read the process will sleep until it changes
     // if read mode is set to NONBLOCKING_READ, returns BLOCKED if the data has not changed since the last read
     // returns FAILURE if already locked
-    RetType read_lock(unsigned int* packet_ids, size_t num);
+    RetType read_lock(unsigned int* packet_ids, size_t num, int timeout = 0);
 
     // lock all shared memory for all packets
     // functionally no different from other read_lock for STANDARD_READ mode
     // BLOCKING_READ and NONBLOCKING_READ work identically assuming all packets are to be locked
     // returns FAILURE if already locked
-    RetType read_lock();
+    RetType read_lock(int timeout = 0);
 
     // unlock the shared memory, not packet specific
     // returns FAILURE if not locked currently, unless 'force' is set to true

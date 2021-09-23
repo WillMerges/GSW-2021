@@ -54,7 +54,9 @@ public:
     void set_update_mode(update_mode_t mode);
 
     // update the telemetry viewer with the most recent telemetry data
-    RetType update();
+    // return FAILURE after 'timeout' milliseconds if the telemetry has not updated
+    // if 'timeout' is 0 or less, never times out and waits forever
+    RetType update(int timeout = 0);
 
     // set 'val' to the value of a telemetry measurement
     // converts raw telemetry data into usable types
@@ -66,7 +68,7 @@ public:
     RetType get_uint(measurement_info_t* meas, unsigned int* val);
     // place up to meas->size bytes into 'buffer'
     RetType get_raw(measurement_info_t* meas, uint8_t* buffer);
-    
+
     // slightly slower functions that use strings as measurement parameters
     RetType get_str(std::string& meas, std::string* val);
     RetType get_float(std::string& meas, float* val);
