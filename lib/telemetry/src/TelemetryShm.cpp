@@ -487,7 +487,7 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, int timeou
         read_locked = false;
 
         if(read_mode == BLOCKING_READ) {
-            if(-1 == syscall(SYS_futex, info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, bitset)) {
+            if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, bitset)) {
                 // timed out or error
                 return FAILURE;
             } // otherwise we've been woken up
@@ -497,7 +497,6 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, int timeou
     }
 }
 
-// TODO packet nonces aren't being updated here which may cause problems
 // see about updating all nonces in read_unlock?? (maybe except master nonce since it's needed for locking)
 // ^^^ did the above, check if that's correct...
 // I THINK IT'S WRONG then next time you call lock and it was technically updated it blocks...
@@ -561,7 +560,7 @@ RetType TelemetryShm::read_lock(int timeout) {
             if(read_mode == BLOCKING_READ) {
                 // wait for any packet to be updated
                 // we don't need to loop here and check if it was our packet that updated since we don't care which packet updated
-                if(-1 == syscall(SYS_futex, info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, 0xFF)) {
+                if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, 0xFF)) {
                     // timeout or error
                     return FAILURE;
                 } // otherwise we've been woken up
