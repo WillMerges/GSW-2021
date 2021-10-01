@@ -664,7 +664,11 @@ RetType TelemetryShm::update_value(unsigned int packet_id, uint32_t* value) {
     // technically 'abs' returns a long int, but since we're only ever subtracting
     // uin32_t's we'll never get a difference bigger than a uint32_t
     // uint32_t master_nonce = *((uint32_t*)((shm_info_t*)master_block->data));
-    *value = labs((long int)(last_nonce - last_nonces[packet_id]));
+    // *value = labs((long int)(last_nonce - last_nonces[packet_id]));
+
+    // ^^^ the above method doesn't actually, does nothing for wrap around
+    // we'll just ignore overflow since we don't care (it would take over a year at 50Hz)
+    *value = last_nonces[packet_id];
 
     return SUCCESS;
 }
