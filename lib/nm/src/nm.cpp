@@ -79,7 +79,7 @@ RetType NetworkManager::Open() {
     attr.mq_curmsgs = 0;
 
     // TODO we may want to block on this
-    mq = mq_open(mqueue_name.c_str(), O_RDONLY|O_NONBLOCK|O_CREAT, 0644, &attr);
+    mq = mq_open(mqueue_name.c_str(), O_RDONLY|O_CREAT, 0644, &attr);
     if((mqd_t)-1 == mq) {
         logger.log_message("unable to open mqueue");
         return FAILURE;
@@ -191,12 +191,16 @@ RetType NetworkManager::Send() {
 
     // send the message from the mqueue out of the socket
     if(read != -1) {
-        // device address has not been set (still zeroed)
+
+        // if the port is still zeroed we haven't received a packet yet
+        // which means we don't have a valid IP address to send to
         if(0 == device_addr.sin_port) {
-            logger.log_message("Receiver has not yet sent a packet providing a port \
-                            and address, failed to send UDP message");
+            logger.log_message("Receiver has not yet sent a packet providing an"
+                                " address, failed to send UDP message");
             return FAILURE;
         }
+
+        // device_addr.sin_port = htons(vcm->port);
 
         ssize_t sent = -1;
         sent = sendto(sockfd, (char*)tx_buffer, read, 0,
@@ -205,9 +209,12 @@ RetType NetworkManager::Send() {
             logger.log_message("Failed to send UDP message");
             return FAILURE;
         }
+
+        return SUCCESS;
     }
 
-    return SUCCESS;
+    logger.log_message("Failed to retreieve message from mqueue");
+    return FAILURE;
 }
 
 RetType NetworkManager::Receive(size_t* received) {

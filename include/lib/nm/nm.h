@@ -21,7 +21,7 @@ namespace nm {
     // per telemetry packet
     class NetworkManager {
     public:
-        
+
         // construct a network manager named 'name'
         // this name must match any associated network interfaces
         // binds to 'port' (e.g. received packets dst = port, sent packets src = port)
@@ -33,6 +33,7 @@ namespace nm {
 
         // destructor
         ~NetworkManager();
+        
         RetType Open();
         RetType Close(); // returns fail if anything goes wrong
 

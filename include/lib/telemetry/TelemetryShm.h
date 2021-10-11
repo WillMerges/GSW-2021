@@ -26,7 +26,7 @@
 * Currently locking is vehicle-wide
 * Regardless of which packet(s) are being read/written there is one lock
 * e.g. even if two writers are writing to different packets only one can write at a time
-*unsigned int* packet_id, size_t* offset
+* unsigned int* packet_id, size_t* offset
 * The above limitation can be solved by storing an entire info block for each
 * packet rather than just a nonce. To block on multiple packets would require
 * creating a thread for each packet and blocking on that packets nonce from the
@@ -73,12 +73,12 @@ public:
     // does not do any size check, data must be at least as large as the packet size
     // if any bytes fail to write FAILURE is returned
     // NOTE: this is a blocking operation
-    RetType write(unsigned int packet_id, uint8_t* data);
+    RetType write(uint32_t packet_id, uint8_t* data);
 
     // clear telemetry block corresponding to 'packet_id' with value 'val'
     // returns FAULURE if any bytes fail to clear
     // NOTE: this is a blocking operation
-    RetType clear(unsigned int packet_id, uint8_t val = 0x0);
+    RetType clear(uint32_t packet_id, uint8_t val = 0x0);
 
     // lock the shared memory for packets as a reader (e.g. dont allow any writers)
     // pass packets to read as a list of 'num' packet ids
@@ -88,7 +88,7 @@ public:
     // if read mode is set to BLOCKING_READ, if the data has not changed since the last read the process will sleep until it changes
     // if read mode is set to NONBLOCKING_READ, returns BLOCKED if the data has not changed since the last read
     // returns FAILURE if already locked
-    RetType read_lock(unsigned int* packet_ids, size_t num, int timeout = 0);
+    RetType read_lock(uint32_t* packet_ids, size_t num, int timeout = 0);
 
     // lock all shared memory for all packets
     // functionally no different from other read_lock for STANDARD_READ mode
@@ -102,14 +102,14 @@ public:
 
     // get the buffer to read from for a packet
     // returns NULL on error
-    const uint8_t* get_buffer(unsigned int packet_id);
+    const uint8_t* get_buffer(uint32_t packet_id);
 
     // set 'updated' to true if packet corresponding to 'packet_id' was updated before the last call to 'read_lock'
     // after calling read_lock this will not change since no writers may update the packets when shm is read locked
     // MUST be called after read_lock
     // returns FAILURE if shm is not currently read locked
     // otherwise returns SUCCESS
-    RetType packet_updated(unsigned int packet_id, bool* updated);
+    RetType packet_updated(uint32_t packet_id, bool* updated);
 
     // check a list of 'num' packet ids for which was updated more recently
     // sets 'recent' to the more recently updated packet_id
@@ -122,7 +122,7 @@ public:
     // the smaller the number, the more recent the update (the most recent should have a value of 0)
     // the actual value does not mean much, but each packets value can be compared
     // and the smallest value is more recently updated
-    RetType update_value(unsigned int packet_id, uint32_t* value);
+    RetType update_value(uint32_t packet_id, uint32_t* value);
 
     // reading modes
     typedef enum {
@@ -155,7 +155,6 @@ private:
     Shm** packet_blocks; // list of blocks holding raw telemetry data
     Shm** info_blocks; // list of blocks holding uint32_t nonces TODO rename this to something better lol
     Shm* master_block; // holds a single shm_info_t for locking
-
 };
 
 #endif

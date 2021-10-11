@@ -52,8 +52,6 @@ using namespace dls;
 //      could keep a master lock? i have absolutely no idea how that would work
 
 
-// TODO make packet ids be uint32_ts to match VCM
-
 // locking is done with writers preference
 // https://en.wikipedia.org/wiki/Readers%E2%80%93writers_problem
 
@@ -282,7 +280,7 @@ RetType TelemetryShm::destroy() {
     return SUCCESS;
 }
 
-RetType TelemetryShm::write(unsigned int packet_id, uint8_t* data) {
+RetType TelemetryShm::write(uint32_t packet_id, uint8_t* data) {
     MsgLogger logger("TelemetryShm", "write");
 
     if(packet_id >= num_packets) {
@@ -339,7 +337,7 @@ RetType TelemetryShm::write(unsigned int packet_id, uint8_t* data) {
     return SUCCESS;
 }
 
-RetType TelemetryShm::clear(unsigned int packet_id, uint8_t val) {
+RetType TelemetryShm::clear(uint32_t packet_id, uint8_t val) {
     MsgLogger logger("TelemetryShm", "clear");
 
     if(packet_id >= num_packets) {
@@ -617,7 +615,7 @@ RetType TelemetryShm::read_unlock(bool force) {
     return SUCCESS;
 }
 
-const uint8_t* TelemetryShm::get_buffer(unsigned int packet_id) {
+const uint8_t* TelemetryShm::get_buffer(uint32_t packet_id) {
     MsgLogger logger("TelemtryShm", "get_buffer");
 
     if(packet_id >= num_packets) {
@@ -633,7 +631,7 @@ const uint8_t* TelemetryShm::get_buffer(unsigned int packet_id) {
     return packet_blocks[packet_id]->data;
 }
 
-RetType TelemetryShm::packet_updated(unsigned int packet_id, bool* updated) {
+RetType TelemetryShm::packet_updated(uint32_t packet_id, bool* updated) {
     MsgLogger logger("TelemetryShm", "packet_updated");
 
     if(!read_locked) {
@@ -653,7 +651,7 @@ RetType TelemetryShm::packet_updated(unsigned int packet_id, bool* updated) {
 }
 
 
-RetType TelemetryShm::update_value(unsigned int packet_id, uint32_t* value) {
+RetType TelemetryShm::update_value(uint32_t packet_id, uint32_t* value) {
     MsgLogger logger("TelemetryShm", "update_value");
 
     if(packet_id >= num_packets) {

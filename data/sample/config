@@ -6,8 +6,8 @@
 # specify the protocol for packets to use (must be set at some point)
 protocol = udp
 
-# specify the port the receiver will send a packet to to initiate communications (not telemetry)
-# the receiver should send a packet (with any data) to this port, then the ground station will send packets to whatever port the receiver used
+# specify the port the ground station should send packets TO
+# the IP will be stripped from telemetry packets
 #addr = 127.0.0.1
 port = 8089
 
@@ -22,7 +22,7 @@ endianness = big
 TEST 4 0 0 int signed
 TEST2 2 0 0 float unsigned
 
-# telemetry packets, number is the port
+# telemetry packets, number is the port that the receiver will send packets TO on the ground station
 8081 {
 TEST
 TEST2
