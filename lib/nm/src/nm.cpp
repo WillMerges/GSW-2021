@@ -184,10 +184,28 @@ RetType NetworkManager::Send() {
         return FAILURE;
     }
 
+    // TODO check the NmShm to see if we have an address we can send to that
+    // a receiving instance stripped, if we don't just return since we don't
+    // know where to send
+    // before unlocking anything, check a single byte that the receiving process
+    // will set everytime it gets a packet.
+    // The receiving end will just move on if the shm is locked, we don't want
+    // to lock the process out by trying to read if we know we don't have anything
+    // we can assume that a single byte is accessed atomically so we can just
+    // check that it's set before locking
+    // TODO this could still be an issue if we lock the receiving process out
+    // of shared memory and the IP changes, maybe do a writers preference lock?
+    // or just check a writers lock and a readers lock? if a reader locked it
+    // the receiver should wait, if it was a writer it should just not care
+    // or just don't care and don't expect the IP to change, and if it does we
+    // shouldn't call send
+
+    // ^^^ call the above before checking the mqueue, so we don't drop any
+    // messages if we already know we're going to get an error
+
     // check the mqueue
     ssize_t read = -1;
     read = mq_receive(mq, (char*)tx_buffer, NM_MAX_MSG_SIZE, NULL);
-
 
     // send the message from the mqueue out of the socket
     if(read != -1) {
@@ -232,6 +250,9 @@ RetType NetworkManager::Receive(size_t* received) {
         received = 0;
         return FAILURE; // no packet
     }
+
+    // TODO try and write the IP address of device_addr to NmShm
+    // if it's locked we can just ignore it and move on
 
     // // set in size to the size of the buffer if we received too much data for our buffer
     // if(n > MAX_MSG_SIZE) {

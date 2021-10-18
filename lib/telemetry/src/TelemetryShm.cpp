@@ -13,6 +13,7 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <limits.h>
+#include <signal.h>
 #include "lib/dls/dls.h"
 #include "lib/telemetry/TelemetryShm.h"
 
@@ -109,14 +110,18 @@ TelemetryShm::~TelemetryShm() {
 RetType TelemetryShm::init(VCM* vcm) {
     num_packets = vcm->num_packets;
 
-    // creates and zero last_nonces
+    // create and zero last_nonces
     last_nonces = (uint32_t*)malloc(num_packets * sizeof(uint32_t));
     memset(last_nonces, 0, num_packets * sizeof(uint32_t));
 
+    // create master Shm object
+    // use an id guaranteed unused so we can use the same file name for all blocks
+    master_block = new Shm(vcm->config_file.c_str(), 0, sizeof(shm_info_t));
+
+    // create Shm objects for each telemetry packet
     packet_blocks = new Shm*[num_packets];
     info_blocks = new Shm*[num_packets];
 
-    // create Shm objects for each telemetry packet
     packet_info_t* packet;
     size_t i;
     for(i = 0; i < num_packets; i++) {
@@ -126,10 +131,6 @@ RetType TelemetryShm::init(VCM* vcm) {
         packet_blocks[i] = new Shm(vcm->config_file.c_str(), 2*(i+1), packet->size);
         info_blocks[i] = new Shm(vcm->config_file.c_str(), (2*i)+1, sizeof(uint32_t)); // holds one nonce
     }
-
-    // create master Shm object
-    // use an id guaranteed unused so we can use the same file name for master block as well
-    master_block = new Shm(vcm->config_file.c_str(), 2*(i+1), sizeof(shm_info_t));
 
     return SUCCESS;
 }
@@ -325,6 +326,7 @@ RetType TelemetryShm::write(uint32_t packet_id, uint8_t* data) {
     // syscall(SYS_futex, &(info->nonce), FUTEX_WAKE, INT_MAX, NULL, NULL, NULL); // TODO check return
 
 
+    // exit as a writer
     V(info->resource);
 
     P(info->wmutex);
@@ -382,6 +384,7 @@ RetType TelemetryShm::clear(uint32_t packet_id, uint8_t val) {
     // some packets may have to share, the reader should check to see if their packet really updated
     syscall(SYS_futex, info->nonce, FUTEX_WAKE_BITSET, INT_MAX, NULL, NULL, 1 << (packet_id % 32));
 
+    // exit as a writer
     V(info->resource);
 
     P(info->wmutex);
@@ -696,6 +699,77 @@ RetType TelemetryShm::more_recent_packet(unsigned int* packet_ids, size_t num, u
 void TelemetryShm::set_read_mode(read_mode_t mode) {
     read_mode = mode;
 }
+
+// uint8_t TelemetryShm::num_instances = 0;
+//
+// void TelemetryShm::add_signal_handlers() {
+//     // if this function has already been called, just mark we need to try and unlock again
+//     if(num_instances > 0) {
+//         num_instances++;
+//         return;
+//     }
+//
+//     const int signums[5] = {
+//                          SIGINT,
+//                          SIGTERM,
+//                          SIGSEGV,
+//                          SIGFPE,
+//                          SIGABRT
+//                         };
+//
+//     int signum;
+//     for(int i = 0; i < 5; i++) {
+//         signum = signums[i];
+//         sighandlers[signum] = signal(signum, TelemetryShm::sighandler);
+//     }
+//
+//     num_instances++;
+// }
+
+// void TelemetryShm::sighandler(int signum) {
+//     MsgLogger logger("TelemetryShm", "sighandler");
+//     logger.log_message("received signal, unlocking telemetry shared memory");
+//
+//     // get the locks from shared memory
+//     // TODO just put config file in a string vector and pop from that until it's empty, then call old signal handlers, then can get rid of num_instances variable
+//     Shm* master_block = new Shm(vcm->config_file.c_str(), 0, sizeof(shm_info_t));
+//     shm_info_t* info = (shm_info_t*)master_block->data;
+//
+//     // try and unlock shared memory blocks
+//     if(info != NULL) {
+//         // try and exit read locks
+//         sem_wait(&(info->rmutex));
+//         info->readers--;
+//         if(info->readers == 0) {
+//             sem_post(&(info->resource));
+//         }
+//         sem_post(&(info->rmutex));
+//
+//         // try and exit write locks
+//         sem_post(&(info->resource));
+//
+//         sem_wait(&(info->wmutex));
+//         info->writers--;
+//         if(info->writers == 0) {
+//             sem_post(&(info->readTry));
+//         }
+//
+//         sem_post(&(info->wmutex));
+//     }
+//
+//     num_instances--;
+//     if(num_instances > 0) { // need to try and unlock again recursively since we have another instance open
+//         sighandler(signum);
+//     } else { // base case
+//         // call the old signal handler
+//         void (TelemetryShm::* next_handler)(int) = sighandlers[signum];
+//
+//         if(next_handler != NULL) {
+//             // pass it on
+//             next_handler(signum);
+//         }
+//     }
+// }
 
 #undef P
 #undef V

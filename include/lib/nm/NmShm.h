@@ -2,6 +2,8 @@
 #define NM_SHM_H
 
 #include <semaphore.h>
+#include <netinet/in.h>
+#include <string>
 #include "lib/shm/shm.h"
 #include "common/types.h"
 
@@ -15,14 +17,9 @@ Intended operation is for processes that receive telemetry to strip the IP
 from the packet and write it to shared memory so the sending process knows
 where to send packets to.
 
-Uses a single lock, if it's currently locked and a process tries to write, don't
-block or wait for the lock to free, just don't write that address to shared
-memory. All receiving processes for a vehicle should be receiving from the same
-address (TODO if this is not true anymore, this will need to hold multiple IPs).
-Since they all receive from the same address, it's not a big deal if we miss a
-write. Even if the address changes during operation, we don't care if we have to
-wait for one more packet to be able to send to the correct address again since
-changing IPs of the receiver is not a normal circumstance.
+Uses a single semaphore to lock shared memory.
+
+All operations are blocking (for now).
 */
 
 class NmShm {
@@ -33,21 +30,44 @@ public:
     // destructor
     virtual ~NmShm();
 
-    // initialize the object using 'vcm'
-    // NOTE: shared memory must already be created first, one process must call
-    //       'create' before calling init.
-    RetType init(VCM* vcm);
-
-    // initialize the object using the default vcm config file
-    // NOTE: shared memory must already be created first, one process must call
-    //       'create' before calling init.
+    // initialize the object
     RetType init();
 
+    // attach to shared memory
+    RetType attach();
+
+    // detach from shared memory
+    RetType detach();
+
     // create shared memory
-    static RetType create();
+    RetType create();
 
     // destroy shared memory
-    static RetType destroy();
+    RetType destroy();
+
+    // Get the address stored in shared memory
+    // NOTE: blocking function
+    RetType get_addr(struct sockaddr_in* addr);
+
+    // Updated shared memory with this address
+    // NOTE: blocking function
+    RetType update(struct sockaddr_in* addr);
+
+private:
+    // shared memory object
+    Shm* shm;
+
+    // layout of Network Manager shared memory
+    typedef struct {
+        sem_t sem;
+        struct sockaddr_in addr;
+    } nm_shm_t;
+
+    // file to use for generating shared memory token
+    std::string key_filename;
+
+    // random number used to generate shared memory token
+    static const int key_id = 0x54;
 };
 
 #endif
