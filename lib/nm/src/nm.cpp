@@ -139,7 +139,6 @@ RetType NetworkManager::Open() {
     //device_addr.sin_port = htons(vcm->port);
     //device_addr.sin_addr.s_addr = htons(vcm->addr);
 
-    // TODO maybe don't call bind unless the user says to specifically
     struct sockaddr_in myaddr;
     myaddr.sin_addr.s_addr = htons(INADDR_ANY); // use any interface we have available (likely just 1 ip)
     myaddr.sin_family = AF_INET;
@@ -147,6 +146,17 @@ RetType NetworkManager::Open() {
     int rc = bind(sockfd, (struct sockaddr*) &myaddr, sizeof(myaddr));
     if(rc) {
         logger.log_message("socket bind failed");
+        return FAILURE;
+    }
+
+    // setup the shared memory to hold the address from received packets
+    if(shm.init() == FAILURE) {
+        logger.log_message("failed to initialize shared memory");
+        return FAILURE;
+    }
+
+    if(shm.attach() == FAILURE) {
+        logger.log_message("failed to attach to shared memory");
         return FAILURE;
     }
 
@@ -210,6 +220,10 @@ RetType NetworkManager::Send() {
     // send the message from the mqueue out of the socket
     if(read != -1) {
 
+        // get the last address we received from
+        // value will be set by whatever process calls receive
+        shm.get_addr(&device_addr);
+
         // if the port is still zeroed we haven't received a packet yet
         // which means we don't have a valid IP address to send to
         if(0 == device_addr.sin_port) {
@@ -251,8 +265,8 @@ RetType NetworkManager::Receive(size_t* received) {
         return FAILURE; // no packet
     }
 
-    // TODO try and write the IP address of device_addr to NmShm
-    // if it's locked we can just ignore it and move on
+    // update shared memory with the address we just receive from
+    shm.update(&device_addr);
 
     // // set in size to the size of the buffer if we received too much data for our buffer
     // if(n > MAX_MSG_SIZE) {

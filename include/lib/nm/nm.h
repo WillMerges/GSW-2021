@@ -8,6 +8,7 @@
 #include <string>
 #include "lib/vcm/vcm.h"
 #include "common/types.h"
+#include "lib/nm/NmShm.h"
 
 #define NM_MAX_MSG_SIZE 4096
 
@@ -33,7 +34,7 @@ namespace nm {
 
         // destructor
         ~NetworkManager();
-        
+
         RetType Open();
         RetType Close(); // returns fail if anything goes wrong
 
@@ -64,6 +65,8 @@ namespace nm {
         uint8_t tx_buffer[NM_MAX_MSG_SIZE];
 
         bool open;
+
+        NmShm shm;
     };
 
     // allows a process to queue a message to send

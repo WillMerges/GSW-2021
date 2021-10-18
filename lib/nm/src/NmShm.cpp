@@ -1,6 +1,8 @@
 #include "lib/nm/NmShm.h"
 #include "lib/dls/dls.h"
 
+#include <string.h>
+
 using namespace dls;
 using namespace shm;
 
@@ -48,6 +50,10 @@ RetType NmShm::create() {
     RetType ret = shm->create();
 
     if(SUCCESS == ret) {
+        // zero shared memory
+        memset((void*)shm->data, 0, sizeof(nm_shm_t));
+
+        // initialize the semaphore
         nm_shm_t* data = (nm_shm_t*)shm->data;
         if(0 != sem_init(&(data->sem), 1, 1)) {
             logger.log_message("Failed to initialize semaphore");
