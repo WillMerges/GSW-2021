@@ -16,10 +16,9 @@ VCM::VCM() {
     MsgLogger logger("VCM", "Constructor");
 
     // default values
-    // addr = port = -1;
-    // addr = 0; // 0.0.0.0 is an invalid address
     port = 0; // treat zero as an invalid port
     protocol = PROTOCOL_NOT_SET;
+    multicast_addr = 0; // treat address of zero as invalid
     // packet_size = 0;
     num_packets = 0;
     device = "";
