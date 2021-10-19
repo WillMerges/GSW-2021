@@ -43,3 +43,7 @@ echo "starting decom process"
 ${GSW_HOME}/proc/decom/decom &
 echo $! | cat - pidlist > temp && mv temp pidlist
 
+# start the uplink process
+echo "starting uplink process"
+${GSW_HOME}/proc/uplink/uplink &
+echo $! | cat - pidlist > temp && mv temp pidlist

@@ -7,6 +7,7 @@
 #include "lib/dls/dls.h"
 #include "lib/telemetry/TelemetryShm.h"
 #include "common/types.h"
+#include "lib/nm/NmShm.h"
 
 // run as shmctl -on or shmctl -off to create and destroy shared memory
 // option -f argument to specify VCM config file (current default used otherwise)
@@ -64,42 +65,72 @@ int main(int argc, char* argv[]) {
         return FAILURE;
     }
 
-    TelemetryShm mem;
-    if(mem.init(vcm) == FAILURE) {
+    NmShm nm_shm;
+    if(nm_shm.init() == FAILURE) {
+        printf("failed to initialize network manager shm controller\n");
+        logger.log_message("failed to initialize network manager shm controller");
+        return FAILURE;
+    }
+
+    TelemetryShm tlm_shm;
+    if(tlm_shm.init(vcm) == FAILURE) {
         printf("failed to initialize telemetry shm controller\n");
         logger.log_message("failed to initialize telemetry shm controller");
         return FAILURE;
     }
 
+    RetType ret = SUCCESS;
     if(on) {
         printf("creating shared memory\n");
         logger.log_message("creating shared memory");
 
-        if(FAILURE == mem.create()) {
-            printf("Failed to create shared memory\n");
-            logger.log_message("Failed to create shared memory");
-            return FAILURE;
+        if(FAILURE == tlm_shm.create()) {
+            printf("Failed to create telemetry shared memory\n");
+            logger.log_message("Failed to create telemetry shared memory");
+            ret = FAILURE;
+        } else {
+            printf("created telemetry shared memory\n");
+            logger.log_message("created telemetry shared memory");
         }
 
-        printf("created shared memory\n");
-        logger.log_message("created shared memory");
-        return SUCCESS;
+        if(FAILURE == nm_shm.create()) {
+            printf("failed to create network manager shared memory\n");
+            logger.log_message("failed to create network manager shared memory");
+            ret = FAILURE;
+        } else {
+            printf("created network manager shared memory\n");
+            logger.log_message("created network manager shared memory");
+        }
+
+        return ret;
     } else if(off) {
         printf("destroying shared memory\n");
         logger.log_message("destroying shared memory");
 
-        if(FAILURE == mem.open()) {
-            printf("Shared memory not created, nothing to destroy\n");
-            logger.log_message("Shared memory not created, nothing to destroy");
-        }
-        if(FAILURE == mem.destroy()) {
-            printf("Failed to destroy shared memory\n");
-            logger.log_message("Failed to destroy shared memory");
-            return FAILURE;
+        if(FAILURE == tlm_shm.open()) {
+            printf("telemetry shared memory not created, nothing to destroy\n");
+            logger.log_message("telemetry shared memory not created, nothing to destroy");
+            ret = FAILURE;
+        } else {
+            if(FAILURE == tlm_shm.destroy()) {
+                printf("failed to destroy telemetry shared memory\n");
+                logger.log_message("failed to destroy telemetry shared memory");
+                ret = FAILURE;;
+            }
         }
 
-        printf("destroyed shared memory\n");
-        logger.log_message("destroyed shared memory");
-        return SUCCESS;
+        if(FAILURE == nm_shm.attach()) {
+            printf("network manager shared memory not created, nothing to destroy\n");
+            logger.log_message("network manager shared memory not created, nothing to destroy");
+            ret = FAILURE;
+        } else {
+            if(FAILURE == nm_shm.destroy()) {
+                printf("failed to destroy network manager shared memory\n");
+                logger.log_message("failed to destroy network manager shared memory");
+                ret = FAILURE;;
+            }
+        }
+
+        return ret;
     }
 }

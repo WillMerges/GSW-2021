@@ -85,8 +85,8 @@ namespace vcm {
 
         // TODO maybe put addr and port in another subclass
         // TODO maybe get rid of addr altogether, it isn't currently used anywhere
-        uint32_t addr; // address and port (only for UDP right now) ACTUALLY each packet specifies a port but the address of the ground computer doesn't change
-        // int port; // specified per telemetry packet now
+        // uint32_t addr; // address and port (only for UDP right now) ACTUALLY each packet specifies a port but the address of the ground computer doesn't change
+        int port; // port that receiver will route communications to
         protocol_t protocol;
         std::string config_file;
         std::string device;

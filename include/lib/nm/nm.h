@@ -8,6 +8,7 @@
 #include <string>
 #include "lib/vcm/vcm.h"
 #include "common/types.h"
+#include "lib/nm/NmShm.h"
 
 #define NM_MAX_MSG_SIZE 4096
 
@@ -21,11 +22,12 @@ namespace nm {
     // per telemetry packet
     class NetworkManager {
     public:
-        
+
         // construct a network manager named 'name'
         // this name must match any associated network interfaces
         // binds to 'port' (e.g. received packets dst = port, sent packets src = port)
         // places received data in 'buffer' of 'size' bytes
+        // if buffer is NULL or size is 0, calling 'Receive' discards the packet
         // a receive attempt will timeout after 'rx_timeout' milliseconds
         // if 'rx_timeout' is set to -1 (or anything less than 0), all calls to receive will be blocking
         NetworkManager(uint16_t port, const char* name, uint8_t* buffer,
@@ -33,8 +35,10 @@ namespace nm {
 
         // destructor
         ~NetworkManager();
+
+        // return FAILURE on failure
         RetType Open();
-        RetType Close(); // returns fail if anything goes wrong
+        RetType Close();
 
         // send any outgoing messages from the mqueue, return FAILURE on error
         RetType Send();
@@ -63,6 +67,8 @@ namespace nm {
         uint8_t tx_buffer[NM_MAX_MSG_SIZE];
 
         bool open;
+
+        NmShm shm;
     };
 
     // allows a process to queue a message to send
@@ -74,6 +80,10 @@ namespace nm {
         ~NetworkInterface();
         RetType Open();
         RetType Close();
+
+        // Queues a UDP process to be sent by a network manager of name 'name'
+        // Message will be sent over network when NetworkManager calls 'Send'
+        // and reads this message from the mqueue
         RetType QueueUDPMessage(const char* msg, size_t size);
     private:
         bool open;

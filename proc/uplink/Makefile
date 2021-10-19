@@ -1,6 +1,6 @@
-# shared memory control
+# network uplink
 
-TARGET = shmctl
+TARGET = uplink 
 
 CXX = g++
 CC = g++
@@ -11,7 +11,7 @@ CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
 CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -ggdb
 LDFLAGS = -L$(GSW_HOME)/lib/bin/ -Wl,-rpath=$(GSW_HOME)/lib/bin/
 
-LIBS = -ldls -lvcm -ltelemetry -lconvert -lnm -lshm
+LIBS = -ldls -lnm -lvcm -lshm 
 
 CPP_FILES := $(wildcard src/*.cpp)
 C_FILES := $(wildcard src/*.c)

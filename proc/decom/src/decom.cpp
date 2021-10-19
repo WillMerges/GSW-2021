@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <csignal>
 #include "lib/nm/nm.h"
 #include "lib/shm/shm.h"
 #include "lib/dls/dls.h"
@@ -22,6 +21,9 @@
 *   When the decom master process is killed, it kills each child process as well.
 *   If a child process dies unexpectedly, either due to error or being manually
 *   sent a kill signal, the master process will report it through the message log.
+*
+*   Run as: ./decom [config file path]
+*   If no VCM config file path is specified, the default location is used
 */
 
 

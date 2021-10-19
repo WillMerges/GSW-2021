@@ -28,6 +28,11 @@ NetworkManager::NetworkManager(uint16_t port, const char* name, uint8_t* buffer,
 
     open = false;
 
+    // if we have an invalid buffer, set size to 0
+    if(buffer == NULL) {
+        size = 0;
+    }
+
     // in_buffer = new char[vcm->packet_size];
     // in_size = 0;
 
@@ -78,8 +83,8 @@ RetType NetworkManager::Open() {
     attr.mq_msgsize = NM_MAX_MSG_SIZE; // this limits how many bytes we can send
     attr.mq_curmsgs = 0;
 
-    // TODO we may want to block on this
-    mq = mq_open(mqueue_name.c_str(), O_RDONLY|O_NONBLOCK|O_CREAT, 0644, &attr);
+    // open the mqueue, NOTE: we open it in blocking mode, 'Send' is now a blocking function
+    mq = mq_open(mqueue_name.c_str(), O_RDONLY|O_CREAT, 0644, &attr);
     if((mqd_t)-1 == mq) {
         logger.log_message("unable to open mqueue");
         return FAILURE;
@@ -97,7 +102,6 @@ RetType NetworkManager::Open() {
            return FAILURE;
         }
     }
-
 
     // at this point we need to close the socket regardless
     open = true;
@@ -139,7 +143,6 @@ RetType NetworkManager::Open() {
     //device_addr.sin_port = htons(vcm->port);
     //device_addr.sin_addr.s_addr = htons(vcm->addr);
 
-    // TODO maybe don't call bind unless the user says to specifically
     struct sockaddr_in myaddr;
     myaddr.sin_addr.s_addr = htons(INADDR_ANY); // use any interface we have available (likely just 1 ip)
     myaddr.sin_family = AF_INET;
@@ -147,6 +150,17 @@ RetType NetworkManager::Open() {
     int rc = bind(sockfd, (struct sockaddr*) &myaddr, sizeof(myaddr));
     if(rc) {
         logger.log_message("socket bind failed");
+        return FAILURE;
+    }
+
+    // setup the shared memory to hold the address from received packets
+    if(shm.init() == FAILURE) {
+        logger.log_message("failed to initialize shared memory");
+        return FAILURE;
+    }
+
+    if(shm.attach() == FAILURE) {
+        logger.log_message("failed to attach to shared memory");
         return FAILURE;
     }
 
@@ -184,30 +198,59 @@ RetType NetworkManager::Send() {
         return FAILURE;
     }
 
+    // TODO check the NmShm to see if we have an address we can send to that
+    // a receiving instance stripped, if we don't just return since we don't
+    // know where to send
+    // before unlocking anything, check a single byte that the receiving process
+    // will set everytime it gets a packet.
+    // The receiving end will just move on if the shm is locked, we don't want
+    // to lock the process out by trying to read if we know we don't have anything
+    // we can assume that a single byte is accessed atomically so we can just
+    // check that it's set before locking
+    // TODO this could still be an issue if we lock the receiving process out
+    // of shared memory and the IP changes, maybe do a writers preference lock?
+    // or just check a writers lock and a readers lock? if a reader locked it
+    // the receiver should wait, if it was a writer it should just not care
+    // or just don't care and don't expect the IP to change, and if it does we
+    // shouldn't call send
+
+    // ^^^ call the above before checking the mqueue, so we don't drop any
+    // messages if we already know we're going to get an error
+
     // check the mqueue
     ssize_t read = -1;
     read = mq_receive(mq, (char*)tx_buffer, NM_MAX_MSG_SIZE, NULL);
 
-
     // send the message from the mqueue out of the socket
     if(read != -1) {
-        // device address has not been set (still zeroed)
+
+        // get the last address we received from
+        // value will be set by whatever process calls receive
+        shm.get_addr(&device_addr);
+
+        // if the port is still zeroed we haven't received a packet yet
+        // which means we don't have a valid IP address to send to
         if(0 == device_addr.sin_port) {
-            logger.log_message("Receiver has not yet sent a packet providing a port \
-                            and address, failed to send UDP message");
+            logger.log_message("receiver has not yet sent a packet providing an"
+                                " address, failed to send UDP message");
             return FAILURE;
         }
+
+        // device_addr.sin_port = htons(vcm->port);
 
         ssize_t sent = -1;
         sent = sendto(sockfd, (char*)tx_buffer, read, 0,
             (struct sockaddr*)&device_addr, sizeof(device_addr)); // send to whatever we last received from
         if(sent == -1) {
-            logger.log_message("Failed to send UDP message");
+            logger.log_message("failed to send UDP message");
             return FAILURE;
         }
+
+        return SUCCESS;
     }
 
-    return SUCCESS;
+    logger.log_message("failed to retrieve message from mqueue");
+    return FAILURE;
 }
 
 RetType NetworkManager::Receive(size_t* received) {
@@ -225,6 +268,9 @@ RetType NetworkManager::Receive(size_t* received) {
         received = 0;
         return FAILURE; // no packet
     }
+
+    // update shared memory with the address we just receive from
+    shm.update(&device_addr);
 
     // // set in size to the size of the buffer if we received too much data for our buffer
     // if(n > MAX_MSG_SIZE) {

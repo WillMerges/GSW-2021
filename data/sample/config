@@ -3,13 +3,13 @@
 # this is what packet's coming from the receiver should look like
 # if measurements have the same name the latest one's size is used (furthest down in the file)!
 
-# these need to be set at some point
-# these are the address and port the receiver will send packets TO on the ground station
-# it does not matter what port/addr the receiver sends from as long as multiple receivers have different addresses/ports
-# currently address doesn't do anything since the ground station doesn't determine it's ip (only one network card, may have multiple receivers)
+# specify the protocol for packets to use (must be set at some point)
 protocol = udp
-addr = 127.0.0.1
-#port = 8081
+
+# specify the port the ground station should send packets TO
+# the IP will be stripped from telemetry packets
+#addr = 127.0.0.1
+port = 8089
 
 # device name
 name = sample_device
@@ -22,7 +22,7 @@ endianness = big
 TEST 4 0 0 int signed
 TEST2 2 0 0 float unsigned
 
-# telemetry packets, number is the port
+# telemetry packets, number is the port that the receiver will send packets TO on the ground station
 8081 {
 TEST
 TEST2

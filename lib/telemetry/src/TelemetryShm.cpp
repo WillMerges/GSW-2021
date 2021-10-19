@@ -13,12 +13,45 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <limits.h>
+#include <signal.h>
 #include "lib/dls/dls.h"
 #include "lib/telemetry/TelemetryShm.h"
 
 using namespace dls;
 
-// TODO make packet ids be uint32_ts to match VCM
+// how locking works right now (for individual packet):
+//  lock master block
+//  check each packet nonce against last saved nonces
+//      during this check save all the new nonces if any changed
+//
+//  if a nonce changed, return
+//  if a nonce didn't change and need to block
+//      unlock master block
+//      futex wait bitset on master nonce
+//      when wake up, check all the nonces again and repeat
+//
+//  why is this bad? one lock for all readers/writers even if working on different packet
+//      also, overflow isn't detected when looking for packet updates
+
+// potential other way:
+//  store the master nonce locally
+//      if it changes after the individual packet nonces are checked, we should recheck them
+//      only want to do this if we need to sleep the process
+//  check each packet nonce against last saved nonces
+//      don't need to lock here since if they change while we check, that's actually good
+//
+//  if a nonce changed
+//      lock individual locks for each packet
+//      return
+//
+//  if a nonce didn't change
+//      futex bitset on the master nonce we stored before and the master nonce
+//          writers should just change this every write so it knows to wake people up
+//
+//  why is this bad? still no way to tell who was updated more recently, I think each nonce should just get incremented and check for overflow, resetting the others if it happens
+//      locking all packets may be a bit harder actually, need to lock a lot of individual blocks
+//      could keep a master lock? i have absolutely no idea how that would work
+
 
 // locking is done with writers preference
 // https://en.wikipedia.org/wiki/Readers%E2%80%93writers_problem
@@ -77,14 +110,18 @@ TelemetryShm::~TelemetryShm() {
 RetType TelemetryShm::init(VCM* vcm) {
     num_packets = vcm->num_packets;
 
-    // creates and zero last_nonces
+    // create and zero last_nonces
     last_nonces = (uint32_t*)malloc(num_packets * sizeof(uint32_t));
     memset(last_nonces, 0, num_packets * sizeof(uint32_t));
 
+    // create master Shm object
+    // use an id guaranteed unused so we can use the same file name for all blocks
+    master_block = new Shm(vcm->config_file.c_str(), 0, sizeof(shm_info_t));
+
+    // create Shm objects for each telemetry packet
     packet_blocks = new Shm*[num_packets];
     info_blocks = new Shm*[num_packets];
 
-    // create Shm objects for each telemetry packet
     packet_info_t* packet;
     size_t i;
     for(i = 0; i < num_packets; i++) {
@@ -94,10 +131,6 @@ RetType TelemetryShm::init(VCM* vcm) {
         packet_blocks[i] = new Shm(vcm->config_file.c_str(), 2*(i+1), packet->size);
         info_blocks[i] = new Shm(vcm->config_file.c_str(), (2*i)+1, sizeof(uint32_t)); // holds one nonce
     }
-
-    // create master Shm object
-    // use an id guaranteed unused so we can use the same file name for master block as well
-    master_block = new Shm(vcm->config_file.c_str(), 2*(i+1), sizeof(shm_info_t));
 
     return SUCCESS;
 }
@@ -248,7 +281,7 @@ RetType TelemetryShm::destroy() {
     return SUCCESS;
 }
 
-RetType TelemetryShm::write(unsigned int packet_id, uint8_t* data) {
+RetType TelemetryShm::write(uint32_t packet_id, uint8_t* data) {
     MsgLogger logger("TelemetryShm", "write");
 
     if(packet_id >= num_packets) {
@@ -293,6 +326,7 @@ RetType TelemetryShm::write(unsigned int packet_id, uint8_t* data) {
     // syscall(SYS_futex, &(info->nonce), FUTEX_WAKE, INT_MAX, NULL, NULL, NULL); // TODO check return
 
 
+    // exit as a writer
     V(info->resource);
 
     P(info->wmutex);
@@ -305,7 +339,7 @@ RetType TelemetryShm::write(unsigned int packet_id, uint8_t* data) {
     return SUCCESS;
 }
 
-RetType TelemetryShm::clear(unsigned int packet_id, uint8_t val) {
+RetType TelemetryShm::clear(uint32_t packet_id, uint8_t val) {
     MsgLogger logger("TelemetryShm", "clear");
 
     if(packet_id >= num_packets) {
@@ -350,6 +384,7 @@ RetType TelemetryShm::clear(unsigned int packet_id, uint8_t val) {
     // some packets may have to share, the reader should check to see if their packet really updated
     syscall(SYS_futex, info->nonce, FUTEX_WAKE_BITSET, INT_MAX, NULL, NULL, 1 << (packet_id % 32));
 
+    // exit as a writer
     V(info->resource);
 
     P(info->wmutex);
@@ -453,7 +488,7 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, int timeou
         read_locked = false;
 
         if(read_mode == BLOCKING_READ) {
-            if(-1 == syscall(SYS_futex, info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, bitset)) {
+            if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, bitset)) {
                 // timed out or error
                 return FAILURE;
             } // otherwise we've been woken up
@@ -463,7 +498,6 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, int timeou
     }
 }
 
-// TODO packet nonces aren't being updated here which may cause problems
 // see about updating all nonces in read_unlock?? (maybe except master nonce since it's needed for locking)
 // ^^^ did the above, check if that's correct...
 // I THINK IT'S WRONG then next time you call lock and it was technically updated it blocks...
@@ -527,7 +561,7 @@ RetType TelemetryShm::read_lock(int timeout) {
             if(read_mode == BLOCKING_READ) {
                 // wait for any packet to be updated
                 // we don't need to loop here and check if it was our packet that updated since we don't care which packet updated
-                if(-1 == syscall(SYS_futex, info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, 0xFF)) {
+                if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, 0xFF)) {
                     // timeout or error
                     return FAILURE;
                 } // otherwise we've been woken up
@@ -584,7 +618,7 @@ RetType TelemetryShm::read_unlock(bool force) {
     return SUCCESS;
 }
 
-const uint8_t* TelemetryShm::get_buffer(unsigned int packet_id) {
+const uint8_t* TelemetryShm::get_buffer(uint32_t packet_id) {
     MsgLogger logger("TelemtryShm", "get_buffer");
 
     if(packet_id >= num_packets) {
@@ -600,7 +634,7 @@ const uint8_t* TelemetryShm::get_buffer(unsigned int packet_id) {
     return packet_blocks[packet_id]->data;
 }
 
-RetType TelemetryShm::packet_updated(unsigned int packet_id, bool* updated) {
+RetType TelemetryShm::packet_updated(uint32_t packet_id, bool* updated) {
     MsgLogger logger("TelemetryShm", "packet_updated");
 
     if(!read_locked) {
@@ -620,7 +654,7 @@ RetType TelemetryShm::packet_updated(unsigned int packet_id, bool* updated) {
 }
 
 
-RetType TelemetryShm::update_value(unsigned int packet_id, uint32_t* value) {
+RetType TelemetryShm::update_value(uint32_t packet_id, uint32_t* value) {
     MsgLogger logger("TelemetryShm", "update_value");
 
     if(packet_id >= num_packets) {
@@ -628,10 +662,10 @@ RetType TelemetryShm::update_value(unsigned int packet_id, uint32_t* value) {
         return FAILURE;
     }
 
-    // technically 'abs' returns a long int, but since we're only ever subtracting
-    // uin32_t's we'll never get a difference bigger than a uint32_t
-    // uint32_t master_nonce = *((uint32_t*)((shm_info_t*)master_block->data));
-    *value = labs((long int)(last_nonce - last_nonces[packet_id]));
+    // return difference between last master nonce and last packet nonce
+    // the smaller the difference, the more recent the packet
+    // a value of 0 indicates the packet was updated before the last call to 'read_lock'
+    *value = last_nonce - last_nonces[packet_id];
 
     return SUCCESS;
 }
@@ -652,9 +686,8 @@ RetType TelemetryShm::more_recent_packet(unsigned int* packet_ids, size_t num, u
             return FAILURE;
         }
 
-        // we can't just take the biggest nonce as the most recent since it could have overflowed and wrapped around
-        // instead we find the nonce with the smallest absolute value different from the master nonce (guaranteed to change every update)
-        diff = labs((long int)(last_nonce - last_nonces[i]));
+        // find the nonce with the smallest value different from the master nonce (guaranteed to change every update)
+        diff = last_nonce - last_nonces[i];
         if(diff < best_diff) {
             *recent = i;
         }
@@ -666,6 +699,77 @@ RetType TelemetryShm::more_recent_packet(unsigned int* packet_ids, size_t num, u
 void TelemetryShm::set_read_mode(read_mode_t mode) {
     read_mode = mode;
 }
+
+// uint8_t TelemetryShm::num_instances = 0;
+//
+// void TelemetryShm::add_signal_handlers() {
+//     // if this function has already been called, just mark we need to try and unlock again
+//     if(num_instances > 0) {
+//         num_instances++;
+//         return;
+//     }
+//
+//     const int signums[5] = {
+//                          SIGINT,
+//                          SIGTERM,
+//                          SIGSEGV,
+//                          SIGFPE,
+//                          SIGABRT
+//                         };
+//
+//     int signum;
+//     for(int i = 0; i < 5; i++) {
+//         signum = signums[i];
+//         sighandlers[signum] = signal(signum, TelemetryShm::sighandler);
+//     }
+//
+//     num_instances++;
+// }
+
+// void TelemetryShm::sighandler(int signum) {
+//     MsgLogger logger("TelemetryShm", "sighandler");
+//     logger.log_message("received signal, unlocking telemetry shared memory");
+//
+//     // get the locks from shared memory
+//     // TODO just put config file in a string vector and pop from that until it's empty, then call old signal handlers, then can get rid of num_instances variable
+//     Shm* master_block = new Shm(vcm->config_file.c_str(), 0, sizeof(shm_info_t));
+//     shm_info_t* info = (shm_info_t*)master_block->data;
+//
+//     // try and unlock shared memory blocks
+//     if(info != NULL) {
+//         // try and exit read locks
+//         sem_wait(&(info->rmutex));
+//         info->readers--;
+//         if(info->readers == 0) {
+//             sem_post(&(info->resource));
+//         }
+//         sem_post(&(info->rmutex));
+//
+//         // try and exit write locks
+//         sem_post(&(info->resource));
+//
+//         sem_wait(&(info->wmutex));
+//         info->writers--;
+//         if(info->writers == 0) {
+//             sem_post(&(info->readTry));
+//         }
+//
+//         sem_post(&(info->wmutex));
+//     }
+//
+//     num_instances--;
+//     if(num_instances > 0) { // need to try and unlock again recursively since we have another instance open
+//         sighandler(signum);
+//     } else { // base case
+//         // call the old signal handler
+//         void (TelemetryShm::* next_handler)(int) = sighandlers[signum];
+//
+//         if(next_handler != NULL) {
+//             // pass it on
+//             next_handler(signum);
+//         }
+//     }
+// }
 
 #undef P
 #undef V

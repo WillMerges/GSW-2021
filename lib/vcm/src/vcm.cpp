@@ -17,7 +17,8 @@ VCM::VCM() {
 
     // default values
     // addr = port = -1;
-    addr = 0; // 0.0.0.0 is an invalid address
+    // addr = 0; // 0.0.0.0 is an invalid address
+    port = -1;
     protocol = PROTOCOL_NOT_SET;
     // packet_size = 0;
     num_packets = 0;
@@ -54,8 +55,6 @@ VCM::VCM(std::string config_file) {
     this->config_file = config_file;
 
     // default values
-    // addr = port = -1;
-    addr = 0; // 0.0.0.0 is an invalid address
     protocol = PROTOCOL_NOT_SET;
     // packet_size = 0;
     num_packets = 0;
@@ -124,21 +123,21 @@ RetType VCM::init() {
 
         // port or addr or protocol line
         if(snd == "=") {
-            if(fst == "addr") {
+            // if(fst == "addr") {
+                // try {
+                //     // addr = std::stoi(third, NULL, 10);
+                //     inet_pton(AF_INET, third.c_str(), &addr);
+                // } catch(std::invalid_argument& ia) {
+                //     logger.log_message("Invalid addr in line: " + line);
+                //     return FAILURE;
+                // }
+            if(fst == "port") {
                 try {
-                    // addr = std::stoi(third, NULL, 10);
-                    inet_pton(AF_INET, third.c_str(), &addr);
+                    port = std::stoi(third, NULL, 10);
                 } catch(std::invalid_argument& ia) {
-                    logger.log_message("Invalid addr in line: " + line);
+                    logger.log_message("Invalid port in line: " + line);
                     return FAILURE;
                 }
-            // } else if(fst == "port") {
-            //     try {
-            //         port = std::stoi(third, NULL, 10);
-            //     } catch(std::invalid_argument& ia) {
-            //         logger.log_message("Invalid port in line: " + line);
-            //         return FAILURE;
-            //     }
             } else if(fst == "protocol") {
                 if(third == "udp") {
                     protocol = UDP;
@@ -271,9 +270,9 @@ RetType VCM::init() {
         logger.log_message("Config file missing protocol: " + config_file);
         return FAILURE;
     // } else if(protocol == UDP && (addr == -1 || port == -1)) {
-    } else if(protocol == UDP && addr == 0) { // 0.0.0.0 is an invalid address (and the default)
+    } else if(protocol == UDP && port == -1) {
         // logger.log_message("Config file missing port or addr for UDP protocol: " + config_file);
-        logger.log_message("Config file missing addr for UDP protocol: " + config_file);
+        logger.log_message("Config file missing port for UDP protocol: " + config_file);
         return FAILURE;
     }
 

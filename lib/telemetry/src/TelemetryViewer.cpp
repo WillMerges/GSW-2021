@@ -124,7 +124,7 @@ RetType TelemetryViewer::add(std::string& measurement) {
     return SUCCESS;
 }
 
-RetType TelemetryViewer::add(unsigned int packet_id) {
+RetType TelemetryViewer::add(uint32_t packet_id) {
     if(packet_id < vcm->num_packets) {
         for(size_t i = 0; i < num_packets; i++) {
             if(packet_ids[i] == packet_id) {

@@ -10,6 +10,7 @@
 #ifndef TELVIEW_H
 #define TELVIEW_H
 
+#include <stdint.h>
 #include "lib/telemetry/TelemetryShm.h"
 #include "lib/vcm/vcm.h"
 #include "common/types.h"
@@ -41,7 +42,7 @@ public:
     RetType add(std::string& measurement);
 
     // add all the measurements in a single telemetry packet to be viewable
-    RetType add(unsigned int packet_id);
+    RetType add(uint32_t packet_id);
 
     // update mode
     typedef enum {

@@ -131,7 +131,7 @@ int main(int argc, char* argv[]) {
     if(config_file == "") {
         vcm = new VCM(); // use default config file
     } else {
-        vcm = new VCM(config_file); // use specified config file
+        vcm = new VCM(gsw_home + "/" + config_file); // use specified config file
     }
 
     if(FAILURE == vcm->init()) {
