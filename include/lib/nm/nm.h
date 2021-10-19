@@ -31,7 +31,7 @@ namespace nm {
         // a receive attempt will timeout after 'rx_timeout' milliseconds
         // if 'rx_timeout' is set to -1 (or anything less than 0), all calls to receive will be blocking
         NetworkManager(uint16_t port, const char* name, uint8_t* buffer,
-                    size_t size, ssize_t rx_timeout = -1);
+                    size_t size, uint32_t* multicast_addr = NULL, ssize_t rx_timeout = -1);
 
         // destructor
         ~NetworkManager();
@@ -69,6 +69,8 @@ namespace nm {
         bool open;
 
         NmShm shm;
+
+        uint32_t* multicast_addr;
     };
 
     // allows a process to queue a message to send

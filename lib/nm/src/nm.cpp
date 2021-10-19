@@ -16,7 +16,7 @@ using namespace dls;
 using namespace shm;
 using namespace vcm;
 
-NetworkManager::NetworkManager(uint16_t port, const char* name, uint8_t* buffer, size_t size, ssize_t rx_timeout) {
+NetworkManager::NetworkManager(uint16_t port, const char* name, uint8_t* buffer, size_t size, uint32_t* multicast_addr, ssize_t rx_timeout) {
     mqueue_name = "/";
     mqueue_name += name;
 
@@ -32,6 +32,8 @@ NetworkManager::NetworkManager(uint16_t port, const char* name, uint8_t* buffer,
     if(buffer == NULL) {
         size = 0;
     }
+
+    this->multicast_addr = multicast_addr;
 
     // in_buffer = new char[vcm->packet_size];
     // in_size = 0;
@@ -151,6 +153,20 @@ RetType NetworkManager::Open() {
     if(rc) {
         logger.log_message("socket bind failed");
         return FAILURE;
+    }
+
+    // if we have a multicast address, join the multicast group
+    // this should an IGMP packet to the router (if there is one)
+    // for a simple network like point to point, the packet is likely just dropped at the receiver
+    if(multicast_addr != NULL) {
+        struct ip_mreqn mreq;
+        mreq.imr_multiaddr.s_addr = htonl(*multicast_addr);
+        mreq.imr_address.s_addr = htons(INADDR_ANY);
+        mreq.imr_ifindex = 0;
+        if(setsockopt(sockfd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0) {
+            logger.log_message("failed to join multicast group");
+            return FAILURE;
+        }
     }
 
     // setup the shared memory to hold the address from received packets
