@@ -7,9 +7,13 @@
 protocol = udp
 
 # specify the port the ground station should send packets TO
-# the IP will be stripped from telemetry packets
-#addr = 127.0.0.1
-port = 8089
+# ports are in the range 1 to (2^16 - 1)
+# the IP address to send to will be stripped from packets from the receiver
+port = 8080
+
+# set a multicast address that the receiver will send packets to (ground software should listen on this address)
+# optional, if not set will receive at IP address of default interface
+multicast = 224.0.0.1
 
 # device name
 name = sample_device

@@ -1,5 +1,8 @@
 #include <iostream>
 #include <string>
+#include <string.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include "lib/vcm/vcm.h"
 
 using namespace vcm;
@@ -26,6 +29,15 @@ int main() {
         std::cout << "little endian\n";
     } else if(vcm.sys_endianness == GSW_BIG_ENDIAN) {
         std::cout << "big endian\n";
+    }
+
+    std::cout << "destination port: " << vcm.port << "\n";
+
+    if(vcm.multicast_addr != 0) {
+        struct in_addr addr;
+        memset(&addr, 0, sizeof(addr));
+        addr.s_addr = vcm.multicast_addr;
+        std::cout << "multicast address: " << inet_ntoa(addr) << "\n";
     }
 
     std::cout << "\npackets: \n";
