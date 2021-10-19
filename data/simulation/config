@@ -1,7 +1,7 @@
 # simulation
 
 protocol = udp
-port = 8089
+port = 8080
 
 name = sim_v1
 

@@ -47,21 +47,27 @@ RetType NmShm::create() {
     MsgLogger logger("NmShm", "create");
 
     // create shared memory
-    RetType ret = shm->create();
-
-    if(SUCCESS == ret) {
-        // zero shared memory
-        memset((void*)shm->data, 0, sizeof(nm_shm_t));
-
-        // initialize the semaphore
-        nm_shm_t* data = (nm_shm_t*)shm->data;
-        if(0 != sem_init(&(data->sem), 1, 1)) {
-            logger.log_message("Failed to initialize semaphore");
-            return FAILURE;
-        }
+    if(shm->create() != SUCCESS) {
+        logger.log_message("Unable to create shared memory");
+        return FAILURE;
     }
 
-    return ret;
+    if(shm->attach() != SUCCESS) {
+        logger.log_message("Unable to attach to shared memory");
+        return FAILURE;
+    }
+
+    // zero shared memory
+    memset((void*)shm->data, 0, sizeof(nm_shm_t));
+
+    // initialize the semaphore
+    nm_shm_t* data = (nm_shm_t*)shm->data;
+    if(0 != sem_init(&(data->sem), 1, 1)) {
+        logger.log_message("Failed to initialize semaphore");
+        return FAILURE;
+    }
+
+    return SUCCESS;
 }
 
 RetType NmShm::destroy() {
