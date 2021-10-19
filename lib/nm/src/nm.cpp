@@ -16,7 +16,7 @@ using namespace dls;
 using namespace shm;
 using namespace vcm;
 
-NetworkManager::NetworkManager(uint16_t port, const char* name, uint8_t* buffer, size_t size, uint32_t* multicast_addr, ssize_t rx_timeout) {
+NetworkManager::NetworkManager(uint16_t port, const char* name, uint8_t* buffer, size_t size, uint32_t multicast_addr, ssize_t rx_timeout) {
     mqueue_name = "/";
     mqueue_name += name;
 
@@ -146,7 +146,7 @@ RetType NetworkManager::Open() {
     //device_addr.sin_addr.s_addr = htons(vcm->addr);
 
     struct sockaddr_in myaddr;
-    myaddr.sin_addr.s_addr = htons(INADDR_ANY); // use any interface we have available (likely just 1 ip)
+    myaddr.sin_addr.s_addr = htonl(INADDR_ANY); // use any interface we have available (likely just 1 ip)
     myaddr.sin_family = AF_INET;
     myaddr.sin_port = htons(port); // bind OUR port (we receive and send from this port instead of letting the OS pick)
     int rc = bind(sockfd, (struct sockaddr*) &myaddr, sizeof(myaddr));
@@ -158,10 +158,10 @@ RetType NetworkManager::Open() {
     // if we have a multicast address, join the multicast group
     // this should an IGMP packet to the router (if there is one)
     // for a simple network like point to point, the packet is likely just dropped at the receiver
-    if(multicast_addr != NULL) {
+    if(multicast_addr != 0) {
         struct ip_mreqn mreq;
-        mreq.imr_multiaddr.s_addr = htonl(*multicast_addr);
-        mreq.imr_address.s_addr = htons(INADDR_ANY);
+        mreq.imr_multiaddr.s_addr = htonl(multicast_addr);
+        mreq.imr_address.s_addr = htonl(INADDR_ANY);
         mreq.imr_ifindex = 0;
         if(setsockopt(sockfd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0) {
             logger.log_message("failed to join multicast group");

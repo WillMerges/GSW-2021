@@ -30,8 +30,9 @@ namespace nm {
         // if buffer is NULL or size is 0, calling 'Receive' discards the packet
         // a receive attempt will timeout after 'rx_timeout' milliseconds
         // if 'rx_timeout' is set to -1 (or anything less than 0), all calls to receive will be blocking
+        // if a multicast address other than 0 is specified, the network manager will listen on that group
         NetworkManager(uint16_t port, const char* name, uint8_t* buffer,
-                    size_t size, uint32_t* multicast_addr = NULL, ssize_t rx_timeout = -1);
+                    size_t size, uint32_t multicast_addr = 0, ssize_t rx_timeout = -1);
 
         // destructor
         ~NetworkManager();
@@ -70,7 +71,7 @@ namespace nm {
 
         NmShm shm;
 
-        uint32_t* multicast_addr;
+        uint32_t multicast_addr;
     };
 
     // allows a process to queue a message to send
