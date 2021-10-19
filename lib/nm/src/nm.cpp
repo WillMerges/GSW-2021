@@ -28,6 +28,11 @@ NetworkManager::NetworkManager(uint16_t port, const char* name, uint8_t* buffer,
 
     open = false;
 
+    // if we have an invalid buffer, set size to 0
+    if(buffer == NULL) {
+        size = 0;
+    }
+
     // in_buffer = new char[vcm->packet_size];
     // in_size = 0;
 
@@ -78,7 +83,7 @@ RetType NetworkManager::Open() {
     attr.mq_msgsize = NM_MAX_MSG_SIZE; // this limits how many bytes we can send
     attr.mq_curmsgs = 0;
 
-    // TODO we may want to block on this
+    // open the mqueue, NOTE: we open it in blocking mode, 'Send' is now a blocking function
     mq = mq_open(mqueue_name.c_str(), O_RDONLY|O_CREAT, 0644, &attr);
     if((mqd_t)-1 == mq) {
         logger.log_message("unable to open mqueue");
@@ -97,7 +102,6 @@ RetType NetworkManager::Open() {
            return FAILURE;
         }
     }
-
 
     // at this point we need to close the socket regardless
     open = true;
@@ -227,7 +231,7 @@ RetType NetworkManager::Send() {
         // if the port is still zeroed we haven't received a packet yet
         // which means we don't have a valid IP address to send to
         if(0 == device_addr.sin_port) {
-            logger.log_message("Receiver has not yet sent a packet providing an"
+            logger.log_message("receiver has not yet sent a packet providing an"
                                 " address, failed to send UDP message");
             return FAILURE;
         }
@@ -238,14 +242,14 @@ RetType NetworkManager::Send() {
         sent = sendto(sockfd, (char*)tx_buffer, read, 0,
             (struct sockaddr*)&device_addr, sizeof(device_addr)); // send to whatever we last received from
         if(sent == -1) {
-            logger.log_message("Failed to send UDP message");
+            logger.log_message("failed to send UDP message");
             return FAILURE;
         }
 
         return SUCCESS;
     }
 
-    logger.log_message("Failed to retreieve message from mqueue");
+    logger.log_message("failed to retrieve message from mqueue");
     return FAILURE;
 }
 
