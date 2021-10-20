@@ -87,7 +87,7 @@ void execute(size_t packet_id, packet_info_t* packet) {
     MsgLogger logger(decom_id.c_str(), "execute");
 
     // set packet name to use for logging messages and network manager name
-    std::string packet_name = veh->device + "[" + std::to_string(packet_id) + "]";
+    std::string packet_name = veh->device + "(" + std::to_string(packet_id) + ")";
 
     // create a receive buffer
     uint8_t* buffer = new uint8_t[packet->size];
