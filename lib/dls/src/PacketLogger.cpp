@@ -33,3 +33,103 @@ RetType PacketLogger::log_packet(unsigned char* buffer, size_t size) {
 
     return ret;
 }
+
+packet_record_t* retrieve_record(std::istream& f) {
+    // get the timestamp
+    std::string* timestamp = new std::string();
+
+    char c = 0;
+    while(1) {
+        f.read(&c, sizeof(char));
+
+        // some error or EOF
+        if(!f) {
+            return NULL;
+        }
+
+        if(c == '[') {
+            // we found a start of a record in the file
+            while(f) {
+                f.read(&c, sizeof(char));
+
+                if(c == ']') {
+                    // got the timestamp
+                    break;
+                }
+
+                *timestamp += c;
+            }
+        }
+    }
+
+    // get the device name
+    std::string* device = new std::string();
+
+    f.read(&c, sizeof(char));
+    if(!f || c != '<') {
+        return NULL;
+    }
+
+    while(1) {
+        f.read(&c, sizeof(char));
+
+        if(!f) {
+            return NULL;
+        }
+
+        if(c == '>') {
+            // all done
+            break;
+        }
+
+        *device += c;
+    }
+
+    // get the size of the packet
+    uint8_t buff[4];
+    f.read((char*)buff, 4);
+
+    if(!f) {
+        return NULL;
+    }
+
+    uint32_t size = *((uint32_t*)buff);
+
+    // read the rest of the packet
+    uint8_t* data = (uint8_t*)malloc(size);
+    f.read((char*)data, size);
+
+    if(!f) {
+        return NULL;
+    }
+
+    // put together the record to return
+    packet_record_t* rec = (packet_record_t*)malloc(sizeof(packet_record_t));
+    rec->timestamp = timestamp;
+    rec->device = device;
+    rec->size = size;
+    rec->data = data;
+
+    return rec;
+}
+
+void free_record(packet_record_t* packet) {
+    if(!packet) {
+        // nothing to free, NULL pointer
+        return;
+    }
+
+    if(packet->timestamp != NULL) {
+        delete packet->timestamp;
+    }
+
+    if(packet->device != NULL) {
+        delete packet->device;
+    }
+
+    if(packet->data != NULL) {
+        free(packet->data);
+    }
+
+    free(packet);
+}

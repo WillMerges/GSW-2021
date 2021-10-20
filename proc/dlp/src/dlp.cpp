@@ -111,8 +111,8 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
             }
             if(verbose) {
                 if(binary) {
-                    gettimeofday(&curr_time, NULL);
-                    std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
+                    // gettimeofday(&curr_time, NULL);
+                    // std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
                     // printf("%s received telemetry packet\n", timestamp.c_str());
                 } else {
                     printf("%s\n", buffer);
