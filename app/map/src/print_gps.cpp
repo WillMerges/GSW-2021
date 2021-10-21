@@ -5,8 +5,8 @@
 #include <vector>
 #include <stdint.h>
 #include <unistd.h>
+#include <csignal>
 #include "lib/vcm/vcm.h"
-// #include "lib/shm/shm.h"
 #include "lib/telemetry/TelemetryViewer.h"
 #include "lib/dls/dls.h"
 #include "lib/convert/convert.h"
@@ -30,10 +30,36 @@ using namespace shm;
 using namespace dls;
 using namespace convert;
 
+
+bool killed = false;
+
+#define NUM_SIGNALS 5
+int signals[NUM_SIGNALS] = {
+                            SIGINT,
+                            SIGTERM,
+                            SIGSEGV,
+                            SIGFPE,
+                            SIGABRT
+                        };
+
+void sighandler(int signum) {
+    killed = true;
+
+    // shut the compiler up
+    int garbage = signum;
+    garbage = garbage + 1;
+}
+
+
 int main(int argc, char* argv[]) {
     MsgLogger logger("print_gps");
 
     logger.log_message("starting print_gps");
+
+    // add signal handlers
+    for(int i = 0; i < NUM_SIGNALS; i++) {
+        signal(signals[i], sighandler);
+    }
 
     std::string config_file = "";
 
@@ -108,6 +134,10 @@ int main(int argc, char* argv[]) {
     std::string alt;
 
     while(1) {
+        if(killed) {
+            exit(0);
+        }
+
         // update telemetry
         if(FAILURE == tlm.update()) {
             logger.log_message("failed to update telemetry");

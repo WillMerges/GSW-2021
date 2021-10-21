@@ -18,7 +18,6 @@
 #include <arpa/inet.h>
 #include <csignal>
 #include "lib/vcm/vcm.h"
-// #include "lib/shm/shm.h"
 #include "lib/telemetry/TelemetryViewer.h"
 #include "lib/dls/dls.h"
 #include "lib/convert/convert.h"
@@ -39,13 +38,18 @@ using namespace convert;
 
 int sockfd;
 unsigned char sock_open = 0;
+bool killed = false;
 
 void sighandler(int signum) {
     if(sock_open) {
         close(sockfd);
     }
 
-    exit(signum);
+    killed = true;
+
+    // shut the compiler up
+    int garbage = signum;
+    garbage = garbage + 1;
 }
 
 int main(int argc, char* argv[]) {
@@ -128,6 +132,10 @@ int main(int argc, char* argv[]) {
 
     // main loop
     while(1) {
+        if(killed) {
+            exit(0);
+        }
+
         // update telemetry
         if(FAILURE == tlm.update()) {
             logger.log_message("failed to update telemetry");

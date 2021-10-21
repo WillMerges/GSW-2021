@@ -156,29 +156,6 @@ private:
     Shm** packet_blocks; // list of blocks holding raw telemetry data
     Shm** info_blocks; // list of blocks holding uint32_t nonces TODO rename this to something better lol
     Shm* master_block; // holds a single shm_info_t for locking
-
-    // add a signal handler that tries to unlock all shared memory
-    // avoids a process dying while it has shared memory locked and locking every
-    // other process out
-    // will call the current set signal handler if there is one after unlocking
-    // this should be called in the constructor so each instance adds signal handlers
-    // NOTE: should not change signal handlers after calling this function!
-    // static void add_signal_handlers();
-
-    // previous signal handler functions
-    // keys are signal number values are function pointer
-    // static std::unordered_map<int, void (*)(int)> sighandlers;
-
-    // all instances of TelemetryShm use the same sighandler function
-    // so we need to keep track of how many times we need to try and unlock everything
-    // static uint8_t num_instances;
-
-    // signal handler function
-    // tries to unlock shared memory 'num_instances' number of times and then
-    // calls previously set signal handlers
-    // TODO it's totally possible we accidentally unlock shared memory someone else has locked
-    // when a process dies, that's the tradeoff. That's acceptable because the alternative is locking everyone out of shared memory
-    // static void sighandler(int signum);
 };
 
 #endif

@@ -6,8 +6,8 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <float.h>
+#include <csignal>
 #include "lib/vcm/vcm.h"
-// #include "lib/shm/shm.h"
 #include "lib/telemetry/TelemetryViewer.h"
 #include "lib/dls/dls.h"
 #include "lib/convert/convert.h"
@@ -46,6 +46,26 @@ using namespace convert;
 
 // GSW_HOME environment variable
 std::string gsw_home;
+
+bool killed = false;
+
+#define NUM_SIGNALS 5
+int signals[NUM_SIGNALS] = {
+                            SIGINT,
+                            SIGTERM,
+                            SIGSEGV,
+                            SIGFPE,
+                            SIGABRT
+                        };
+
+void sighandler(int signum) {
+    killed = true;
+
+    // shut the compiler up
+    int garbage = signum;
+    garbage = garbage + 1;
+}
+
 
 void report_alt(float alt) {
     char buff[1024];
@@ -99,6 +119,11 @@ int main(int argc, char* argv[]) {
     MsgLogger logger("voice_report");
 
     logger.log_message("starting voice_report");
+
+    // add signal handlers
+    for(int i = 0; i < NUM_SIGNALS; i++) {
+        signal(signals[i], sighandler);
+    }
 
     std::string config_file = "";
 
@@ -199,6 +224,10 @@ int main(int argc, char* argv[]) {
     clock_t elapsed;
 
     while(1) {
+        if(killed) {
+            exit(0);
+        }
+
         // update telemetry
         if(SUCCESS != tlm.update()) {
             if(started) {
