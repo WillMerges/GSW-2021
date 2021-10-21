@@ -18,9 +18,9 @@ RetType PacketLogger::log_packet(unsigned char* buffer, size_t size) {
                                std::to_string(curr_time.tv_usec) + "]";
 
     header += "<" + device_name + ">";
-    uint32_t len = strlen(header.c_str()) * sizeof(char); // want to get actual # of bytes
+    size_t len = strlen(header.c_str()) * sizeof(char); // want to get actual # of bytes
 
-    uint32_t out_size = len + size + sizeof(uint32_t);
+    size_t out_size = len + size + sizeof(size_t);
 
     char* out_buff = new char[out_size];
 
@@ -34,18 +34,21 @@ RetType PacketLogger::log_packet(unsigned char* buffer, size_t size) {
     return ret;
 }
 
-static packet_record_t* retrieve_record(std::istream& f) {
+packet_record_t* dls::retrieve_record(std::istream& f) {
     // get the timestamp
     std::string* timestamp = new std::string();
 
     char c = 0;
-    while(1) {
-        f.read(&c, sizeof(char));
-
-        // some error or EOF
-        if(!f) {
+    bool done = false;
+    while(!done) {
+        if(!f.read(&c, sizeof(char))) {
             return NULL;
         }
+
+        // some error or EOF
+        // if(!f) {
+        //     return NULL;
+        // }
 
         if(c == '[') {
             // we found a start of a record in the file
@@ -58,6 +61,7 @@ static packet_record_t* retrieve_record(std::istream& f) {
                 }
 
                 *timestamp += c;
+                done = true;
             }
         }
     }
@@ -86,14 +90,14 @@ static packet_record_t* retrieve_record(std::istream& f) {
     }
 
     // get the size of the packet
-    uint8_t buff[4];
-    f.read((char*)buff, 4);
+    uint8_t buff[sizeof(size_t)];
+    f.read((char*)buff, sizeof(size_t));
 
     if(!f) {
         return NULL;
     }
 
-    uint32_t size = *((uint32_t*)buff);
+    size_t size = *((size_t*)buff);
 
     // read the rest of the packet
     uint8_t* data = (uint8_t*)malloc(size);
@@ -113,7 +117,7 @@ static packet_record_t* retrieve_record(std::istream& f) {
     return rec;
 }
 
-static void free_record(packet_record_t* packet) {
+void dls::free_record(packet_record_t* packet) {
     if(!packet) {
         // nothing to free, NULL pointer
         return;

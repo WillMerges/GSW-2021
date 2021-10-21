@@ -35,7 +35,11 @@ ${GSW_HOME}/proc/shmctl/shmctl -off
 echo "stopping log FIFO"
 ${GSW_HOME}/log/fifo.sh -delete
 
-# save the logs (leave the most recent in GSW_HOME/log/system.log and telemetry.log)
+# convert logs to CSV
+echo "converting logs to CSV"
+${GSW_HOME}/proc/tool/log2csv/log2csv ${GSW_HOME}/log
+
+# save the logs (leave the most recent logs in the log directory)
 echo "saving logs"
 TIMESTAMP=`date +%Y-%m-%d_%H-%M-%S`
 cd ${GSW_HOME}/log

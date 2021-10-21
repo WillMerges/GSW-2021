@@ -89,10 +89,14 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
         }
 
         if(!started) {
-            gettimeofday(&curr_time, NULL);
-            std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
-            file << timestamp << " Starting DLP\n";
-            file.flush();
+            if(!binary) {
+                gettimeofday(&curr_time, NULL);
+                std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "."
+                                        + std::to_string(curr_time.tv_usec) + "]";
+                file << timestamp << " Starting DLP\n";
+                file.flush();
+            }
+
             started = true;
         }
 
@@ -106,9 +110,11 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
             if(read == -1) {
                 printf("Read failed from MQueue: %s\n", queue_name);
             }
+
             if(!binary) {
                 buffer[read] = '\0';
             }
+
             if(verbose) {
                 if(binary) {
                     // gettimeofday(&curr_time, NULL);

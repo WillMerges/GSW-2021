@@ -81,37 +81,38 @@ int main(int argc, char** argv) {
     // write out the first entry
     of << "timestamp,packet id,";
     for(std::string m : veh->measurements) {
-        of << m;
+        of << m << ",";
     }
     of << '\n';
+    of.flush();
 
     // open the first input file
     std::string base_filename = dir;
-    base_filename += "/system.log";
+    base_filename += "/telemetry.log";
     int file_index = 0;
 
     std::string filename = base_filename;
 
     while(1) {
-        std::ifstream f(filename.c_str());
+        std::ifstream f(filename.c_str(), std::ifstream::binary);
 
         // file doesn't exist
-        if(!f.good()) {
+        if(!f) {
+            printf("No input file: %s\n", filename.c_str());
             break;
         }
 
-        f.open(filename.c_str(), std::ios::in | std::ios::binary);
+        // f.open(filename.c_str(), std::ifstream::binary);
 
-        if(!f.is_open()) {
-            printf("Failed to open input file: %s\n", filename.c_str());
-            break;
-        }
+        // if(!f.is_open()) {
+        //     break;
+        // }
 
         packet_record_t* rec = NULL;
 
         // should hit eof on last case
         while(!f.eof()) {
-            rec = PacketLogger::retrieve_record(f);
+            rec = retrieve_record(f);
 
             if(rec == NULL) {
                 // something bad happened, try and parse the next record
@@ -119,10 +120,17 @@ int main(int argc, char** argv) {
                 continue;
             }
 
-            char garbage[512];
-            uint32_t packet_id;
-            if(EOF == sscanf(rec->device->c_str(), "%s(%u)%s",
-                                    garbage, &packet_id, garbage)) {
+            // set to some large number, want it to break if scanf has a bad string
+            uint32_t packet_id = 1 << 31;
+
+            size_t first = rec->device->find('(');
+            size_t second = rec->device->find(')');
+            if(first == std::string::npos || second == std::string::npos) {
+                printf("packet id not found in device name in file: %s\n", filename.c_str());
+            }
+
+            std::string id_str = rec->device->substr(first, second);
+            if(EOF == sscanf(id_str.c_str(), "(%u)", &packet_id)) {
                 printf("scanf error in file: %s\n", filename.c_str());
 
                 // look for the next record
@@ -133,6 +141,9 @@ int main(int argc, char** argv) {
                 printf("size mismatch in file: %s\n", filename.c_str());
                 break;
             }
+
+            // write out the record to the CSV file
+            of << rec->timestamp->c_str() << "," << std::to_string(packet_id) << ",";
 
             std::string val;
             measurement_info_t* meas = NULL;
@@ -157,12 +168,14 @@ int main(int argc, char** argv) {
                 }
 
                 // NOTE: we leave an extra comma on each line, but who cares
-                of << val << 'c';
+                of << val << ',';
+                of.flush();
             }
 
             of << '\n';
+            of.flush();
 
-            PacketLogger::free_record(rec);
+            free_record(rec);
 
             // causes the EOF flag to be set if the next character is eof
             // this should happen on the last packet unless we mess something up
@@ -182,5 +195,5 @@ int main(int argc, char** argv) {
     of.close();
 
     printf("completed parsing\n");
-    printf("file written to: %s", of_name.c_str());
+    printf("file written to: %s\n", of_name.c_str());
 }

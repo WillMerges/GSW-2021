@@ -7,11 +7,11 @@ CC = gcc
 
 OPTIONS +=
 
-CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
-CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
+CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -ggdb
+CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -ggdb
 LDFLAGS = -L$(GSW_HOME)/lib/bin/ -Wl,-rpath=$(GSW_HOME)/lib/bin/
 
-LIBS = -ldls -lvcm -lconvert
+LIBS = -lvcm -ldls -lconvert
 
 CPP_FILES := $(wildcard src/*.cpp)
 C_FILES := $(wildcard src/*.c)
