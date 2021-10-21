@@ -35,10 +35,10 @@ namespace dls {
         // f's seek pointer should be at the start of a new logged packet
         // returns NULL on failure
         // to free memory from a packet_record_t, call 'free_record'
-        packet_record_t* retrieve_record(std::istream& f);
+        static packet_record_t* retrieve_record(std::istream& f);
 
         // frees the memory used by a packet record
-        void free_record(packet_record_t* packet);
+        static void free_record(packet_record_t* packet);
     private:
         std::string device_name;
     };

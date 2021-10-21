@@ -34,7 +34,7 @@ RetType PacketLogger::log_packet(unsigned char* buffer, size_t size) {
     return ret;
 }
 
-packet_record_t* retrieve_record(std::istream& f) {
+static packet_record_t* retrieve_record(std::istream& f) {
     // get the timestamp
     std::string* timestamp = new std::string();
 
@@ -113,7 +113,7 @@ packet_record_t* retrieve_record(std::istream& f) {
     return rec;
 }
 
-void free_record(packet_record_t* packet) {
+static void free_record(packet_record_t* packet) {
     if(!packet) {
         // nothing to free, NULL pointer
         return;

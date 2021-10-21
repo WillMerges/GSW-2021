@@ -13,9 +13,14 @@
 
 #include "lib/vcm/vcm.h"
 #include "lib/dls/dls.h"
+#include "lib/convert/convert.h"
+#include <string>
+#include <vector>
+#include <unordered_map>
 
 using namespace vcm;
 using namespace dls;
+using namespace convert;
 
 int main(int argc, char** argv) {
     if(argc < 2) {
@@ -39,10 +44,11 @@ int main(int argc, char** argv) {
     }
 
     // stores list of measurements for each packet id
+    // measurement names map to offset in packet
     // assumes packet id's are sequential and ascending by 1
-    std::vector<std::vector<measurement_info_t>> packets;
+    std::vector<std::unordered_map<std::string, size_t>> packets;
 
-    std::vector<measurement_info_t> temp;
+    std::unordered_map<std::string, size_t> temp;
     measurement_info_t* meas = NULL;
 
     // find what measurements belong in each packet
@@ -52,7 +58,7 @@ int main(int argc, char** argv) {
             for(location_info_t loc : meas->locations) {
                 if(loc.packet_index == i) {
                     // this measurement is in packet with index i
-                    temp.push_back(*meas);
+                    temp[s] = loc.offset;
                 }
             }
         }
@@ -61,9 +67,120 @@ int main(int argc, char** argv) {
         temp.clear();
     }
 
-    // TODO
-    // go through each file in directory
-    // open file, call retrieve_record on packet
-    // for each record, get which packet id, then extract all measurements
-    // then write each measurement to CSV file
+    // open the output file
+    std::ofstream of;
+    std::string of_name = dir;
+    of_name += "/log.csv";
+    of.open(of_name.c_str(), std::ios::out | std::ios::trunc);
+
+    if(!of.is_open()) {
+        printf("Failed to open output file: %s\n", of_name.c_str());
+        return -1;
+    }
+
+    // write out the first entry
+    of << "timestamp,packet id,";
+    for(std::string m : veh->measurements) {
+        of << m;
+    }
+    of << '\n';
+
+    // open the first input file
+    std::string base_filename = dir;
+    base_filename += "/system.log";
+    int file_index = 0;
+
+    std::string filename = base_filename;
+
+    while(1) {
+        std::ifstream f(filename.c_str());
+
+        // file doesn't exist
+        if(!f.good()) {
+            break;
+        }
+
+        f.open(filename.c_str(), std::ios::in | std::ios::binary);
+
+        if(!f.is_open()) {
+            printf("Failed to open input file: %s\n", filename.c_str());
+            break;
+        }
+
+        packet_record_t* rec = NULL;
+
+        // should hit eof on last case
+        while(!f.eof()) {
+            rec = PacketLogger::retrieve_record(f);
+
+            if(rec == NULL) {
+                // something bad happened, try and parse the next record
+                printf("Unexpected failure to parse record in file: %s\n", filename.c_str());
+                continue;
+            }
+
+            char garbage[512];
+            uint32_t packet_id;
+            if(EOF == sscanf(rec->device->c_str(), "%s(%u)%s",
+                                    garbage, &packet_id, garbage)) {
+                printf("scanf error in file: %s\n", filename.c_str());
+
+                // look for the next record
+                continue;
+            }
+
+            if(rec->size != veh->packets[packet_id]->size) {
+                printf("size mismatch in file: %s\n", filename.c_str());
+                break;
+            }
+
+            std::string val;
+            measurement_info_t* meas = NULL;
+            uint8_t* data = NULL;
+            std::unordered_map<std::string, size_t>* packet_map = NULL;
+
+            for(std::string m : veh->measurements) {
+                val = "";
+
+                packet_map = &(packets[packet_id]);
+                if(packet_map->find(m) != packet_map->end()) {
+                    // this measurement is in this record, add it to the csv
+                    meas = veh->get_info(m);
+                    data = rec->data + (*packet_map)[m];
+
+                    if(convert_str(veh, meas, data, &val) != SUCCESS) {
+                        printf("failed to convert value in file: %s\n", filename.c_str());
+                        val = "";
+                        // try the next measurement
+                        continue;
+                    }
+                }
+
+                // NOTE: we leave an extra comma on each line, but who cares
+                of << val << 'c';
+            }
+
+            of << '\n';
+
+            PacketLogger::free_record(rec);
+
+            // causes the EOF flag to be set if the next character is eof
+            // this should happen on the last packet unless we mess something up
+            // if we did mess something up, the conversion should fail at some point
+            // and then we drop the file and move on
+            f.peek();
+        }
+
+        f.close();
+
+        // make the name for the next file
+        filename = base_filename;
+        file_index++;
+        filename += std::to_string(file_index);
+    }
+
+    of.close();
+
+    printf("completed parsing\n");
+    printf("file written to: %s", of_name.c_str());
 }
