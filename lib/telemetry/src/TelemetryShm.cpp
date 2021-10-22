@@ -510,7 +510,7 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
 
             if(force_woken) {
                 // we woke up because someone forced us, not because memory updated
-                force_woken = true; // reset in case the user decides to try and block again
+                force_woken = false; // reset in case the user decides to try and block again
                 return FAILURE;
             }
         } else { // NONBLOCKING_READ
@@ -604,7 +604,7 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
 
                 if(force_woken) {
                     // we woke up because someone forced us, not because memory updated
-                    force_woken = true; // reset in case the user decides to try and block again
+                    force_woken = false; // reset in case the user decides to try and block again
                     return FAILURE;
                 }
             } else {

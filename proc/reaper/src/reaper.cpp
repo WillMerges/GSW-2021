@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include <unistd.h>
 #include "common/types.h"
 #include "lib/vcm/vcm.h"
 #include "lib/dls/dls.h"
@@ -79,5 +80,7 @@ int main(int argc, char** argv) {
         exit(-1);
     }
 
+    printf("success\n");
+    logger.log_message("success");
     return 0;
 }

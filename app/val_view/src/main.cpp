@@ -23,6 +23,7 @@ using namespace dls;
 TelemetryViewer tlm;
 
 bool killed = false;
+std::string reaper_cmd;
 
 #define NUM_SIGNALS 5
 int signals[NUM_SIGNALS] = {
@@ -33,6 +34,7 @@ int signals[NUM_SIGNALS] = {
                             SIGABRT
                         };
 
+
 void sighandler(int signum) {
     killed = true;
 
@@ -40,7 +42,7 @@ void sighandler(int signum) {
     tlm.force_wake();
 
     // ask the reaper to wake us up if we're blocked so we can die
-    // TODO system
+    system(reaper_cmd.c_str());
 
     // shut the compiler up
     int garbage = signum;
@@ -52,11 +54,6 @@ int main(int argc, char* argv[]) {
     MsgLogger logger("val_view");
 
     logger.log_message("starting val_view");
-
-    // add signal handlers
-    for(int i = 0; i < NUM_SIGNALS; i++) {
-        signal(signals[i], sighandler);
-    }
 
     std::string config_file = "";
 
@@ -95,6 +92,28 @@ int main(int argc, char* argv[]) {
         logger.log_message("failed to initialize telemetry viewer");
         printf("failed to initialize telemetry viewer\n");
         exit(-1);
+    }
+
+    // create command to wake us up if we block and get killed
+    if(vcm->num_packets > 0) {
+        char* gsw_home = getenv("GSW_HOME");
+        if(gsw_home == NULL) {
+            printf("Must set GSW_HOME variable with .setenv before running\n");
+            logger.log_message("Must set GSW_HOME variable with .setenv before running");
+        }
+        reaper_cmd = gsw_home;
+        reaper_cmd += "/proc/reaper/reaper ";
+        reaper_cmd += vcm->config_file;
+        reaper_cmd += " 0"; // NOTE: we can only get away with this because we listen to every packet!
+    } else {
+        // can't be sleeping on anything
+        // don't want to create extra error messages
+        reaper_cmd = "";
+    }
+
+    // add signal handlers
+    for(int i = 0; i < NUM_SIGNALS; i++) {
+        signal(signals[i], sighandler);
     }
 
     tlm.add_all();
