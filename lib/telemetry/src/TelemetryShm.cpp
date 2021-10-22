@@ -83,6 +83,7 @@ TelemetryShm::TelemetryShm() {
     last_nonce = 0;
     read_mode = STANDARD_READ;
     read_locked = false;
+    force_woken = false;
 }
 
 TelemetryShm::~TelemetryShm() {
@@ -397,7 +398,7 @@ RetType TelemetryShm::clear(uint32_t packet_id, uint8_t val) {
     return SUCCESS;
 }
 
-RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, int timeout) {
+RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t timeout) {
     MsgLogger logger("TelemetryShm", "read_lock(2 args)");
 
     if(read_locked) {
@@ -420,15 +421,22 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, int timeou
     }
 
     // set timeout if there is one
+    // NOTE: we use an absolute value for 'timespec' NOT relative
+    // see 'man futex' under FUTEX_WAIT section
     struct timespec* timespec = NULL;
-
     if(timeout > 0) {
+        struct timeval curr_time;
+        gettimeofday(&curr_time, NULL);
+
+        uint32_t ms = curr_time.tv_sec * 1000;
+        ms += curr_time.tv_usec / 1000;
+        ms += timeout;
+
         struct timespec time;
-        time.tv_sec = timeout / 1000;
-        time.tv_nsec = (timeout % 1000) * 1000000;
+        time.tv_sec = ms / 1000;
+        time.tv_nsec = (ms % 1000) * 1000000;
         timespec = &time;
     }
-
 
     // if we block, keep looping since we can't guarantee just because we were awoken our packet changed
     // this is due to having only 32 bits in the bitset but arbitrarily many packets
@@ -489,9 +497,22 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, int timeou
 
         if(read_mode == BLOCKING_READ) {
             if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, bitset)) {
-                // timed out or error
-                return FAILURE;
+                if(errno == ETIMEDOUT) {
+                    logger.log_message("shared memory wait timed out");
+                }
+
+                // if we get EAGAIN, it could mean that the nonce changed before we could block, go back and check again
+                if(errno != EAGAIN) {
+                    // else something bad
+                    return FAILURE;
+                }
             } // otherwise we've been woken up
+
+            if(force_woken) {
+                // we woke up because someone forced us, not because memory updated
+                force_woken = true; // reset in case the user decides to try and block again
+                return FAILURE;
+            }
         } else { // NONBLOCKING_READ
             return BLOCKED;
         }
@@ -502,7 +523,7 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, int timeou
 // ^^^ did the above, check if that's correct...
 // I THINK IT'S WRONG then next time you call lock and it was technically updated it blocks...
 // so they should probably all be updated here and only the ones being checked in the other version
-RetType TelemetryShm::read_lock(int timeout) {
+RetType TelemetryShm::read_lock(uint32_t timeout) {
     MsgLogger logger("TelemetryShm", "read_lock(no args)");
 
     if(read_locked) {
@@ -525,12 +546,20 @@ RetType TelemetryShm::read_lock(int timeout) {
     }
 
     // set timeout if there is one
+    // NOTE: we use an absolute value for 'timespec' NOT relative
+    // see 'man futex' under FUTEX_WAIT section
     struct timespec* timespec = NULL;
-
     if(timeout > 0) {
+        struct timeval curr_time;
+        gettimeofday(&curr_time, NULL);
+
+        uint32_t ms = curr_time.tv_sec * 1000;
+        ms += curr_time.tv_usec / 1000;
+        ms += timeout;
+
         struct timespec time;
-        time.tv_sec = timeout / 1000;
-        time.tv_nsec = (timeout % 1000) * 1000000;
+        time.tv_sec = ms / 1000;
+        time.tv_nsec = (ms % 1000) * 1000000;
         timespec = &time;
     }
 
@@ -560,11 +589,24 @@ RetType TelemetryShm::read_lock(int timeout) {
 
             if(read_mode == BLOCKING_READ) {
                 // wait for any packet to be updated
-                // we don't need to loop here and check if it was our packet that updated since we don't care which packet updated
+                // after we're awoken, check the master nonce again, it's possible we were awoken by someone calling 'force_wake'
                 if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, 0xFF)) {
-                    // timeout or error
-                    return FAILURE;
+                    if(errno == ETIMEDOUT) {
+                        logger.log_message("shared memory wait timed out");
+                    }
+
+                    // if we get EAGAIN, it could mean that the nonce changed before we could block, go back and check again
+                    if(errno != EAGAIN) {
+                        // else something bad
+                        return FAILURE;
+                    }
                 } // otherwise we've been woken up
+
+                if(force_woken) {
+                    // we woke up because someone forced us, not because memory updated
+                    force_woken = true; // reset in case the user decides to try and block again
+                    return FAILURE;
+                }
             } else {
                 return BLOCKED;
             }
@@ -582,6 +624,37 @@ RetType TelemetryShm::read_lock(int timeout) {
         }
 
     }
+}
+
+RetType TelemetryShm::force_wake(uint32_t packet_id) {
+    MsgLogger logger("TelemetryShm", "force_wake");
+
+    if(packet_id >= num_packets) {
+        logger.log_message("invalid packet id");
+        return FAILURE;
+    }
+
+    if(packet_blocks == NULL || info_blocks == NULL || master_block == NULL) {
+        // not open
+        logger.log_message("object not open");
+        return FAILURE;
+    }
+
+    // packet_id is an index
+    shm_info_t* info = (shm_info_t*)master_block->data;
+
+    if(info == NULL) {
+        logger.log_message("shared memory block is null");
+        // something isn't attached
+        return FAILURE;
+    }
+
+    // wakeup anyone blocked on this packet (or any packet with an equivalent id mod 32)
+    // this includes ourself if we are sleeping!
+    // everyone else should get woken and see that the nonce hasn't changed, so they will go back to sleep
+    syscall(SYS_futex, &(info->nonce), FUTEX_WAKE_BITSET, INT_MAX, NULL, NULL, 1 << (packet_id % 32)); // TODO check return
+
+    return SUCCESS;
 }
 
 RetType TelemetryShm::read_unlock(bool force) {
@@ -670,7 +743,7 @@ RetType TelemetryShm::update_value(uint32_t packet_id, uint32_t* value) {
     return SUCCESS;
 }
 
-RetType TelemetryShm::more_recent_packet(unsigned int* packet_ids, size_t num, unsigned int* recent) {
+RetType TelemetryShm::more_recent_packet(uint32_t* packet_ids, size_t num, uint32_t* recent) {
     MsgLogger logger("TelemetryShm", "more_recent_packet");
 
     uint32_t best_diff = UINT_MAX;

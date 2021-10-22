@@ -6,6 +6,7 @@ all:
 	-$(MAKE) -C tool all
 	-$(MAKE) -C shmctl all
 	-$(MAKE) -C uplink all
+	-$(MAKE) -C reaper all
 
 clean:
 	-$(MAKE) -C decom clean
@@ -13,3 +14,4 @@ clean:
 	-$(MAKE) -C tool clean
 	-$(MAKE) -C shmctl clean
 	-$(MAKE) -C uplink clean
+	-$(MAKE) -C reaper clean 

@@ -18,8 +18,9 @@
 using namespace vcm;
 using namespace shm;
 using namespace dls;
-using namespace convert;
 
+
+TelemetryViewer tlm;
 
 bool killed = false;
 
@@ -34,6 +35,12 @@ int signals[NUM_SIGNALS] = {
 
 void sighandler(int signum) {
     killed = true;
+
+    // signal the shared memory control to force us to awaken
+    tlm.force_wake();
+
+    // ask the reaper to wake us up if we're blocked so we can die
+    // TODO system
 
     // shut the compiler up
     int garbage = signum;
@@ -84,7 +91,6 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
 
-    TelemetryViewer tlm;
     if(FAILURE == tlm.init(vcm)) {
         logger.log_message("failed to initialize telemetry viewer");
         printf("failed to initialize telemetry viewer\n");

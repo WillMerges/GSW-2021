@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set +e
 
 if ! [ -v GSW_HOME ]
 then
@@ -23,7 +23,7 @@ fi
 #       this keeps the data logger alive as long as possible
 
 # clean out old logs
-${GSW_HOME}/log/clean.sh
+#${GSW_HOME}/log/clean.sh
 
 # create the system log fifo
 echo "creating log FIFO"

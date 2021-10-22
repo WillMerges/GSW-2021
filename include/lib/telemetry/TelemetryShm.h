@@ -37,6 +37,12 @@
 * until any packet has changed.
 */
 
+// NOTE: we could get around using 'force_woken' flag if we guaranteed there were
+// only ever 32 packets. The we would never check nonces after being awoken, and
+// assume that if we woke up with no errors, something updated so we should
+// grab the new nonce and update
+// would change nonce check to if nonces equal && not_already_blocked so we don't check twice and get stuck if we were force woken
+
 using namespace shm;
 using namespace vcm;
 
@@ -89,13 +95,16 @@ public:
     // if read mode is set to BLOCKING_READ, if the data has not changed since the last read the process will sleep until it changes
     // if read mode is set to NONBLOCKING_READ, returns BLOCKED if the data has not changed since the last read
     // returns FAILURE if already locked
-    RetType read_lock(uint32_t* packet_ids, size_t num, int timeout = 0);
+    // if force waked, returns FAILURE
+    RetType read_lock(uint32_t* packet_ids, size_t num, uint32_t timeout = 0);
 
     // lock all shared memory for all packets
     // functionally no different from other read_lock for STANDARD_READ mode
     // BLOCKING_READ and NONBLOCKING_READ work identically assuming all packets are to be locked
     // returns FAILURE if already locked
-    RetType read_lock(int timeout = 0);
+    // if timeout is zero, never times out
+    // if force waked, returns FAILURE
+    RetType read_lock(uint32_t timeout = 0);
 
     // unlock the shared memory, not packet specific
     // returns FAILURE if not locked currently, unless 'force' is set to true
@@ -116,7 +125,7 @@ public:
     // sets 'recent' to the more recently updated packet_id
     // must be read locked before calling this function, returns FAILURE otherwise
     // NOTE: if FAILURE is returned 'recent' may still have been updated
-    RetType more_recent_packet(unsigned int* packet_ids, size_t num, unsigned int* recent);
+    RetType more_recent_packet(uint32_t* packet_ids, size_t num, uint32_t* recent);
 
     // get the update value of a packet
     // this is an unsigned number representing how recently the packet was updated
@@ -135,6 +144,18 @@ public:
     // set the reading mode
     void set_read_mode(read_mode_t mode);
 
+    // force any process to wake up if it is currently blocking on 'packet_id' to update
+    // does nothing if not already sleeping (although does awake other processes that should go back to sleep)
+    // NOTE: intended usage is for a killed process to call TelemetryViewer::force_wake
+    // in it's signal handler, the a separate process should call this function using the
+    // same VCM file and a packet_id it's blocked on. This will force the process to wake
+    // up, and when it sees the 'force_woken' flag set, it will stop blocking on shared memory
+    RetType force_wake(uint32_t packet_id);
+
+    // set by someone preparing to force_wake the process from blocking on shared memory
+    // blocking operations (read_lock) will check this value after they awake to see
+    // if they were forcefully woken up
+    bool force_woken;
 private:
     // info block for locking main shared memory
     typedef struct {

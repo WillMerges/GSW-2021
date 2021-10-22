@@ -56,8 +56,15 @@ public:
 
     // update the telemetry viewer with the most recent telemetry data
     // return FAILURE after 'timeout' milliseconds if the telemetry has not updated
-    // if 'timeout' is 0 or less, never times out and waits forever
-    RetType update(int timeout = 0);
+    // if 'timeout' is 0, never times out and waits forever
+    RetType update(uint32_t timeout = 0);
+
+    // prepares the process to be woken up
+    // a separate process needs to call 'force_wake' on the TelemetryShm object
+    // for the same VCM file and a packet_id we're waiting on
+    // it will force our process to wake up, and if this function has been called
+    // before we woke up, we will stop blocking waiting for shared memory to update
+    void force_wake();
 
     // set 'val' to the value of a telemetry measurement
     // converts raw telemetry data into usable types
@@ -90,7 +97,6 @@ private:
 
     uint8_t** packet_buffers;
     size_t* packet_sizes;
-
 
     // set 'data' to the most recently updated memory containing 'measurement'
     RetType latest_data(measurement_info_t* meas, uint8_t** data);

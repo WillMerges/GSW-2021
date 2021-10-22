@@ -166,7 +166,7 @@ void TelemetryViewer::set_update_mode(update_mode_t mode) {
     shm.set_read_mode(shm_mode);
 }
 
-RetType TelemetryViewer::update(int timeout) {
+RetType TelemetryViewer::update(uint32_t timeout) {
     MsgLogger logger("TelemetryViewer", "update");
 
     RetType status;
@@ -224,6 +224,10 @@ RetType TelemetryViewer::update(int timeout) {
     }
 
     return SUCCESS;
+}
+
+void TelemetryViewer::force_wake() {
+    shm.force_woken = true;
 }
 
 RetType TelemetryViewer::latest_data(measurement_info_t* meas, uint8_t** data) {
