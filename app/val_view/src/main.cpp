@@ -24,9 +24,6 @@ TelemetryViewer tlm;
 
 bool killed = false;
 std::string reaper_cmd;
-// std::string reaper_path;
-// std::string reaper_arg1;
-// std::string reaper_arg2;
 
 #define NUM_SIGNALS 5
 int signals[NUM_SIGNALS] = {
@@ -46,38 +43,10 @@ void sighandler(int signum) {
 
     // ask the reaper to wake us up if we're blocked so we can die
     system(reaper_cmd.c_str());
-    // pid_t pid = fork();
-    // if(pid == 0) {
-    //     // child process
-    //     printf("child proc started: %s\n", reaper_path.c_str());
-    //
-    //     // char* arg1 = (char*)malloc(reaper_arg1.size());
-    //     // memcpy(arg1, reaper_arg1.c_str(), reaper_arg1.size());
-    //     //
-    //     // char* arg2 = (char*)malloc(reaper_arg2.size());
-    //     // memcpy(arg2, reaper_arg2.c_str(), reaper_arg1.size());
-    //
-    //     // char* args[4] = {"reaper", arg1, arg2, NULL};
-    //     setsid();
-    //
-    //     int i = execl("/home/will/Documents/launch/2020-21/GSW-2021/proc/reaper/reaper", "reaper", reaper_arg1.c_str(), reaper_arg2.c_str(), NULL);
-    //
-    //     printf("execl failed: %d\n", i);
-    //     perror("why tho????");
-    //     fflush(stdout);
-    //
-    //     // free(arg1);
-    //     // free(arg2);
-    // }
-
-    // printf("child pid: %d\n", pid);
 
     // shut the compiler up
     int garbage = signum;
     garbage = garbage + 1;
-
-    printf("parent exit sighandler\n");
-    fflush(stdout);
 }
 
 
@@ -137,11 +106,6 @@ int main(int argc, char* argv[]) {
         reaper_cmd += vcm->config_file;
         reaper_cmd += " 0 &"; // NOTE: we can only get away with this because we listen to every packet!
     } else {
-        // can't be sleeping on anything
-        // don't want to create extra error messages
-        // reaper_path = "";
-        // reaper_arg1 = "";
-        // reaper_arg2 = "";
         reaper_cmd = "";
     }
 
