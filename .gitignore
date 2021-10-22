@@ -5,6 +5,8 @@ TODO*
 # logging files
 log/*.log
 log/*/*.log
+log/*.csv
+log/*/*.csv
 
 # Prerequisites
 *.d

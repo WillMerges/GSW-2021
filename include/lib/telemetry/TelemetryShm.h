@@ -156,6 +156,9 @@ public:
     // blocking operations (read_lock) will check this value after they awake to see
     // if they were forcefully woken up
     bool force_woken;
+    
+    // if the shm is currently locked for a reader
+    bool read_locked;
 private:
     // info block for locking main shared memory
     typedef struct {
@@ -169,7 +172,6 @@ private:
     } shm_info_t;
 
     read_mode_t read_mode;
-    bool read_locked; // if the shm is currently locked for a reader
 
     size_t num_packets;
     uint32_t last_nonce; // last master nonce

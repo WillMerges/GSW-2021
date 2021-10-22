@@ -591,6 +591,8 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
                 // wait for any packet to be updated
                 // after we're awoken, check the master nonce again, it's possible we were awoken by someone calling 'force_wake'
                 if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, 0xFF)) {
+                    printf("woken err\n");
+
                     if(errno == ETIMEDOUT) {
                         logger.log_message("shared memory wait timed out");
                     }
@@ -601,6 +603,8 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
                         return FAILURE;
                     }
                 } // otherwise we've been woken up
+
+                printf("woken\n");
 
                 if(force_woken) {
                     // we woke up because someone forced us, not because memory updated

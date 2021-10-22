@@ -27,7 +27,12 @@ TelemetryViewer::TelemetryViewer() {
 }
 
 TelemetryViewer::~TelemetryViewer() {
-    shm.read_unlock();
+    if(shm.read_locked) {
+        // if we're sure we locked shared memory, read unlock
+        // this is unlikely to happen as most processes should use a signal handler
+        // and unlock it themselves before exiting
+        shm.read_unlock();
+    }
 
     if(packet_ids != NULL) {
         delete packet_ids;
