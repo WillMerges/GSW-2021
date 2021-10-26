@@ -1,21 +1,32 @@
 <!DOCTYPE html>
 <html>
-<head>
-<meta charset=utf-8 />
-<title>My live video</title>
-  <link href="https://unpkg.com/video.js/dist/video-js.css" rel="stylesheet">
-</head>
-<body>
-  <h1>My live video - simple HLS player</h1>
 
-  <video-js id="video_id" class="vjs-default-skin" controls preload="auto" width="640" height="360">
-    <source src="http://192.168.0.11:8080/playlist.m3u8" type="application/x-mpegURL">
-  </video-js>
-  <script src="https://unpkg.com/video.js/dist/video.js"></script>
-  <script src="https://unpkg.com/@videojs/http-streaming/dist/videojs-http-streaming.js"></script>
-  <script>
-    var player = videojs('video_id');
-  </script>
-  
+<head>
+  <meta charset=utf-8 />
+  <title>Ground Station Live Feed</title>
+  <link href="lib/video-js.css" rel="stylesheet">
+</head>
+
+<body>
+  <h1>Ground Station Live Feed</h1>
+
+  <div class="video">
+    <video-js id="video_id" class="vjs-default-skin" controls preload="auto" width="640" height="360">
+      <source src="http://192.168.0.11:8080/playlist.m3u8" type="application/x-mpegURL">
+    </video-js>
+    <script src="lib/video.js"></script>
+    <script src="lib/videojs-http-streaming.js"></script>
+    <script>
+      var player = videojs('video_id');
+    </script>
+  </div>
+
+  <div class="button">
+    <form>
+      <button type="submit">Click me</button>
+    </form>
+  </div>
+
 </body>
+
 </html>
