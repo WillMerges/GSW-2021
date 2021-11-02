@@ -262,6 +262,7 @@ void TelemetryViewer::force_wake() {
     }
 
     std::string cmd = reaper_cmd;
+    cmd += " ";
     cmd += std::to_string(mask);
     cmd += " &";
 

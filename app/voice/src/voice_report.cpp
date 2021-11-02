@@ -47,6 +47,8 @@ using namespace convert;
 // GSW_HOME environment variable
 std::string gsw_home;
 
+TelemetryViewer tlm;
+
 bool killed = false;
 
 #define NUM_SIGNALS 5
@@ -60,6 +62,8 @@ int signals[NUM_SIGNALS] = {
 
 void sighandler(int signum) {
     killed = true;
+
+    tlm.force_wake();
 
     // shut the compiler up
     int garbage = signum;
@@ -165,7 +169,6 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
 
-    TelemetryViewer tlm;
     if(FAILURE == tlm.init(vcm)) {
         logger.log_message("failed to initialize telemetry viewer");
         printf("failed to initialize telemetry viewer\n");

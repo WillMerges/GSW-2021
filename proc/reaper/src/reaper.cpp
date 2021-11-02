@@ -81,7 +81,6 @@ int main(int argc, char** argv) {
         exit(-1);
     }
 
-    printf("success\n");
     logger.log_message("success");
     return 0;
 }
