@@ -39,13 +39,17 @@ using namespace convert;
 int sockfd;
 unsigned char sock_open = 0;
 bool killed = false;
+TelemetryViewer tlm;
 
 void sighandler(int signum) {
     if(sock_open) {
         close(sockfd);
     }
 
+
     killed = true;
+
+    tlm.force_wake();
 
     // shut the compiler up
     int garbage = signum;
@@ -114,7 +118,6 @@ int main(int argc, char* argv[]) {
     servaddr.sin_port = htons(INFLUXDB_UDP_PORT);
     servaddr.sin_addr.s_addr = inet_addr(INFLUXDB_ADDR);
 
-    TelemetryViewer tlm;
     if(FAILURE == tlm.init(vcm)) {
         logger.log_message("failed to initialize telemetry viewer");
         printf("failed to initialize telemetry viewer\n");
