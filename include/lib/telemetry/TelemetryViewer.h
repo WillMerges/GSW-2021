@@ -52,6 +52,11 @@ public:
     } update_mode_t;
 
     // set which update mode to use
+    // NOTE: if update mode is set to BLOCKING_UPDATE, signal handlers should NOT be changed after calling this function
+    // the currently set signal handlers will still be called
+    // if signal handlers are changed after this mode is set, receiving a signal could lock shared memory
+    // NOTE: there could be some weird behavior in threads if this function is called with the BLOCKING_OPTION concurrently
+    // this function will call 'init_signals' which modifies static memory without locking it
     void set_update_mode(update_mode_t mode);
 
     // update the telemetry viewer with the most recent telemetry data
@@ -59,11 +64,7 @@ public:
     // if 'timeout' is 0, never times out and waits forever
     RetType update(uint32_t timeout = 0);
 
-    // prepares the process to be woken up
-    // a separate process needs to call 'force_wake' on the TelemetryShm object
-    // for the same VCM file and a packet_id we're waiting on
-    // it will force our process to wake up, and if this function has been called
-    // before we woke up, we will stop blocking waiting for shared memory to update
+    // wakes up the process if it's currently blocked
     void force_wake();
 
     // set 'val' to the value of a telemetry measurement
@@ -100,6 +101,9 @@ private:
 
     // set 'data' to the most recently updated memory containing 'measurement'
     RetType latest_data(measurement_info_t* meas, uint8_t** data);
+
+    // command to execute to start the reaper process
+    std::string reaper_cmd;
 };
 
 #endif

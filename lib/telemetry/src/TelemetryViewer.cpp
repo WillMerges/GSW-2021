@@ -24,6 +24,7 @@ TelemetryViewer::TelemetryViewer() {
     vcm = NULL;
     packet_sizes = NULL;
     packet_buffers = NULL;
+    reaper_cmd = "";
 }
 
 TelemetryViewer::~TelemetryViewer() {
@@ -85,6 +86,18 @@ RetType TelemetryViewer::init(VCM* vcm) {
     packet_ids = new unsigned int[vcm->num_packets];
     packet_sizes = new size_t[vcm->num_packets];
     packet_buffers = new uint8_t*[vcm->num_packets];
+
+    // create command to wake us up if we block and get killed
+    if(vcm->num_packets > 0) {
+        char* gsw_home = getenv("GSW_HOME");
+        if(gsw_home == NULL) {
+            logger.log_message("Must set GSW_HOME variable with .setenv before running");
+        } else {
+            reaper_cmd = gsw_home;
+            reaper_cmd += "/proc/reaper/reaper ";
+            reaper_cmd += vcm->config_file;
+        }
+    }
 
     return SUCCESS;
 }
@@ -233,6 +246,26 @@ RetType TelemetryViewer::update(uint32_t timeout) {
 
 void TelemetryViewer::force_wake() {
     shm.force_woken = true;
+
+    uint32_t mask = 0;
+    if(check_all) {
+        mask = 0xFF;
+    } else {
+        for(size_t i = 0; i < num_packets; i++) {
+            mask |= (1 << i);
+
+            if(i == 31) {
+                // any packet over index 31 will already be woken up due to only being able to lock on 32 packets
+                break;
+            }
+        }
+    }
+
+    std::string cmd = reaper_cmd;
+    cmd += std::to_string(mask);
+    cmd += " &";
+
+    system(cmd.c_str());
 }
 
 RetType TelemetryViewer::latest_data(measurement_info_t* meas, uint8_t** data) {

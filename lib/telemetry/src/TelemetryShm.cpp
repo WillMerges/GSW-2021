@@ -626,13 +626,8 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
     }
 }
 
-RetType TelemetryShm::force_wake(uint32_t packet_id) {
+RetType TelemetryShm::force_wake(uint32_t mask) {
     MsgLogger logger("TelemetryShm", "force_wake");
-
-    if(packet_id >= num_packets) {
-        logger.log_message("invalid packet id");
-        return FAILURE;
-    }
 
     if(packet_blocks == NULL || info_blocks == NULL || master_block == NULL) {
         // not open
@@ -652,7 +647,7 @@ RetType TelemetryShm::force_wake(uint32_t packet_id) {
     // wakeup anyone blocked on this packet (or any packet with an equivalent id mod 32)
     // this includes ourself if we are sleeping!
     // everyone else should get woken and see that the nonce hasn't changed, so they will go back to sleep
-    syscall(SYS_futex, &(info->nonce), FUTEX_WAKE_BITSET, INT_MAX, NULL, NULL, 1 << (packet_id % 32)); // TODO check return
+    syscall(SYS_futex, &(info->nonce), FUTEX_WAKE_BITSET, INT_MAX, NULL, NULL, mask); // TODO check return
 
     return SUCCESS;
 }

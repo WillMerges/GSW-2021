@@ -8,7 +8,8 @@
 *          work and a signal does not interrupt the 'futex' syscall, so we need
 *          a special 'reaper' process to wake it up so it can die.
 *
-* Usage: ./reaper [vcm config file] [packet_id]
+* Usage: ./reaper [vcm config file] [bit mask]
+*        'bit mask' represents which packet id's need to be awoken
 *
 * Author: Will Merges
 *
@@ -52,11 +53,11 @@ int main(int argc, char** argv) {
         exit(-1);
     }
 
-    uint32_t packet_id;
+    uint32_t mask;
 
-    if(1 != sscanf(argv[2], "%u", &packet_id)) {
-        printf("failed to match argument 2 to packet id\n");
-        logger.log_message("failed to match argument 2 to packet id");
+    if(1 != sscanf(argv[2], "%u", &mask)) {
+        printf("failed to match argument 2 to mask\n");
+        logger.log_message("failed to match argument 2 to mask");
         exit(-1);
     }
 
@@ -74,7 +75,7 @@ int main(int argc, char** argv) {
         exit(-1);
     }
 
-    if(SUCCESS != tlm.force_wake(packet_id)) {
+    if(SUCCESS != tlm.force_wake(mask)) {
         printf("force wake operation failed\n");
         logger.log_message("force wake operation failed");
         exit(-1);
