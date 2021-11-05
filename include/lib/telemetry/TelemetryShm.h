@@ -154,6 +154,11 @@ public:
     // up, and when it sees the 'force_woken' flag set, it will stop blocking on shared memory
     RetType force_wake(uint32_t mask = 0xFF);
 
+    // signal handler for TelemetryShm specifically
+    // should be called in the processes signal handler or else shared memory may get locked when in blocking mode
+    void sighandler();
+
+
     // set by someone preparing to force_wake the process from blocking on shared memory
     // blocking operations (read_lock) will check this value after they awake to see
     // if they were forcefully woken up

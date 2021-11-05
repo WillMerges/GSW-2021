@@ -269,6 +269,10 @@ void TelemetryViewer::force_wake() {
     system(cmd.c_str());
 }
 
+void TelemetryViewer::sighandler() {
+    shm.sighandler();
+}
+
 RetType TelemetryViewer::latest_data(measurement_info_t* meas, uint8_t** data) {
     MsgLogger logger("TelemetryViewer", "latest_data");
 

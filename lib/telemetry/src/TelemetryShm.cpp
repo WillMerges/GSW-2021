@@ -14,6 +14,7 @@
 #include <unistd.h>
 #include <limits.h>
 #include <signal.h>
+#include <sys/mman.h>
 #include "lib/dls/dls.h"
 #include "lib/telemetry/TelemetryShm.h"
 
@@ -80,7 +81,7 @@ TelemetryShm::TelemetryShm() {
     master_block = NULL;
     num_packets = 0;
     last_nonces = NULL;
-    last_nonce = 0;
+    last_nonce = 1; // NOTE: cannot be 0, 0 indicates a signal was received
     read_mode = STANDARD_READ;
     read_locked = false;
     force_woken = false;
@@ -246,8 +247,8 @@ RetType TelemetryShm::create() {
     info->readers = 0;
     info->writers = 0;
 
-    // start the master nonce at 0
-    info->nonce = 0;
+    // start the master nonce at 1, 0 indicates a signal
+    info->nonce = 1;
 
     // we should detach to be later attached
     // if this fails it's not the end of the world? but its still bad and shouldn't fail
@@ -457,6 +458,15 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
         // update the stored master nonce
         last_nonce = info->nonce;
 
+        // the only time this is zero is if we received a signal at some point
+        // if we continue on, we will block instead of exiting
+        if(last_nonce == 0) {
+            // we should just unlock and exit
+            logger.log_message("received signal, exiting early");
+            read_unlock(true);
+            return INTERRUPTED;
+        }
+
         // if reading in standard mode we never block so don't check
         // actually we want to update our last nonces so keep going for now
         // if(read_mode == STANDARD_READ) {
@@ -508,11 +518,16 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
                 }
             } // otherwise we've been woken up
 
-            if(force_woken) {
-                // we woke up because someone forced us, not because memory updated
-                force_woken = false; // reset in case the user decides to try and block again
-                return FAILURE;
+            if(info->nonce == 0) {
+                // if this is 0, we got a signal and should exit
+                logger.log_message("woke up after signal, exiting");
+                return INTERRUPTED;
             }
+            // if(force_woken) {
+            //     // we woke up because someone forced us, not because memory updated
+            //     force_woken = false; // reset in case the user decides to try and block again
+            //     return FAILURE;
+            // }
         } else { // NONBLOCKING_READ
             return BLOCKED;
         }
@@ -589,7 +604,7 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
 
             if(read_mode == BLOCKING_READ) {
                 // wait for any packet to be updated
-                // after we're awoken, check the master nonce again, it's possible we were awoken by someone calling 'force_wake'
+                // we don't need to check if the nonce is 0 (indicating a signal) since if it is it will never match 'last_nonce' (which can never be 0)
                 if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, 0xFF)) {
                     if(errno == ETIMEDOUT) {
                         logger.log_message("shared memory wait timed out");
@@ -602,11 +617,16 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
                     }
                 } // otherwise we've been woken up
 
-                if(force_woken) {
-                    // we woke up because someone forced us, not because memory updated
-                    force_woken = false; // reset in case the user decides to try and block again
-                    return FAILURE;
+                if(info->nonce == 0) {
+                    // if this is 0, we got a signal and should exit
+                    logger.log_message("woke up after signal, exiting");
+                    return INTERRUPTED;
                 }
+                // if(force_woken) {
+                //     // we woke up because someone forced us, not because memory updated
+                //     force_woken = false; // reset in case the user decides to try and block again
+                //     return FAILURE;
+                // }
             } else {
                 return BLOCKED;
             }
@@ -650,6 +670,39 @@ RetType TelemetryShm::force_wake(uint32_t mask) {
     syscall(SYS_futex, &(info->nonce), FUTEX_WAKE_BITSET, INT_MAX, NULL, NULL, mask); // TODO check return
 
     return SUCCESS;
+}
+
+// handle a signal, should be called from a sighandler
+void TelemetryShm::sighandler() {
+    MsgLogger logger("TelemetryShm", "sighandler");
+
+    if(master_block == NULL) {
+        // we aren't attached, just return
+        return;
+    }
+
+    shm_info_t* info = (shm_info_t*)master_block->data;
+    void* futex_word = &(info->nonce);
+
+    if(FAILURE == master_block->detach()) {
+        logger.log_message("Failed to detach from shm");
+        // we shouldn't do anything else, trying to stop the process failed and we'll stay running
+        return;
+    }
+
+    // remap the futex word virtual address and then change it
+    // it will look like the nonce changed when the syscall restarts but it didn't
+    // change in shared memory
+    void* addr = mmap(futex_word, 4, PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0);
+
+    if(addr != futex_word) {
+        // mmap failed to map to the address we wanted, leave process running
+        logger.log_message("mmap failed to map to correct address");
+        return;
+    }
+
+    // set nonce to zero so futex_wait returns EAGAIN on the restart
+    *((int*)addr) = 0;
 }
 
 RetType TelemetryShm::read_unlock(bool force) {

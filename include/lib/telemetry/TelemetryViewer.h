@@ -67,6 +67,9 @@ public:
     // wakes up the process if it's currently blocked
     void force_wake();
 
+    // should be called by the processes signal handler, avoids locking shared memory on exit
+    void sighandler();
+
     // set 'val' to the value of a telemetry measurement
     // converts raw telemetry data into usable types
     // returns FAILURE if type conversion is impossible
