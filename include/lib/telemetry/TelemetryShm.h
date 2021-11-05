@@ -144,25 +144,8 @@ public:
     // set the reading mode
     void set_read_mode(read_mode_t mode);
 
-    // force any process to wake up if it is currently blocking on to update
-    // does nothing if not already sleeping (although does awake other processes that should go back to sleep)
-    // 'mask' can set which processes to wake up by which packets they use, a 1 in a position represents a
-    // packet index that all listeners for that packet should be woken up
-    // NOTE: intended usage is for a killed process to call TelemetryViewer::force_wake
-    // in it's signal handler, the a separate process should call this function using the
-    // same VCM file and a packet_id it's blocked on. This will force the process to wake
-    // up, and when it sees the 'force_woken' flag set, it will stop blocking on shared memory
-    RetType force_wake(uint32_t mask = 0xFF);
-
-    // signal handler for TelemetryShm specifically
     // should be called in the processes signal handler or else shared memory may get locked when in blocking mode
     void sighandler();
-
-
-    // set by someone preparing to force_wake the process from blocking on shared memory
-    // blocking operations (read_lock) will check this value after they awake to see
-    // if they were forcefully woken up
-    bool force_woken;
 
     // if the shm is currently locked for a reader
     bool read_locked;

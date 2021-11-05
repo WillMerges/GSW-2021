@@ -84,7 +84,6 @@ TelemetryShm::TelemetryShm() {
     last_nonce = 1; // NOTE: cannot be 0, 0 indicates a signal was received
     read_mode = STANDARD_READ;
     read_locked = false;
-    force_woken = false;
 }
 
 TelemetryShm::~TelemetryShm() {
@@ -511,23 +510,21 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
                     logger.log_message("shared memory wait timed out");
                 }
 
-                // if we get EAGAIN, it could mean that the nonce changed before we could block, go back and check again
+                // if we get EAGAIN, it could mean that the nonce changed before we could block OR we got a signal and it was remapped and set to 0
                 if(errno != EAGAIN) {
                     // else something bad
                     return FAILURE;
                 }
             } // otherwise we've been woken up
 
+            // we can check the nonce here and it's not a race condition
+            // if it's zero, the memory is no longer shared so it doesn't matter
+            // if it's in shared memory, it will never be zero so this doesn't matter
             if(info->nonce == 0) {
                 // if this is 0, we got a signal and should exit
                 logger.log_message("woke up after signal, exiting");
                 return INTERRUPTED;
             }
-            // if(force_woken) {
-            //     // we woke up because someone forced us, not because memory updated
-            //     force_woken = false; // reset in case the user decides to try and block again
-            //     return FAILURE;
-            // }
         } else { // NONBLOCKING_READ
             return BLOCKED;
         }
@@ -610,23 +607,21 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
                         logger.log_message("shared memory wait timed out");
                     }
 
-                    // if we get EAGAIN, it could mean that the nonce changed before we could block, go back and check again
+                    // if we get EAGAIN, it could mean that the nonce changed before we could block OR we got a signal and it was remapped and set to 0
                     if(errno != EAGAIN) {
                         // else something bad
                         return FAILURE;
                     }
                 } // otherwise we've been woken up
 
+                // we can check the nonce here and it's not a race condition
+                // if it's zero, the memory is no longer shared so it doesn't matter
+                // if it's in shared memory, it will never be zero so this doesn't matter
                 if(info->nonce == 0) {
                     // if this is 0, we got a signal and should exit
                     logger.log_message("woke up after signal, exiting");
                     return INTERRUPTED;
                 }
-                // if(force_woken) {
-                //     // we woke up because someone forced us, not because memory updated
-                //     force_woken = false; // reset in case the user decides to try and block again
-                //     return FAILURE;
-                // }
             } else {
                 return BLOCKED;
             }
@@ -644,32 +639,6 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
         }
 
     }
-}
-
-RetType TelemetryShm::force_wake(uint32_t mask) {
-    MsgLogger logger("TelemetryShm", "force_wake");
-
-    if(packet_blocks == NULL || info_blocks == NULL || master_block == NULL) {
-        // not open
-        logger.log_message("object not open");
-        return FAILURE;
-    }
-
-    // packet_id is an index
-    shm_info_t* info = (shm_info_t*)master_block->data;
-
-    if(info == NULL) {
-        logger.log_message("shared memory block is null");
-        // something isn't attached
-        return FAILURE;
-    }
-
-    // wakeup anyone blocked on this packet (or any packet with an equivalent id mod 32)
-    // this includes ourself if we are sleeping!
-    // everyone else should get woken and see that the nonce hasn't changed, so they will go back to sleep
-    syscall(SYS_futex, &(info->nonce), FUTEX_WAKE_BITSET, INT_MAX, NULL, NULL, mask); // TODO check return
-
-    return SUCCESS;
 }
 
 // handle a signal, should be called from a sighandler
@@ -690,9 +659,11 @@ void TelemetryShm::sighandler() {
         return;
     }
 
-    // remap the futex word virtual address and then change it
+    // remap the futex word virtual address and then change the data
     // it will look like the nonce changed when the syscall restarts but it didn't
     // change in shared memory
+    // we reserve the value zero for the nonce so nothing else uses, guaranteeing the syscall will always fail
+    // the only case this would be a problem is if the master nonce wraps around, which will happen once every 4 years of running or so
     void* addr = mmap(futex_word, 4, PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0);
 
     if(addr != futex_word) {

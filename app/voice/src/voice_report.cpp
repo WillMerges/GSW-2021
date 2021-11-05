@@ -63,7 +63,7 @@ int signals[NUM_SIGNALS] = {
 void sighandler(int signum) {
     killed = true;
 
-    tlm.force_wake();
+    tlm.sighandler();
 
     // shut the compiler up
     int garbage = signum;
@@ -181,17 +181,17 @@ int main(int argc, char* argv[]) {
 
     if(FAILURE == tlm.add(gps_lat)) {
         logger.log_message("failed to add " + gps_lat + " to telemetry viewer");
-        printf("failed to add %s to telemetry viewer", gps_lat.c_str());
+        printf("failed to add %s to telemetry viewer\n", gps_lat.c_str());
         exit(-1);
     }
     if(FAILURE == tlm.add(gps_long)) {
         logger.log_message("failed to add " + gps_long + " to telemetry viewer");
-        printf("failed to add %s to telemetry viewer", gps_long.c_str());
+        printf("failed to add %s to telemetry viewer\n", gps_long.c_str());
         exit(-1);
     }
     if(FAILURE == tlm.add(gps_alt)) {
         logger.log_message("failed to add " + gps_alt + " to telemetry viewer");
-        printf("failed to add %s to telemetry viewer", gps_alt.c_str());
+        printf("failed to add %s to telemetry viewer\n", gps_alt.c_str());
         exit(-1);
     }
 

@@ -38,7 +38,7 @@ void sighandler(int signum) {
     killed = true;
 
     // signal the shared memory control to force us to awaken
-    // tlm.force_wake();
+    // tlm.sighandler();
     tlm.sighandler();
 
     // shut the compiler up

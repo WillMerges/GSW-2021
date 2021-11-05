@@ -35,7 +35,7 @@ int signals[NUM_SIGNALS] = {
 void sighandler(int signum) {
     killed = true;
 
-    tlm.force_wake();
+    tlm.sighandler();
 
     // shut the compiler up
     int garbage = signum;

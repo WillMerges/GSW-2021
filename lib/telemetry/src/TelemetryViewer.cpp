@@ -244,31 +244,6 @@ RetType TelemetryViewer::update(uint32_t timeout) {
     return SUCCESS;
 }
 
-void TelemetryViewer::force_wake() {
-    shm.force_woken = true;
-
-    uint32_t mask = 0;
-    if(check_all) {
-        mask = 0xFF;
-    } else {
-        for(size_t i = 0; i < num_packets; i++) {
-            mask |= (1 << i);
-
-            if(i == 31) {
-                // any packet over index 31 will already be woken up due to only being able to lock on 32 packets
-                break;
-            }
-        }
-    }
-
-    std::string cmd = reaper_cmd;
-    cmd += " ";
-    cmd += std::to_string(mask);
-    cmd += " &";
-
-    system(cmd.c_str());
-}
-
 void TelemetryViewer::sighandler() {
     shm.sighandler();
 }

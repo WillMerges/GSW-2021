@@ -64,9 +64,6 @@ public:
     // if 'timeout' is 0, never times out and waits forever
     RetType update(uint32_t timeout = 0);
 
-    // wakes up the process if it's currently blocked
-    void force_wake();
-
     // should be called by the processes signal handler, avoids locking shared memory on exit
     void sighandler();
 
