@@ -664,7 +664,7 @@ void TelemetryShm::sighandler() {
     // change in shared memory
     // we reserve the value zero for the nonce so nothing else uses, guaranteeing the syscall will always fail
     // the only case this would be a problem is if the master nonce wraps around, which will happen once every 4 years of running or so
-    void* addr = mmap(futex_word, 4, PROT_READ | PROT_WRITE, MAP_ANONYMOUS, -1, 0);
+    void* addr = mmap(futex_word, 4, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE | MAP_FIXED, -1, 0);
 
     if(addr != futex_word) {
         // mmap failed to map to the address we wanted, leave process running
@@ -673,6 +673,7 @@ void TelemetryShm::sighandler() {
     }
 
     // set nonce to zero so futex_wait returns EAGAIN on the restart
+    // NOTE: we could skip this, mmap will initialize it to 0
     *((int*)addr) = 0;
 }
 
