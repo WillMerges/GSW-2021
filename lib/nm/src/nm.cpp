@@ -164,7 +164,6 @@ RetType NetworkManager::Open() {
         mreq.imr_interface.s_addr = htonl(INADDR_ANY);
         if(setsockopt(sockfd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0) {
             logger.log_message("failed to join multicast group");
-            perror("why tho: ");
             return FAILURE;
         }
     }
