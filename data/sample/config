@@ -6,7 +6,8 @@
 # specify the protocol for packets to use (must be set at some point)
 protocol = udp
 
-# specify the port the ground station should send packets TO
+# specify the port the ground station should send packets TO and FROM 
+# (e.g. src port = dst port for outgoing packet)
 # ports are in the range 1 to (2^16 - 1)
 # the IP address to send to will be stripped from packets from the receiver
 port = 8080

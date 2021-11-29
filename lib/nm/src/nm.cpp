@@ -246,13 +246,14 @@ RetType NetworkManager::Send() {
 
         // if the port is still zeroed we haven't received a packet yet
         // which means we don't have a valid IP address to send to
-        if(0 == device_addr.sin_port) {
+        if(0 == device_addr.sin_addr.s_addr) {
             logger.log_message("receiver has not yet sent a packet providing an"
                                 " address, failed to send UDP message");
             return FAILURE;
         }
 
-        // device_addr.sin_port = htons(vcm->port);
+        // send to the port listed in the VCM file
+        device_addr.sin_port = htons(vcm->port);
 
         ssize_t sent = -1;
         sent = sendto(sockfd, (char*)tx_buffer, read, 0,

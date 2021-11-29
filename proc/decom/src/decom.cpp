@@ -114,10 +114,14 @@ void execute(size_t packet_id, packet_info_t* packet) {
     }
 
     // clear our packet's shared memory
+    // This should be done at creation time by the shmctl proc actually
+    // don't want to clear shmem if we restarted the decom procs
+    /*
     if(shmem.clear(packet_id) == FAILURE) {
         logger.log_message("failed to clear telemetry shared memory");
         return;
     }
+    */
 
     // create packet logger
     PacketLogger plogger(packet_name);
