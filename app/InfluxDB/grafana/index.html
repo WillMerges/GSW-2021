@@ -5,13 +5,16 @@
   <meta charset=utf-8 />
   <title>Ground Station Live Feed</title>
   <link href="lib/video-js.css" rel="stylesheet">
+  <link href="lib/stylesheet.css" rel="stylesheet">
+  <link href="lib/videojs-http-streaming" rel="stylesheet">
 </head>
 
 <body>
   <h1>Ground Station Live Feed</h1>
 
+<!--
   <div class="video">
-    <video-js id="video_id" class="vjs-default-skin" controls preload="auto" width="640" height="360">
+    <video-js id="video_id" class="vjs-default-skin live-stream" controls preload="auto" width="854" height="480">
       <source src="http://0.0.0.0:8080/playlist.m3u8" type="application/x-mpegURL">
     </video-js>
     <script src="lib/video.js"></script>
@@ -20,6 +23,12 @@
       var player = videojs('video_id');
     </script>
   </div>
+ -->
+
+    <video width=854 height=240 autoplay>
+        <source src="http://0.0.0.0:8080">
+    </video>
+
 
 </body>
 
