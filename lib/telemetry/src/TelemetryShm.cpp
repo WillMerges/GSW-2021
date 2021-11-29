@@ -508,6 +508,8 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
             if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, bitset)) {
                 if(errno == ETIMEDOUT) {
                     logger.log_message("shared memory wait timed out");
+
+                    return TIMEOUT;
                 }
 
                 // if we get EAGAIN, it could mean that the nonce changed before we could block OR we got a signal and it was remapped and set to 0
@@ -566,13 +568,22 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
         gettimeofday(&curr_time, NULL);
 
         uint32_t ms = curr_time.tv_sec * 1000;
-        ms += curr_time.tv_usec / 1000;
+        // ms += curr_time.tv_usec / 1000;
         ms += timeout;
 
+        // NOTE: you would think you can use a timespec struct (like the docs say)
+        //       but you actually can't if you're using 64 bit time
+        //       so we make up our own timespec with seconds in 32 bit time, I guess
+        //       this is some garbage if I do say so myself
+        //       TODO this actually isn't the case, but this never wakes up
         struct timespec time;
         time.tv_sec = ms / 1000;
         time.tv_nsec = (ms % 1000) * 1000000;
         timespec = &time;
+        // uint8_t time[12];
+        // *((uint32_t*)time) = ms / 1000; // tv_sec (but 32-bit)
+        // *((uint64_t*)(&(time[4]))) = (ms % 1000) * 1000000;
+        // timespec = (struct timespec*)(&time);
     }
 
     while(1) {
@@ -605,11 +616,14 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
                 if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, 0xFF)) {
                     if(errno == ETIMEDOUT) {
                         logger.log_message("shared memory wait timed out");
+
+                        return TIMEOUT;
                     }
 
                     // if we get EAGAIN, it could mean that the nonce changed before we could block OR we got a signal and it was remapped and set to 0
                     if(errno != EAGAIN) {
                         // else something bad
+                        perror("uhhhh");
                         return FAILURE;
                     }
                 } // otherwise we've been woken up

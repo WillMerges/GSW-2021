@@ -159,12 +159,12 @@ RetType NetworkManager::Open() {
     // this should an IGMP packet to the router (if there is one)
     // for a simple network like point to point, the packet is likely just dropped at the receiver
     if(multicast_addr != 0) {
-        struct ip_mreqn mreq;
-        mreq.imr_multiaddr.s_addr = htonl(multicast_addr);
-        mreq.imr_address.s_addr = htonl(INADDR_ANY);
-        mreq.imr_ifindex = 0;
+        struct ip_mreq mreq;
+        mreq.imr_multiaddr.s_addr = multicast_addr;
+        mreq.imr_interface.s_addr = htonl(INADDR_ANY);
         if(setsockopt(sockfd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mreq, sizeof(mreq)) < 0) {
             logger.log_message("failed to join multicast group");
+            perror("why tho: ");
             return FAILURE;
         }
     }
@@ -253,7 +253,8 @@ RetType NetworkManager::Send() {
         }
 
         // send to the port listed in the VCM file
-        device_addr.sin_port = htons(vcm->port);
+        // TODO we need to track this!
+        // device_addr.sin_port = htons(vcm->port);
 
         ssize_t sent = -1;
         sent = sendto(sockfd, (char*)tx_buffer, read, 0,

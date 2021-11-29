@@ -5,7 +5,8 @@ typedef enum {
     SUCCESS = 0,
     FAILURE = -1,
     BLOCKED = 1,
-    INTERRUPTED = 2
+    INTERRUPTED = 2,
+    TIMEOUT = 3
 } RetType;
 
 #endif

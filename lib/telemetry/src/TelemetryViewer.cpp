@@ -24,7 +24,6 @@ TelemetryViewer::TelemetryViewer() {
     vcm = NULL;
     packet_sizes = NULL;
     packet_buffers = NULL;
-    reaper_cmd = "";
 }
 
 TelemetryViewer::~TelemetryViewer() {
@@ -86,18 +85,6 @@ RetType TelemetryViewer::init(VCM* vcm) {
     packet_ids = new unsigned int[vcm->num_packets];
     packet_sizes = new size_t[vcm->num_packets];
     packet_buffers = new uint8_t*[vcm->num_packets];
-
-    // create command to wake us up if we block and get killed
-    if(vcm->num_packets > 0) {
-        char* gsw_home = getenv("GSW_HOME");
-        if(gsw_home == NULL) {
-            logger.log_message("Must set GSW_HOME variable with .setenv before running");
-        } else {
-            reaper_cmd = gsw_home;
-            reaper_cmd += "/proc/reaper/reaper ";
-            reaper_cmd += vcm->config_file;
-        }
-    }
 
     return SUCCESS;
 }
@@ -203,6 +190,7 @@ RetType TelemetryViewer::update(uint32_t timeout) {
             // need to check that one of our packets did actually update if we're in blocking mode
             // with less than 32 packets we can skip this since we can guarantee we were awoken for our packet
             // this is because our packet index isn't equivalent to another packet modulo 32 and the lock only allows 32 bits
+            // TODO I think this is actually checked in TelemetryShm so this is redundant... investigate this
             if((update_mode == BLOCKING_UPDATE) && (vcm->num_packets > 32)) {
                 bool updated = false;
                 for(size_t i = 0; i < num_packets && !updated; i++) {
