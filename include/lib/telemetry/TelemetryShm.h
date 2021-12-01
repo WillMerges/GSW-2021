@@ -37,12 +37,6 @@
 * until any packet has changed.
 */
 
-// NOTE: we could get around using 'force_woken' flag if we guaranteed there were
-// only ever 32 packets. The we would never check nonces after being awoken, and
-// assume that if we woke up with no errors, something updated so we should
-// grab the new nonce and update
-// would change nonce check to if nonces equal && not_already_blocked so we don't check twice and get stuck if we were force woken
-
 using namespace shm;
 using namespace vcm;
 
