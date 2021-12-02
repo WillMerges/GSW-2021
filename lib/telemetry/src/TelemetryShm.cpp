@@ -425,11 +425,11 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
     // see 'man futex' under FUTEX_WAIT section
     struct timespec* timespec = NULL;
     if(timeout > 0) {
-        struct timeval curr_time;
-        gettimeofday(&curr_time, NULL);
+        struct timespec curr_time;
+        clock_gettime(CLOCK_REALTIME, &curr_time);
 
         uint32_t ms = curr_time.tv_sec * 1000;
-        ms += curr_time.tv_usec / 1000;
+        ms += (curr_time.tv_nsec / 1000000);
         ms += timeout;
 
         struct timespec time;
@@ -505,7 +505,7 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
         read_locked = false;
 
         if(read_mode == BLOCKING_READ) {
-            if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, bitset)) {
+            if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET | FUTEX_CLOCK_REALTIME, last_nonce, timespec, NULL, bitset)) {
                 if(errno == ETIMEDOUT) {
                     logger.log_message("shared memory wait timed out");
 
@@ -564,26 +564,17 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
     // see 'man futex' under FUTEX_WAIT section
     struct timespec* timespec = NULL;
     if(timeout > 0) {
-        struct timeval curr_time;
-        gettimeofday(&curr_time, NULL);
+        struct timespec curr_time;
+        clock_gettime(CLOCK_REALTIME, &curr_time);
 
         uint32_t ms = curr_time.tv_sec * 1000;
-        // ms += curr_time.tv_usec / 1000;
+        ms += (curr_time.tv_nsec / 1000000);
         ms += timeout;
 
-        // NOTE: you would think you can use a timespec struct (like the docs say)
-        //       but you actually can't if you're using 64 bit time
-        //       so we make up our own timespec with seconds in 32 bit time, I guess
-        //       this is some garbage if I do say so myself
-        //       TODO this actually isn't the case, but this never wakes up
         struct timespec time;
         time.tv_sec = ms / 1000;
         time.tv_nsec = (ms % 1000) * 1000000;
         timespec = &time;
-        // uint8_t time[12];
-        // *((uint32_t*)time) = ms / 1000; // tv_sec (but 32-bit)
-        // *((uint64_t*)(&(time[4]))) = (ms % 1000) * 1000000;
-        // timespec = (struct timespec*)(&time);
     }
 
     while(1) {
@@ -613,7 +604,7 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
             if(read_mode == BLOCKING_READ) {
                 // wait for any packet to be updated
                 // we don't need to check if the nonce is 0 (indicating a signal) since if it is it will never match 'last_nonce' (which can never be 0)
-                if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, 0xFF)) {
+                if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET | FUTEX_CLOCK_REALTIME, last_nonce, timespec, NULL, 0xFF)) {
                     if(errno == ETIMEDOUT) {
                         logger.log_message("shared memory wait timed out");
 
