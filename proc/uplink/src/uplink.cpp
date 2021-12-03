@@ -1,6 +1,7 @@
 #include "lib/dls/dls.h"
 #include "lib/vcm/vcm.h"
 #include "lib/nm/nm.h"
+#include <signal.h>
 
 /*
 *   This executable runs the "uplink" process.
@@ -21,7 +22,20 @@ using namespace dls;
 using namespace vcm;
 using namespace nm;
 
-// TODO maybe add signal handler to send a logging message
+
+NetworkManager* net;
+
+void sighandler(int signum) {
+    MsgLogger logger("UPLINK", "sighandler");
+    logger.log_message("uplink killed, shutting down");
+
+    if(net) {
+        net->Close();
+    }
+
+    exit(signum);
+}
+
 
 int main(int argc, char** argv) {
     MsgLogger logger("UPLINK", "main");
@@ -46,14 +60,22 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    NetworkManager nm(veh->port, (veh->device).c_str(), NULL, 0);
+    // add signals
+    signal(SIGINT, sighandler);
+    signal(SIGTERM, sighandler);
+    signal(SIGSEGV, sighandler);
+    signal(SIGFPE, sighandler);
+    signal(SIGABRT, sighandler);
 
-    if(nm.Open() == FAILURE) {
+    // send and receive from same port (but never receive as of right now)
+    net = new NetworkManager(veh->port, veh->port, (veh->device).c_str(), NULL, 0);
+
+    if(net->Open() == FAILURE) {
         logger.log_message("failed to open Network Manager");
         return -1;
     }
 
     while(1) {
-        nm.Send();
+        net->Send();
     }
 }

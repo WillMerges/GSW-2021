@@ -24,19 +24,19 @@ struct timeval curr_time;
 
 // list of mqueues to close
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-std::vector<mqd_t*> mqs;
+std::vector<std::string> mqs;
 
 void sighandler(int signum) {
     // close any open mqueues
-    for(auto mq : mqs) {
-        mq_close(*mq); // hopefully this doesn't fail
+    for(std::string mq : mqs) {
+        mq_unlink(mq.c_str()); // hopefully this doesn't fail
         // if it does fail just move one, don't want to leave the process hanging
     }
 
     exit(signum);
 }
 
-void add_mq_to_close(mqd_t* mq) {
+void add_mq_to_close(std::string& mq) {
     pthread_mutex_lock(&lock);
     mqs.push_back(mq);
     pthread_mutex_unlock(&lock);
@@ -70,7 +70,8 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
     mq = mq_open(queue_name, O_CREAT | O_RDONLY, 0644, &attr);
     CHECK((mqd_t)-1 != mq);
 
-    add_mq_to_close(&mq);
+    std::string mq_name = queue_name;
+    add_mq_to_close(mq_name);
 
     bool started = false;
 
@@ -117,9 +118,9 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
 
             if(verbose) {
                 if(binary) {
-                    // gettimeofday(&curr_time, NULL);
-                    // std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
-                    // printf("%s received telemetry packet\n", timestamp.c_str());
+                    gettimeofday(&curr_time, NULL);
+                    std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
+                    printf("%s received telemetry packet\n", timestamp.c_str());
                 } else {
                     printf("%s\n", buffer);
                 }

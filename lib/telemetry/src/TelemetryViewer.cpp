@@ -85,6 +85,7 @@ RetType TelemetryViewer::init(VCM* vcm) {
     packet_ids = new unsigned int[vcm->num_packets];
     packet_sizes = new size_t[vcm->num_packets];
     packet_buffers = new uint8_t*[vcm->num_packets];
+    memset(packet_buffers, 0, sizeof(uint8_t*) * vcm->num_packets);
 
     return SUCCESS;
 }

@@ -426,7 +426,8 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
     struct timespec* timespec = NULL;
     if(timeout > 0) {
         struct timespec curr_time;
-        clock_gettime(CLOCK_REALTIME, &curr_time);
+        // TODO setting to CLOCK_REALTIME and ORing futex op with FUTEX_CLOCK_REALTIME doesnt seem to work...
+        clock_gettime(CLOCK_MONOTONIC, &curr_time);
 
         uint32_t ms = curr_time.tv_sec * 1000;
         ms += (curr_time.tv_nsec / 1000000);
@@ -505,7 +506,7 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
         read_locked = false;
 
         if(read_mode == BLOCKING_READ) {
-            if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET | FUTEX_CLOCK_REALTIME, last_nonce, timespec, NULL, bitset)) {
+            if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, bitset)) {
                 if(errno == ETIMEDOUT) {
                     logger.log_message("shared memory wait timed out");
 
@@ -565,7 +566,8 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
     struct timespec* timespec = NULL;
     if(timeout > 0) {
         struct timespec curr_time;
-        clock_gettime(CLOCK_REALTIME, &curr_time);
+        // TODO setting to CLOCK_REALTIME and ORing futex op with FUTEX_CLOCK_REALTIME doesnt seem to work...
+        clock_gettime(CLOCK_MONOTONIC, &curr_time);
 
         uint32_t ms = curr_time.tv_sec * 1000;
         ms += (curr_time.tv_nsec / 1000000);
@@ -604,7 +606,7 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
             if(read_mode == BLOCKING_READ) {
                 // wait for any packet to be updated
                 // we don't need to check if the nonce is 0 (indicating a signal) since if it is it will never match 'last_nonce' (which can never be 0)
-                if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET | FUTEX_CLOCK_REALTIME, last_nonce, timespec, NULL, 0xFF)) {
+                if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, 0xFF)) {
                     if(errno == ETIMEDOUT) {
                         logger.log_message("shared memory wait timed out");
 
@@ -614,7 +616,6 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
                     // if we get EAGAIN, it could mean that the nonce changed before we could block OR we got a signal and it was remapped and set to 0
                     if(errno != EAGAIN) {
                         // else something bad
-                        perror("uhhhh");
                         return FAILURE;
                     }
                 } // otherwise we've been woken up

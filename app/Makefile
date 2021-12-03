@@ -1,4 +1,4 @@
-# Make all process subdirs
+# Make all application subdirs
 
 all:
 	-$(MAKE) -C view_log all
@@ -7,6 +7,7 @@ all:
 	-$(MAKE) -C db all
 	-$(MAKE) -C map all
 	-$(MAKE) -C voice all
+	-$(MAKE) -C propulsion all
 
 clean:
 	-$(MAKE) -C view_log clean
@@ -15,3 +16,4 @@ clean:
 	-$(MAKE) -C db clean
 	-$(MAKE) -C map clean
 	-$(MAKE) -C voice clean
+	-$(MAKE) -C propulsion clean

@@ -100,12 +100,6 @@ int main() {
         return -1;
     }
 
-    // bind the socket to our address
-    if(-1 == bind(sockfd, (struct sockaddr*)&src_addr, sizeof(src_addr))) {
-        printf("failed to bind UDP socket\n");
-        return -1;
-    }
-
     // set socket options so we can use the same port
     // allows us to reuse ports with different procs (e.g. decom and this sim)
     int on = 1;
@@ -119,6 +113,17 @@ int main() {
         printf("socket option REUSEPORt failed\n");
         return -1;
     }
+
+    // bind the socket to our address
+    if(-1 == bind(sockfd, (struct sockaddr*)&src_addr, sizeof(src_addr))) {
+        printf("failed to bind UDP socket\n");
+        return -1;
+    }
+
+    // send out all of our telemetry first
+    ack_cmd();
+    send_solenoid_state();
+    send_igniter_state();
 
     // listen for command packets
     uint8_t recv_buffer[sizeof(ec_command_t)];

@@ -10,7 +10,7 @@
 #include "common/types.h"
 #include "lib/nm/NmShm.h"
 
-#define NM_MAX_MSG_SIZE 4096
+#define NM_MAX_MSG_SIZE 2048
 
 namespace nm {
     // checks an mqueue of name /'name' for messages to send over UDP
@@ -25,14 +25,16 @@ namespace nm {
 
         // construct a network manager named 'name'
         // this name must match any associated network interfaces
-        // binds to 'port' (e.g. received packets dst = port, sent packets src = port)
+        // binds to 'src_port' (e.g. received packets dst = port, sent packets src = port)
+        // sends any outgoing packets to 'dst_port'
+        // ports in host order
         // places received data in 'buffer' of 'size' bytes
         // if buffer is NULL or size is 0, calling 'Receive' discards the packet
         // a receive attempt will timeout after 'rx_timeout' milliseconds
         // if 'rx_timeout' is set to -1 (or anything less than 0), all calls to receive will be blocking
         // if a multicast address other than 0 is specified, the network manager will listen on that group
         // the multicast address is expected in network order
-        NetworkManager(uint16_t port, const char* name, uint8_t* buffer,
+        NetworkManager(uint16_t src_port, uint16_t dst_port, const char* name, uint8_t* buffer,
                     size_t size, uint32_t multicast_addr = 0, ssize_t rx_timeout = -1);
 
         // destructor
@@ -60,13 +62,14 @@ namespace nm {
         struct sockaddr_in device_addr; // address of the device we're listening to (filled in by recvfrom)
         int sockfd;
 
-        uint16_t port;
+        uint16_t src_port;
+        uint16_t dst_port;
 
         uint8_t* rx_buffer;
         size_t rx_size;
         ssize_t rx_timeout;
 
-        uint8_t tx_buffer[NM_MAX_MSG_SIZE];
+        uint8_t tx_buffer[NM_MAX_MSG_SIZE + 1];
 
         bool open;
 

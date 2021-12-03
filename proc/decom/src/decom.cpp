@@ -93,7 +93,7 @@ void execute(size_t packet_id, packet_info_t* packet) {
     uint8_t* buffer = new uint8_t[packet->size];
 
     // open the network manager (use default timeout)
-    net = new NetworkManager(packet->port, packet_name.c_str(), buffer,
+    net = new NetworkManager(packet->port, 0, packet_name.c_str(), buffer,
                                         packet->size, veh->multicast_addr);
     if(FAILURE == net->Open()) {
         logger.log_message("failed to open network manager");

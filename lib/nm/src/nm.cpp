@@ -16,14 +16,15 @@ using namespace dls;
 using namespace shm;
 using namespace vcm;
 
-NetworkManager::NetworkManager(uint16_t port, const char* name, uint8_t* buffer, size_t size, uint32_t multicast_addr, ssize_t rx_timeout) {
+NetworkManager::NetworkManager(uint16_t src_port, uint16_t dst_port, const char* name, uint8_t* buffer, size_t size, uint32_t multicast_addr, ssize_t rx_timeout) {
     mqueue_name = "/";
     mqueue_name += name;
 
     rx_buffer = buffer;
     rx_size = size;
 
-    this->port = port;
+    this->src_port = src_port;
+    this->dst_port = dst_port;
     this->rx_timeout = rx_timeout;
 
     open = false;
@@ -148,7 +149,7 @@ RetType NetworkManager::Open() {
     struct sockaddr_in myaddr;
     myaddr.sin_addr.s_addr = htonl(INADDR_ANY); // use any interface we have available (likely just 1 ip)
     myaddr.sin_family = AF_INET;
-    myaddr.sin_port = htons(port); // bind OUR port (we receive and send from this port instead of letting the OS pick)
+    myaddr.sin_port = htons(src_port); // bind OUR port (we receive and send from this port instead of letting the OS pick)
     int rc = bind(sockfd, (struct sockaddr*) &myaddr, sizeof(myaddr));
     if(rc) {
         logger.log_message("socket bind failed");
@@ -192,7 +193,7 @@ RetType NetworkManager::Close() {
         logger.log_message("nothing to close, network manager not open");
     }
 
-    if(0 != mq_close(mq)) {
+    if(0 != mq_unlink(mqueue_name.c_str())) {
         ret = FAILURE;
         logger.log_message("unable to close mqueue");
     }
@@ -251,9 +252,8 @@ RetType NetworkManager::Send() {
             return FAILURE;
         }
 
-        // send to the port listed in the VCM file
-        // TODO we need to track this!
-        // device_addr.sin_port = htons(vcm->port);
+        // send to the dst port
+        device_addr.sin_port = htons(dst_port);
 
         ssize_t sent = -1;
         sent = sendto(sockfd, (char*)tx_buffer, read, 0,
@@ -266,6 +266,7 @@ RetType NetworkManager::Send() {
         return SUCCESS;
     }
 
+    perror(mqueue_name.c_str());
     logger.log_message("failed to retrieve message from mqueue");
     return FAILURE;
 }
@@ -304,6 +305,7 @@ NetworkInterface::NetworkInterface(const char* name) {
     mqueue_name = "/";
     mqueue_name += name;
 
+    open = false;
     // try to open, do nothing if it doesn't work (don't want to blow everything up)
     // Open();
 }
@@ -322,6 +324,7 @@ RetType NetworkInterface::Open() {
     // turned non blocking on so if the queue is full it won't be logged (could be a potential issue if messages are being dropped)
     mq = mq_open(mqueue_name.c_str(), O_WRONLY|O_NONBLOCK); // TODO consider adding O_CREAT here, or actually should it fail if the network manager doesnt exist?
     if((mqd_t)-1 == mq) {
+        perror(mqueue_name.c_str());
         logger.log_message("unable to open mqueue");
         return FAILURE;
     }

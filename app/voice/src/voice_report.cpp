@@ -60,14 +60,10 @@ int signals[NUM_SIGNALS] = {
                             SIGABRT
                         };
 
-void sighandler(int signum) {
+void sighandler(int) {
     killed = true;
 
     tlm.sighandler();
-
-    // shut the compiler up
-    int garbage = signum;
-    garbage = garbage + 1;
 }
 
 

@@ -34,16 +34,12 @@ int signals[NUM_SIGNALS] = {
                         };
 
 
-void sighandler(int signum) {
+void sighandler(int) {
     killed = true;
 
     // signal the shared memory control to force us to awaken
     // tlm.sighandler();
     tlm.sighandler();
-
-    // shut the compiler up
-    int garbage = signum;
-    garbage = garbage + 1;
 }
 
 

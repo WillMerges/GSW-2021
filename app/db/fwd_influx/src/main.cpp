@@ -41,7 +41,7 @@ unsigned char sock_open = 0;
 bool killed = false;
 TelemetryViewer tlm;
 
-void sighandler(int signum) {
+void sighandler(int) {
     if(sock_open) {
         close(sockfd);
     }
@@ -50,10 +50,6 @@ void sighandler(int signum) {
     killed = true;
 
     tlm.sighandler();
-
-    // shut the compiler up
-    int garbage = signum;
-    garbage = garbage + 1;
 }
 
 int main(int argc, char* argv[]) {
