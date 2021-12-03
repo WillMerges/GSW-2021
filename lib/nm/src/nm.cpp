@@ -266,7 +266,6 @@ RetType NetworkManager::Send() {
         return SUCCESS;
     }
 
-    perror(mqueue_name.c_str());
     logger.log_message("failed to retrieve message from mqueue");
     return FAILURE;
 }
@@ -324,7 +323,6 @@ RetType NetworkInterface::Open() {
     // turned non blocking on so if the queue is full it won't be logged (could be a potential issue if messages are being dropped)
     mq = mq_open(mqueue_name.c_str(), O_WRONLY|O_NONBLOCK); // TODO consider adding O_CREAT here, or actually should it fail if the network manager doesnt exist?
     if((mqd_t)-1 == mq) {
-        perror(mqueue_name.c_str());
         logger.log_message("unable to open mqueue");
         return FAILURE;
     }
