@@ -1,0 +1,17 @@
+protocol = udp
+port = 8080
+
+name = aprs_forwarder 
+
+endianness = little
+
+# [measurement name] [total measurement size in bytes (including padding)] [most sig padding (bits)] [least sig (bits)] [optional type of int, float, or string, default is int] [optional signed or unsigned, default is signed]
+# signed/unsigned cannot be specified without a type
+APRS_LAT 4 0 0 float signed
+APRS_LONG 4 0 0 float signed
+
+# telemetry packets
+8081 {
+APRS_LAT
+APRS_LONG
+}

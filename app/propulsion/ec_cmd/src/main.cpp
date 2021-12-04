@@ -170,4 +170,6 @@ int main(int argc, char* argv[]) {
     }
 
     printf("command acknowledged\n");
+
+    return 0;
 }

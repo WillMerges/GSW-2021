@@ -5,3 +5,4 @@ sudo dpkg -i grafana_7.3.7_amd64.deb
 rm grafana_7.3.7_amd64.deb
 
 sudo cp grafana.ini /etc/grafana/grafana.ini
+sudo grafana-cli plugins install cloudspout-button-panel
