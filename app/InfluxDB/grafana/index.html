@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>MediaCapture and Streams API</title>
+    <title>Ground Station Live Stream</title>
     <meta name="viewport" content="width=device-width">
 </head>
 <body>
     <header>
-        <h1>Live Stream</h1>
+        <h1>Ground Station Live Stream</h1>
     </header>
     <main>
         
@@ -18,6 +18,8 @@
         
         <video id="vid2" controls></video>
     </main>    
+
+    <!-- JS -->
     <script>
         
         let constraintObj = { 
@@ -41,7 +43,7 @@
                     getUserMedia.call(navigator, constraintObj, resolve, reject);
                 });
             }
-        }else{
+        } else {
             navigator.mediaDevices.enumerateDevices()
             .then(devices => {
                 devices.forEach(device=>{
@@ -94,15 +96,9 @@
                 let videoURL = window.URL.createObjectURL(blob);
                 vidSave.src = videoURL;
                 blob.href = videoURL;
-                blob.download = "streaming.mp4";
+                blob.download = "stream-recording.mp4";
                 blob.click();
                 window.URL.revokeObjectURL(videoURL);
-
-                // let file = new File([blob], "vid.mp4", {
-                //     type: blob.type,
-                // });
-
-                // console.log(file);
             }
         })
         .catch(function(err) { 
