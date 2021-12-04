@@ -1,4 +1,12 @@
 #!/bin/bash
+#
+# File:     clear_influx.sh
+#
+# Purpose:  clears all data out of the 'gsw' database in the currently running
+#           InfluxDB server
+#
+# Usage:    ./clear_influx.sh
+#
 
 #if [ -v $1 ]
 #then
