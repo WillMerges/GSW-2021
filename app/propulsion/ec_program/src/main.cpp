@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <map>
 #include <string>
+#include <vector>
 #include <stdint.h>
 
 using namespace dls;
@@ -43,7 +44,42 @@ std::map commands<uint32_t, command_t>;
 
 // parse the program file
 bool parse_file(const char* file) {
- // TODO
+    MsgLogger logger("EC_PROGRAM", "parse_file");
+
+
+    f = new std::ifstream(file);
+
+    for(std::string line; std::getline(*f,line); ) {
+        if(line == "" || !line.rfind("#",0)) { // blank or comment '#'
+            continue;
+        }
+
+        stringstream ss(line);
+        std::string s;
+        std::vector tokens;
+
+        while(getline(ss, s, ' ')) {
+            if(!s.rfind("#",0)) {
+                // comment
+                break;
+            }
+
+            tokens.push_back(s);
+        }
+
+        if(tokens.size() != 3) {
+            logger.log_message("unexpected number of tokens");
+            return false;
+        }
+
+        if(tokens[1] == "=") {
+            // macro
+            macros[tokens[0]] = tokens[2];
+        } else {
+            // command to add
+            // TODO
+        }
+    }
 }
 
 // main function
