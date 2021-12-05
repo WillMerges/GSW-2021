@@ -2,7 +2,7 @@
 # Runs over 10 seconds
 
 # define some macros
-# matches a single control or state
+# matches a single word
 FUEL = 100      # solenoid 1
 OX = 101        # solenoid 2
 PURGE = 102     # solenoid 3
@@ -20,3 +20,5 @@ OFF = 0         # off state
 7000 OX OFF
 7000 PURGE ON
 10000 PURGE OFF
+
+end
