@@ -163,7 +163,7 @@ int main() {
 
         if(cmd->control >= igniter_control_start &&
                 cmd->control < igniter_control_start + NUM_IGNITERS) {
-            // this is a command for one of the igniters 
+            // this is a command for one of the igniters
             uint16_t igniter_num = cmd->control % igniter_control_start;
             igniters[igniter_num] = cmd->state;
 

@@ -7,10 +7,10 @@
 #           If process returns an error sends an HTTP 418 (I'm a teapot),
 #           otherwise a 200 (OK). Will also respond to OPTIONS requests, but
 #           no other HTTP functions are supported.
-#           
-#   
+#
+#
 # Usage:    ./ec_server.py <port>
-#           'port' is optional port to listen to HTTP requests over, 
+#           'port' is optional port to listen to HTTP requests over,
 #           uses 8080 by default
 #
 # Base code taken from:

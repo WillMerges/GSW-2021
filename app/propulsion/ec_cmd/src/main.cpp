@@ -19,7 +19,7 @@ using namespace vcm;
 using namespace nm;
 
 // amount of time to wait for telemetry to indicate command was accepted
-#define TIMEOUT 1000 // ms
+#define TIMEOUT 500 // ms
 
 // measurement to look for sequence number of command in
 #define SEQUENCE_ACK_MEASUREMENT "SEQ_NUM"
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    // interpret the 1st argument as a config_file location if available
+    // interpret the 3rd argument as a config_file location if available
     std::string config_file = "";
     if(argc > 3) {
         config_file = argv[3];
