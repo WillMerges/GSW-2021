@@ -15,10 +15,10 @@
 #include "common/types.h"
 #include "common/time.h"
 #include <unordered_map>
-#include <map>
 #include <string>
 #include <vector>
 #include <sstream>
+#include <algorithm>
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
@@ -38,13 +38,20 @@ using namespace nm;
 std::unordered_map<std::string, std::string> macros;
 
 // engine controller command
-typedef struct {
+typedef struct command_s{
+    uint32_t time;
     uint16_t control;
     uint16_t state;
+
+    // for sorting my time
+    bool operator < (const struct command_s& other) const
+    {
+        return time < other.time;
+    }
 } command_t;
 
 // keys are time, values are commands
-std::map<uint32_t, command_t> commands;
+std::vector<command_t> commands;
 
 
 // parse the program file
@@ -144,9 +151,13 @@ RetType parse() {
             command_t cmd;
             cmd.control = (uint16_t)control;
             cmd.state = (uint16_t)state;
-            commands[(uint32_t)abs_time] = cmd;
+            cmd.time = (uint32_t)abs_time;
+            commands.push_back(cmd);
         }
     }
+
+    // sort the commands by execution time
+    std::sort(commands.begin(), commands.end());
 
     return SUCCESS;
 }
@@ -241,16 +252,16 @@ int main(int argc, char* argv[]) {
     uint32_t elapsed;
     ec_command_t cmd;
     long cmd_num;
-    for(std::pair<uint32_t, command_t> c : commands) {
+    for(command_t c : commands) {
         cmd_num = seq_num + 1;
         cmd.seq_num = (uint32_t)cmd_num;
-        cmd.control = c.second.control;
-        cmd.state = c.second.state;
+        cmd.control = c.control;
+        cmd.state = c.state;
 
         elapsed = systime() - start;
-        if(elapsed < c.first) {
+        if(elapsed < c.time) {
             // we need to wait to execute this
-            usleep((c.first - elapsed) * 1000);
+            usleep((c.time - elapsed) * 1000);
         }
 
         // send the command over the network

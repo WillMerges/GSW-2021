@@ -24,6 +24,8 @@ all: $(TARGET)
 
 $(TARGET): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LIBS)
+	chmod +x update_programs.py
 
 clean:
 	-rm src/*.o $(TARGET)
+	chmod -x update_programs.py

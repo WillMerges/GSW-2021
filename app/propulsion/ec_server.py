@@ -43,7 +43,16 @@ class S(BaseHTTPRequestHandler):
 
         self.data_string = self.rfile.read(int(self.headers["Content-Length"]))
 
-        cmd = "ec_cmd/ec_cmd " + self.data_string
+        tokens = self.data_string.split()
+        if len(tokens) == 2:
+            cmd = "ec_cmd/ec_cmd " + self.data_string
+        elif len(tokens) == 1:
+            cmd = "cat ec_program/programs/" + self.data_string + " | ec_program/ec_program"
+        else:
+            self.send_response(418) # I'm a teapot
+            self.end_headers()
+            return
+
         resp = os.system(cmd)
         if resp == 0:
             self.send_response(200) # OK
