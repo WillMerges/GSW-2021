@@ -648,6 +648,10 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
 }
 
 // handle a signal, should be called from a sighandler
+// takes of the case where a process is blocking in 'read_lock' and gets a signal
+// need to make the function return and stop blocking
+// NOT useful for writers to use, the 'write' functions should be allowed to
+// finish if a signal is received, and then have the process exit after
 void TelemetryShm::sighandler() {
     MsgLogger logger("TelemetryShm", "sighandler");
 

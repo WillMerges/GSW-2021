@@ -43,6 +43,9 @@ std::vector<pid_t> pids;
 
 bool ignore_kill = false;
 
+bool killed = false;
+int received_sig = 0;
+
 
 void sighandler(int signum) {
     MsgLogger logger(decom_id.c_str(), "sighandler");
@@ -68,14 +71,22 @@ void sighandler(int signum) {
             i++;
         }
         logger.log_message("killed all children, exiting");
+        exit(signum);
     } else { // if we're a child we need to clean up our mess
-        logger.log_message("killed, cleaning up resources");
-        if(net) { // it's possible we get killed before we can create out network manager
-            delete net; // this also calls close
-        }
+        // mark us as killed, don't want to kill immediately in case we have shared memory locked
+        killed = true;
+        received_sig = signum;
     }
+}
 
-    exit(signum);
+// clean up memory of a child
+void child_cleanup() {
+    MsgLogger logger(decom_id.c_str(), "child_cleanup");
+
+    logger.log_message("killed, cleaning up resources");
+    if(net) { // it's possible we get killed before we can create out network manager
+        delete net; // this also calls close
+    }
 }
 
 // main logic for each sub process to run
@@ -149,9 +160,12 @@ void execute(size_t packet_id, packet_info_t* packet) {
                 }
             }
             plogger.log_packet((unsigned char*)buffer, n); // log the packet either way
+        } else if(killed) {
+            // we got killed and got a signal, making net->Receive fail
+            child_cleanup();
+            exit(received_sig);
         }
     }
-
 }
 
 int main(int argc, char** argv) {
