@@ -1,5 +1,5 @@
 # Simple Engine Controller Test Program
-# Runs over 10 seconds
+# Runs over 22 seconds
 
 # define some macros
 # matches a single word
@@ -14,11 +14,11 @@ OFF = 0         # off state
 # Format is [absolute time in ms (from start of program)] [control] [state]
 0 PURGE ON
 3000 OX ON
-3500 PURGE OFF
+3000 PURGE OFF
 5000 FUEL ON
-6000 FUEL OFF
-7000 OX OFF
-7000 PURGE ON
-10000 PURGE OFF
+19000 FUEL OFF
+20000 OX OFF
+20000 PURGE ON
+22000 PURGE OFF
 
 end
