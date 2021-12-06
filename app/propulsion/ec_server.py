@@ -15,10 +15,18 @@
 #
 # Base code taken from:
 #   https://stackoverflow.com/questions/31371166/reading-json-from-simplehttpserver-post-data/31393963#31393963
+#   and doing multiple connections on one port
+#   https://stackoverflow.com/questions/46210672/python-2-7-streaming-http-server-supporting-multiple-connections-on-one-port
 #
 from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 import SocketServer
+import socket
 import os
+import sys
+import time
+
+# how many separate requests can we handle at once
+NUM_SERVERS = 5
 
 class S(BaseHTTPRequestHandler):
     def _set_headers(self):
@@ -53,6 +61,8 @@ class S(BaseHTTPRequestHandler):
             self.end_headers()
             return
 
+        print(cmd)
+
         resp = os.system(cmd)
         if resp == 0:
             self.send_response(200) # OK
@@ -62,16 +72,43 @@ class S(BaseHTTPRequestHandler):
         self.end_headers()
 
 
-def run(server_class=HTTPServer, handler_class=S, port=8080):
+def run(port, server_class=HTTPServer, handler_class=S):
     server_address = ('', port)
-    httpd = server_class(server_address, handler_class)
-    print("Starting httpd...")
+
+    # to enable multiple server processes
+    # https://stackoverflow.com/questions/46210672/python-2-7-streaming-http-server-supporting-multiple-connections-on-one-port
+    sock = socket.socket (socket.AF_INET, socket.SOCK_STREAM)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
+    sock.bind(server_address)
+    sock.listen(5)
+
+    httpd = server_class(server_address, handler_class, False)
+    httpd.socket = sock
+
+    print("Starting http server on port " + str(port))
     httpd.serve_forever()
 
 if __name__ == "__main__":
-    from sys import argv
+    if len(sys.argv) == 2:
+        port = int(sys.argv[1])
+    else:
+        port = 8080
 
-if len(argv) == 2:
-    run(port=int(argv[1]))
-else:
-    run()
+    # start a bunch of server processes
+    # since recv can handle multiple processes asking for packets, they can
+    # all create separate sockets using the same address and only one process
+    # will handle each incoming packet
+    i = 0
+    while i < NUM_SERVERS:
+        pid = os.fork()
+
+        if pid == 0:
+            # child proc
+            run(port)
+
+        # else parent proc
+        i = i + 1
+
+# sleep forever
+time.sleep(9e9)
