@@ -192,6 +192,11 @@ int main(int argc, char** argv) {
     pid_t pid;
     size_t i = 0;
     for(packet_info_t* packet : veh->packets) {
+        if(packet->port == 0) {
+            // this is a virtual telemetry packet, so it has no network input
+            continue;
+        }
+
         pid = fork();
         if(pid == -1) {
             logger.log_message("failed to start decom sub-process " + std::to_string(i));
