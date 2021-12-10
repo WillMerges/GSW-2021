@@ -1,3 +1,12 @@
+/*******************************************************************************
+* Name: clock.cpp
+*
+* Purpose: Countdown clock access and control library
+*
+* Author: Will Merges
+*
+* RIT Launch Initiative
+*******************************************************************************/
 #include "lib/clock/clock.h"
 #include "lib/dls/dls.h"
 #include "common/time.h"
@@ -53,8 +62,14 @@ RetType CountdownClock::create() {
     // zero shared memory
     memset((void*)shm->data, 0, sizeof(clock_shm_t));
 
-    // initialize the semaphore
     clock_shm_t* data = (clock_shm_t*)shm->data;
+
+    // set the hold time and t0 to right now
+    uint32_t curr_time = systime();
+    data->t0 = data->hold = curr_time;
+    data->hold_set = true;
+
+    // initialize the semaphore
     if(0 != sem_init(&(data->sem), 1, 1)) {
         logger.log_message("Failed to initialize semaphore");
         return FAILURE;
@@ -105,8 +120,14 @@ RetType CountdownClock::parse_cmd(clock_cmd_t* cmd) {
                 data->stopped = true;
             }
             break;
-        case HOLD_CLOCK:
+        case SET_HOLD_CLOCK:
             data->hold = curr_time + cmd->arg;
+            data->hold_set = true;
+            break;
+        case RELEASE_HOLD_CLOCK:
+            data->hold_set = false;
+            // set the new t0 time
+            data->t0 = curr_time + (data->t0 - data->hold);
             break;
         case SET_CLOCK:
             data->t0 = curr_time + cmd->arg;
@@ -142,7 +163,7 @@ RetType CountdownClock::read_time(int64_t* time) {
     if(data->stopped) {
         *time = ((int64_t)curr_time) - ((int64_t)data->stop_time);
     } else {
-        if(curr_time > data->hold) {
+        if(data->hold_set && curr_time > data->hold) {
             *time = ((int64_t)data->t0) - ((int64_t)data->hold);
         } else {
             *time = ((int64_t)curr_time) - ((int64_t)data->t0);
@@ -159,5 +180,9 @@ RetType CountdownClock::read_time(int64_t* time) {
 }
 
 // RetType CountdownClock::block_until(int64_t time) {
-// TODO
+//     // TODO
+// }
+
+// RetType CountdownClock::to_str(int64_t time, std::string* str) {
+//     // TODO
 // }

@@ -26,7 +26,8 @@ namespace countdown_clock {
     typedef enum {
         START_CLOCK,
         STOP_CLOCK,
-        HOLD_CLOCK,
+        SET_HOLD_CLOCK,
+        RELEASE_HOLD_CLOCK,
         SET_CLOCK
     } cmd_type;
 
@@ -78,6 +79,7 @@ namespace countdown_clock {
         typedef struct {
             sem_t sem;
             uint32_t t0;        // t-0 time (ms)
+            bool hold_set;      // if a hold was set
             uint32_t hold;      // hold time (ms)
             bool stopped;       // if the clock is stopped
             uint32_t stop_time; // time the clock was stopped

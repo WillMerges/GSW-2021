@@ -8,6 +8,7 @@ all:
 	-$(MAKE) -C map all
 	-$(MAKE) -C voice all
 	-$(MAKE) -C propulsion all
+	-$(MAKE) -C clock_view all
 
 clean:
 	-$(MAKE) -C view_log clean
@@ -17,3 +18,4 @@ clean:
 	-$(MAKE) -C map clean
 	-$(MAKE) -C voice clean
 	-$(MAKE) -C propulsion clean
+	-$(MAKE) -C clock_view clean
