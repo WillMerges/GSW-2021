@@ -16,6 +16,7 @@
 #include <stdint.h>
 #include <semaphore.h>
 #include <string>
+#include <time.h>
 
 using namespace shm;
 using namespace vcm;
@@ -43,10 +44,7 @@ namespace countdown_clock {
         // Desctructor
         virtual ~CountdownClock();
 
-        // Initialize the object using 'vcm'
-        RetType init(VCM* vcm);
-
-        // Initialize using the default VCM file
+        // Initialize the clock object, needs to be done before using any function
         RetType init();
 
         // Create shared memory
@@ -64,35 +62,29 @@ namespace countdown_clock {
         // Parse a clock command
         RetType parse_cmd(clock_cmd_t* cmd);
 
-        // Block until a certain time
-        // NOTE: blocking function
-        RetType block_until(int64_t time);
-
         // Read the current time
         // NOTE: blocking function
         RetType read_time(int64_t* time);
 
-        // Convert a int64 time to a string
-        // outputed as T+/- hh:mm:ss:ms
-        RetType to_str(int64_t time, std::string* str);
+        // Block until a certain time
+        // NOTE: blocking function
+        // RetType block_until(int64_t time);
 
-        // Update time of clock, intended to be updated by the 'clock' process
-        // Contains the logic for hold time
-        RetType tick();
+        // Convert a int64 time to a string
+        // outputed as T+/- hh:mm:ss.ms
+        // RetType to_str(int64_t time, std::string* str);
 
     private:
         typedef struct {
-            uint32_t readers;
-            uint32_t writers;
-            sem_t rmutex;
-            sem_t wmutex;
-            sem_t readTry;
-            sem_t resource;
-            int64_t time;
-            int64_t hold_time;
+            sem_t sem;
+            uint32_t t0;        // t-0 time (ms)
+            uint32_t hold;      // hold time (ms)
+            bool stopped;       // if the clock is stopped
+            uint32_t stop_time; // time the clock was stopped
         } clock_shm_t;
 
-        static const int shmid = 0x92; // random unique int for shared memory key
+        static const int shm_key_id = 0x92; // random unique int for shared memory key
+        static const clockid_t clock_id = CLOCK_REALTIME;
 
         Shm* shm;
     };
