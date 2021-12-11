@@ -110,7 +110,7 @@ int main() {
 
     on = 1;
     if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) < 0) {
-        printf("socket option REUSEPORt failed\n");
+        printf("socket option REUSEPORT failed\n");
         return -1;
     }
 

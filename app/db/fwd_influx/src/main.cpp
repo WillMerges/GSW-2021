@@ -38,20 +38,88 @@ using namespace countdown_clock;
 
 #define NANOSEC_PER_MILLISEC (10^6)
 
+#define CLOCK_PERIOD 100 // send clock update every 100 ms
+
 int sockfd;
+struct sockaddr_in servaddr;
 unsigned char sock_open = 0;
 bool killed = false;
 TelemetryViewer tlm;
+VCM* veh;
 
+// signal handler
 void sighandler(int) {
     if(sock_open) {
         close(sockfd);
     }
 
-
     killed = true;
 
     tlm.sighandler();
+}
+
+// thread that sends clock info once per CLOCK_PERIOD to InfluxDB
+void* clock_thread(void*) {
+    MsgLogger logger("DB_FWD", "clock_thread");
+
+    CountdownClock cl;
+
+    if(FAILURE == cl.init()) {
+        logger.log_message("failed to initialize countdown clock");
+        printf("failed to initialize countdown clock\n");
+        exit(-1);
+    }
+
+    if(FAILURE == cl.open()) {
+        logger.log_message("failed to open countdown clock");
+        printf("failed to open countdown clock\n");
+        exit(-1);
+    }
+
+    std::string msg;
+    std::string val;
+
+    int64_t clock_time;
+    int64_t hold_time;
+    bool hold_set;
+
+    while(!killed) {
+        msg = veh->device;
+        msg += " ";
+
+        if(FAILURE != cl.read_time(&clock_time, &hold_time, &hold_set)) {
+            cl.to_str(clock_time, &val);
+            msg += "CLOCK=\"";
+            msg += val;
+            msg += "\",";
+
+            if(hold_set) {
+                cl.to_str(hold_time, &val);
+                msg += "HOLD=\"";
+                msg += val;
+                msg += "\"";
+            } else {
+                msg += "HOLD=\"--:--:--.--\"";
+            }
+        } else {
+            logger.log_message("Failed to read clock time");
+            printf("Failed to read clock time\n");
+        }
+
+        // send the message
+        ssize_t sent = -1;
+        sent = sendto(sockfd, msg.c_str(), msg.length(), 0,
+            (struct sockaddr*)&servaddr, sizeof(servaddr));
+        if(sent == -1) {
+            logger.log_message("Failed to send UDP message");
+            printf("Failed to send UDP message\n");
+            // continue on
+        }
+
+        usleep(CLOCK_PERIOD * 1000);
+    }
+
+    return NULL;
 }
 
 int main(int argc, char* argv[]) {
@@ -79,14 +147,13 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    VCM* vcm;
     if(config_file == "") {
-        vcm = new VCM(); // use default config file
+        veh = new VCM(); // use default config file
     } else {
-        vcm = new VCM(config_file); // use specified config file
+        veh = new VCM(config_file); // use specified config file
     }
 
-    if(FAILURE == vcm->init()) {
+    if(FAILURE == veh->init()) {
         logger.log_message("failed to initialize VCM");
         printf("failed to initialize VCM\n");
         exit(-1);
@@ -107,16 +174,13 @@ int main(int argc, char* argv[]) {
     }
     sock_open = 1;
 
-    // define influxdb server endpoint
-    struct sockaddr_in servaddr;
-
     memset(&servaddr, 0, sizeof(servaddr));
 
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(INFLUXDB_UDP_PORT);
     servaddr.sin_addr.s_addr = inet_addr(INFLUXDB_ADDR);
 
-    if(FAILURE == tlm.init(vcm)) {
+    if(FAILURE == tlm.init(veh)) {
         logger.log_message("failed to initialize telemetry viewer");
         printf("failed to initialize telemetry viewer\n");
         exit(-1);
@@ -130,6 +194,10 @@ int main(int argc, char* argv[]) {
     std::string val;
     // uint32_t timestamp = 0;
     // unsigned char use_timestamp = 0;
+
+    // start the thread to send clock updates
+    pthread_t clock_tid;
+    pthread_create(&clock_tid, NULL, &clock_thread, NULL);
 
     // main loop
     while(1) {
@@ -146,17 +214,17 @@ int main(int argc, char* argv[]) {
         }
 
         // construct the message
-        msg = vcm->device;
+        msg = veh->device;
         msg += " ";
 
         unsigned char first = 1;
 
-        for(std::string meas : vcm->measurements) {
-            m_info = vcm->get_info(meas);
+        for(std::string meas : veh->measurements) {
+            m_info = veh->get_info(meas);
 
             /**
             if(meas == "UPTIME") {
-                if(SUCCESS == convert_uint(vcm, m_info, buff, &timestamp)) {
+                if(SUCCESS == convert_uint(veh, m_info, buff, &timestamp)) {
                     use_timestamp = 1;
                 }
             }
@@ -175,6 +243,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
+        // TODO this probably didn't work because there's an extra comman at the end of the measurements line
         // we can add a timestamp in nano-seconds to the end of the line in Influx line protocol
         //if(use_timestamp) {
         //    uint64_t nanosec_time = timestamp;

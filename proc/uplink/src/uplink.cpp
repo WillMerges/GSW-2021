@@ -68,6 +68,7 @@ int main(int argc, char** argv) {
     signal(SIGABRT, sighandler);
 
     // send and receive from same port (but never receive as of right now)
+    // net = new NetworkManager(veh->port, veh->port, (veh->device).c_str(), NULL, 0);
     net = new NetworkManager(veh->port, veh->port, (veh->device).c_str(), NULL, 0);
 
     if(net->Open() == FAILURE) {

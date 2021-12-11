@@ -75,7 +75,7 @@ namespace countdown_clock {
 
         // Convert a int64 time to a string
         // outputed as T+/- hh:mm:ss.ms
-        // RetType to_str(int64_t time, std::string* str);
+        static void to_str(int64_t& time, std::string* str);
 
     private:
         typedef struct {

@@ -159,6 +159,7 @@ void execute(size_t packet_id, packet_info_t* packet) {
                     // ignore and continue
                 }
             }
+
             plogger.log_packet((unsigned char*)buffer, n); // log the packet either way
         } else if(killed) {
             // we got killed and got a signal, making net->Receive fail

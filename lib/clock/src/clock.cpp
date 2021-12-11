@@ -112,13 +112,13 @@ RetType CountdownClock::parse_cmd(clock_cmd_t* cmd) {
     // handle command
     switch(cmd->cmd) {
         case START_CLOCK:
+            data->stopped = false;
+            data->t0 = curr_time + (((int64_t)data->t0) - ((int64_t)data->stop_time));
+
             // if we're already past the hold, unset it
             if(curr_time > data->t0 + data->hold) {
                 data->hold_set = false;
             }
-
-            data->stopped = false;
-            data->t0 = curr_time + (((int64_t)data->t0) - ((int64_t)data->stop_time));
             break;
         case STOP_CLOCK:
             if(!data->stopped) {
@@ -222,6 +222,39 @@ RetType CountdownClock::read_time(int64_t* time, int64_t* hold_time, bool* hold_
 //     // TODO
 // }
 
-// RetType CountdownClock::to_str(int64_t time, std::string* str) {
-//     // TODO
-// }
+void CountdownClock::to_str(int64_t& time, std::string* str) {
+    std::string t = "T";
+    if(time > 0) {
+        t += "+";
+    } else {
+        t += "-";
+        time *= -1;
+    }
+
+    // TODO precompute some of these constants
+    unsigned int ms_per_hour = (60 * 60 * 1000);
+    std::string hh = std::to_string(time / ms_per_hour);
+    if(hh.size() < 2) {
+        hh = "0" + hh;
+    }
+    time %= ms_per_hour;
+
+    unsigned int ms_per_minute = (60 * 1000);
+    std::string mm = std::to_string(time / ms_per_minute);
+    if(mm.size() < 2) {
+        mm = "0" + mm;
+    }
+    time %= ms_per_minute;
+
+    unsigned int ms_per_second = 1000;
+    std::string ss = std::to_string(time / ms_per_second);
+    if(ss.size() < 2) {
+        ss = "0" + ss;
+    }
+    time %= ms_per_second;
+
+    std::string ms = std::to_string(time);
+
+    t = t + " " + hh + ":" + mm + ":" + ss + "." + ms;
+    *str = t;
+}

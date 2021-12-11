@@ -11,6 +11,7 @@
 #include "lib/dls/dls.h"
 #include <stdio.h>
 #include <unistd.h>
+#include <string>
 
 using namespace countdown_clock;
 using namespace dls;
@@ -37,15 +38,18 @@ int main() {
     int64_t t_time;
     int64_t hold_time;
     bool hold_set;
+    std::string str;
     while(1) {
         if(FAILURE != cl.read_time(&t_time, &hold_time, &hold_set)) {
             // clear the screen
             printf("\033[2J");
 
             // print the times
-            printf("time: %ld\n", t_time);
+            cl.to_str(t_time, &str);
+            printf("time: %s\n", str.c_str());
             if(hold_set) {
-                printf("hold: %ld\n", hold_time);
+                cl.to_str(hold_time, &str);
+                printf("hold: %s\n", str.c_str());
             } else {
                 printf("hold: -----\n");
             }
