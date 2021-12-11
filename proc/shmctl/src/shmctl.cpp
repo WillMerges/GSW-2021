@@ -8,6 +8,7 @@
 #include "lib/telemetry/TelemetryShm.h"
 #include "common/types.h"
 #include "lib/nm/NmShm.h"
+#include "lib/clock/clock.h"
 
 // run as shmctl -on or shmctl -off to create and destroy shared memory
 // option -f argument to specify VCM config file (current default used otherwise)
@@ -16,6 +17,7 @@
 using namespace vcm;
 using namespace shm;
 using namespace dls;
+using namespace countdown_clock;
 
 bool on = false;
 bool off = false;
@@ -65,6 +67,13 @@ int main(int argc, char* argv[]) {
         return FAILURE;
     }
 
+    CountdownClock cl;
+    if(cl.init() == FAILURE) {
+        printf("failed to initialize countdown clock\n");
+        logger.log_message("failed to initialize countdown clock");
+        return FAILURE;
+    }
+
     NmShm nm_shm;
     if(nm_shm.init() == FAILURE) {
         printf("failed to initialize network manager shm controller\n");
@@ -85,8 +94,8 @@ int main(int argc, char* argv[]) {
         logger.log_message("creating shared memory");
 
         if(FAILURE == tlm_shm.create()) {
-            printf("Failed to create telemetry shared memory\n");
-            logger.log_message("Failed to create telemetry shared memory");
+            printf("failed to create telemetry shared memory\n");
+            logger.log_message("failed to create telemetry shared memory");
             ret = FAILURE;
         } else {
             printf("created telemetry shared memory\n");
@@ -100,6 +109,15 @@ int main(int argc, char* argv[]) {
         } else {
             printf("created network manager shared memory\n");
             logger.log_message("created network manager shared memory");
+        }
+
+        if(FAILURE == cl.create()) {
+            printf("failed to create countdown clock shared memory\n");
+            logger.log_message("failed to create countdown clock shared memory");
+            ret = FAILURE;
+        } else {
+            printf("created countdown clock shared memory\n");
+            logger.log_message("created countdown clock shared memory");
         }
 
         return ret;
@@ -127,6 +145,18 @@ int main(int argc, char* argv[]) {
             if(FAILURE == nm_shm.destroy()) {
                 printf("failed to destroy network manager shared memory\n");
                 logger.log_message("failed to destroy network manager shared memory");
+                ret = FAILURE;;
+            }
+        }
+
+        if(FAILURE == cl.open()) {
+            printf("countdown clock shared memory not created, nothing to destroy\n");
+            logger.log_message("countdown clock shared memory not created, nothing to destroy");
+            ret = FAILURE;
+        } else {
+            if(FAILURE == cl.destroy()) {
+                printf("failed to destroy countdown clock shared memory\n");
+                logger.log_message("failed to destroy countdown clock shared memory");
                 ret = FAILURE;;
             }
         }

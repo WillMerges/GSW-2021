@@ -9,6 +9,7 @@ all:
 	-$(MAKE) -C voice all
 	-$(MAKE) -C propulsion all
 	-$(MAKE) -C clock_view all
+	-$(MAKE) -C clock_ctrl all
 
 clean:
 	-$(MAKE) -C view_log clean
@@ -19,3 +20,4 @@ clean:
 	-$(MAKE) -C voice clean
 	-$(MAKE) -C propulsion clean
 	-$(MAKE) -C clock_view clean
+	-$(MAKE) -C clock_ctrl clean

@@ -10,7 +10,6 @@
 #include "lib/clock/clock.h"
 #include "lib/dls/dls.h"
 #include <stdio.h>
-#include <unistd.h>
 
 using namespace countdown_clock;
 using namespace dls;
@@ -34,24 +33,11 @@ int main() {
         return -1;
     }
 
-    int64_t t_time;
-    int64_t hold_time;
-    bool hold_set;
+    int64_t time;
     while(1) {
-        if(FAILURE != cl.read_time(&t_time, &hold_time, &hold_set)) {
-            // clear the screen
-            printf("\033[2J");
-
-            // print the times
-            printf("time: %ld\n", t_time);
-            if(hold_set) {
-                printf("hold: %ld\n", hold_time);
-            } else {
-                printf("hold: -----\n");
-            }
+        if(FAILURE != cl.read_time(&time)) {
+            printf("\033[2J"); // clear the screen
+            // printf("time: %ld\n", time);
         }
-
-        // sleep 1 ms
-        usleep(1000);
     }
 }

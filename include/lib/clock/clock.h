@@ -28,7 +28,8 @@ namespace countdown_clock {
         STOP_CLOCK,
         SET_HOLD_CLOCK,
         RELEASE_HOLD_CLOCK,
-        SET_CLOCK
+        SET_CLOCK,
+        NUM_CLOCK_CMDS
     } cmd_type;
 
     typedef struct {
@@ -63,9 +64,10 @@ namespace countdown_clock {
         // Parse a clock command
         RetType parse_cmd(clock_cmd_t* cmd);
 
-        // Read the current time
+        // Read the current time on the countdown clock
+        // If both 'hold_time' and 'hold_set' are not NULL, returns the current hold
         // NOTE: blocking function
-        RetType read_time(int64_t* time);
+        RetType read_time(int64_t* time, int64_t* hold_time = NULL, bool* hold_set = NULL);
 
         // Block until a certain time
         // NOTE: blocking function
@@ -80,7 +82,7 @@ namespace countdown_clock {
             sem_t sem;
             uint32_t t0;        // t-0 time (ms)
             bool hold_set;      // if a hold was set
-            uint32_t hold;      // hold time (ms)
+            int64_t hold;      // hold time (ms)
             bool stopped;       // if the clock is stopped
             uint32_t stop_time; // time the clock was stopped
         } clock_shm_t;
@@ -89,6 +91,9 @@ namespace countdown_clock {
         static const clockid_t clock_id = CLOCK_REALTIME;
 
         Shm* shm;
+
+        // needs to be stored with the object so Shm class has a valid pointer
+        std::string key_filename;
     };
 }
 

@@ -22,6 +22,7 @@
 #include "lib/dls/dls.h"
 #include "lib/convert/convert.h"
 #include "common/types.h"
+#include "lib/clock/clock.h"
 
 // TODO
 // remove printfs? or add verbose mode
@@ -30,6 +31,7 @@ using namespace vcm;
 using namespace shm;
 using namespace dls;
 using namespace convert;
+using namespace countdown_clock;
 
 #define INFLUXDB_UDP_PORT 8089
 #define INFLUXDB_ADDR "127.0.0.1"

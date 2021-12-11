@@ -1,6 +1,6 @@
-# shared memory control
+# countdown clock control
 
-TARGET = shmctl
+TARGET = clock_ctrl
 
 CXX = g++
 CC = g++
@@ -11,7 +11,7 @@ CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
 CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -ggdb
 LDFLAGS = -L$(GSW_HOME)/lib/bin/ -Wl,-rpath=$(GSW_HOME)/lib/bin/
 
-LIBS = -ldls -lvcm -ltelemetry -lconvert -lnm -lclock -lshm
+LIBS = -ldls -lvcm -ltelemetry -lconvert -lclock -lshm
 
 CPP_FILES := $(wildcard src/*.cpp)
 C_FILES := $(wildcard src/*.c)
