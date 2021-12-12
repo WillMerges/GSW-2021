@@ -14,6 +14,9 @@ chmod +x startup/select_current.sh
 
 . setenv
 
+# set the 'gsw' alias to go to this directory
+echo "alias gsw=\"cd ${GSW_HOME}; . setenv\"" >> ~/.bashrc
+
 # TODO let operator select this
 # for now use a default config file
 (cd data; ./select_config.sh sample)
