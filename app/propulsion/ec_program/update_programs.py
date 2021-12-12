@@ -4,7 +4,8 @@ import socket
 import os
 
 # TODO make these configurable
-ip = "localhost"
+# ip = "localhost"
+ip = "influx.local"
 port = 8089
 
 influxaddr = (ip, port)

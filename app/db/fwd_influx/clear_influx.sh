@@ -18,4 +18,4 @@
 #influx -execute "drop measurement $1" -database=gsw
 
 # clears everything
-influx -execute "DROP SERIES FROM /.*/" -database=gsw
+influx -host influx.local -execute "DROP SERIES FROM /.*/" -database=gsw

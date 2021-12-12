@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 3,
-  "iteration": 1639205670829,
+  "iteration": 1639279082745,
   "links": [],
   "panels": [
     {
@@ -1753,11 +1753,11 @@
         "options": [
           {
             "selected": true,
-            "text": "127.0.0.1",
-            "value": "127.0.0.1"
+            "text": "gs.local",
+            "value": "gs.local"
           }
         ],
-        "query": "127.0.0.1",
+        "query": "gs.local",
         "skipUrlSync": false,
         "type": "textbox"
       },
@@ -1785,39 +1785,13 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "simple1.ec",
           "value": "simple1.ec"
         },
         "datasource": "InfluxDB",
         "definition": "",
-        "error": {
-          "config": {
-            "data": "q=SELECT%20program%20from%20ec_programs",
-            "headers": {
-              "Content-type": "application/x-www-form-urlencoded",
-              "X-Grafana-Org-Id": 1
-            },
-            "hideFromInspector": false,
-            "inspect": {
-              "type": "influxdb"
-            },
-            "method": "POST",
-            "params": {
-              "db": "gsw",
-              "epoch": "ms"
-            },
-            "precision": "ms",
-            "retry": 0,
-            "url": "api/datasources/proxy/1/query"
-          },
-          "data": {
-            "error": "Bad Gateway",
-            "message": "Bad Gateway",
-            "response": ""
-          },
-          "message": "InfluxDB Error: Bad Gateway"
-        },
+        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": null,
@@ -1861,5 +1835,5 @@
   "timezone": "",
   "title": "Engine Controller",
   "uid": "yg3nqk27k",
-  "version": 31
+  "version": 34
 }

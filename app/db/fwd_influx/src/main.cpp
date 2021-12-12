@@ -23,6 +23,7 @@
 #include "lib/convert/convert.h"
 #include "common/types.h"
 #include "lib/clock/clock.h"
+#include "common/net.h"
 
 // TODO
 // remove printfs? or add verbose mode
@@ -34,7 +35,8 @@ using namespace convert;
 using namespace countdown_clock;
 
 #define INFLUXDB_UDP_PORT 8089
-#define INFLUXDB_ADDR "127.0.0.1"
+// #define INFLUXDB_ADDR "127.0.0.1"
+#define INFLUXDB_HOST "influx.local"
 
 #define NANOSEC_PER_MILLISEC (10^6)
 
@@ -178,7 +180,13 @@ int main(int argc, char* argv[]) {
 
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons(INFLUXDB_UDP_PORT);
-    servaddr.sin_addr.s_addr = inet_addr(INFLUXDB_ADDR);
+    // servaddr.sin_addr.s_addr = inet_addr(INFLUXDB_ADDR);
+
+    if(FAILURE == get_addr(INFLUXDB_HOST, &servaddr.sin_addr)) {
+        logger.log_message("failed to resolve InfluxDB server host name");
+        printf("failed to resolve host name: %s\n", INFLUXDB_HOST);
+        exit(-1);
+    }
 
     if(FAILURE == tlm.init(veh)) {
         logger.log_message("failed to initialize telemetry viewer");
