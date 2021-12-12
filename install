@@ -21,8 +21,18 @@ echo "alias gsw=\"cd ${GSW_HOME}; . setenv\"" >> ~/.bashrc
 # for now use a default config file
 (cd data; ./select_config.sh sample)
 
-make all
+# If we have the build tools, build everything
+# If not, don't build
+if [[ `command -v g++` && `command -v make` ]];
+then
+    make all
+fi
 
 # install grafana and InfluxDB for view applications
 sudo bash app/db/grafana/install.sh
 sudo bash app/db/run_influx/install.sh
+
+# install mDNS tools (usually stock with Ubuntu)
+sudo apt install avahi-daemon
+sudo apt install avahi-utils
+sudo systemctl enable avahi-daemon
