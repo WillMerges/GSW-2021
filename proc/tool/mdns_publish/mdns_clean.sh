@@ -6,7 +6,7 @@
 if ! [ $1 ]
 then
     echo "usage: ./mdns_clean [PID file]"
-    return
+    exit
 fi
 
 FILE=`pwd`/$1
