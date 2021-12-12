@@ -10,7 +10,6 @@
 *
 *  RIT Launch Initiative
 *********************************************************************/
-
 #include "lib/vcm/vcm.h"
 #include "lib/dls/dls.h"
 #include "lib/convert/convert.h"

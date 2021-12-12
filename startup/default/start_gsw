@@ -50,3 +50,7 @@ echo $! | cat - pidlist > temp && mv temp pidlist
 echo "starting uplink process"
 ${GSW_HOME}/proc/uplink/uplink &
 echo $! | cat - pidlist > temp && mv temp pidlist
+
+# start advertising ourselves over mDNS as "gs.local"
+echo "advertising over mDNS as 'gs.local'"
+${GSW_HOME}/proc/tool/mdns_publish/mdns_publish gs.local mdns_pids

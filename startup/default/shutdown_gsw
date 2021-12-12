@@ -9,6 +9,10 @@ then
     echo environment not set, must run '. setenv' first
 fi
 
+# stop advertising ourselves over mDNS
+echo "stopping mDNS advertisement"
+${GSW_HOME}/proc/tool/mdns_publish/mdns_clean.sh mdns_pids
+
 # TODO should probably kill DLP last (after destroying shared memory)
 #      not a huge issue though
 
