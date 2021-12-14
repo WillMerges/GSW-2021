@@ -100,63 +100,88 @@ RetType CountdownClock::parse_cmd(clock_cmd_t* cmd) {
         return FAILURE;
     }
 
+    uint32_t curr_time = systime();
+
     // lock shared memory
     if(0 != sem_wait(&(data->sem))) {
         logger.log_message("Error locking semaphore");
         return FAILURE;
     }
 
-    uint32_t curr_time = systime();
-    uint32_t ref_t0;
+    int64_t ref_t0;
 
     // handle command
     switch(cmd->cmd) {
         case START_CLOCK:
-            data->stopped = false;
-            data->t0 = curr_time + (((int64_t)data->t0) - ((int64_t)data->stop_time));
+            if(data->stopped) {
+                // set a new t0 reference time if we're coming out of a stop
+                data->stopped = false;
+                data->t0 = curr_time + (((int64_t)data->t0) - ((int64_t)data->stop_time));
 
-            // if we're already past the hold, unset it
-            if(curr_time > data->t0 + data->hold) {
-                data->hold_set = false;
+                if(data->hold_set) {
+                    // if we're already past a hold, unset it
+                    if(curr_time > data->t0 + data->hold) {
+                        data->hold_set = false;
+                    }
+                }
             }
             break;
         case STOP_CLOCK:
             if(!data->stopped) {
                 data->stop_time = curr_time;
                 data->stopped = true;
+
+                // if we're at a hold, adjust t0 forward so the stop lines up
+                if(data->hold_set && curr_time >= data->t0 + data->hold) {
+                    data->t0 = data->stop_time - data->hold;
+                }
             }
             break;
         case SET_HOLD_CLOCK:
             ref_t0 = data->t0;
             if(data->stopped) {
                 ref_t0 = curr_time + (((int64_t)data->t0) - ((int64_t)data->stop_time));
+            } else if(data->hold_set && curr_time > data->t0 - data->hold) {
+                logger.log_message("already at a hold, must release first!");
+                printf("already at a hold, must release first!\n");
+
+                ret = FAILURE;
+                break;
             }
 
-            if(curr_time - cmd->arg > ref_t0) {
+            if(curr_time > ref_t0 + cmd->arg) {
                 // this hold has already passed, we can't set it
                 logger.log_message("Hold time has already passed, cannot set");
                 printf("Hold time has already passed, cannot set\n");
 
                 ret = FAILURE;
             } else {
-                // set a new T0 if we were already holding
-                if(curr_time > ref_t0 + data->hold) {
-                    data->t0 = curr_time - data->hold;
-                }
-
+                // set the hold
                 data->hold = cmd->arg;
                 data->hold_set = true;
             }
             break;
         case RELEASE_HOLD_CLOCK:
-            data->hold_set = false;
-            // set the new t0 time if we are past the hold
-            if(curr_time > data->t0 + data->hold) {
-                data->t0 = curr_time - data->hold;
+            if(data->hold_set) {
+                data->hold_set = false;
+
+                // set the new t0 time if we are past the hold
+                if(curr_time >= data->t0 + data->hold) {
+                    ref_t0 = data->t0;
+                    data->t0 = curr_time - data->hold;
+
+                    // if we are stopped, adjust the stop time
+                    if(data->stopped) {
+                        data->stop_time = data->stop_time + (data->t0 - ref_t0);
+                    }
+                }
             }
             break;
         case SET_CLOCK:
+            // set a new t0
             data->t0 = ((int64_t)curr_time) - cmd->arg;
+
+            // if we were stopped, set a new reference time
             if(data->stopped) {
                 data->stop_time = curr_time;
             }
