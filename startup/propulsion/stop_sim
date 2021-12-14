@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+
+if ! [ -v GSW_HOME ]
+then
+    echo environment not set, must run '. setenv' first
+fi
+
+cd ${GSW_HOME}/startup/propulsion
+
+
+if ! [ -f sim_pids ]
+then
+    echo "SIM is not running!"
+    exit
+else
+    # kill all PIDs
+    while read l; do
+        echo "killing PID $l"
+        sudo kill $l
+        sleep 0.5
+    done <sim_pids
+fi
+
+rm sim_pids

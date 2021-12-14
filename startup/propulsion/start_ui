@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# hostnames of InfluxDB server and Grafana server
+INFLUX="redpanda.local"
+GRAFANA="giantpanda.local"
+
+# username to log onto remote machines with
+USER="launch"
+
+if ! [ -v GSW_HOME ]
+then
+    echo environment not set, must run '. setenv' first
+fi
+
+cd ${GSW_HOME}/startup/propulsion
+
+if [ -f ui_pids ]
+then
+    echo "UI already running!"
+    exit
+fi
+
+# start InfluxDB on remote machine
+echo "remotely starting InfluxDB on $INFLUX"
+${GSW_HOME}/app/db/run_influx/remote_run.sh > /dev/null $INFLUX $USER &
+echo $! >> ui_pids
+
+# clear InfluxDB
+echo "clearing InfluxDB"
+${GSW_HOME}/app/db/fwd_influx/clear_influx.sh
+
+# start measurement forwarding to InfluxDB
+echo "starting database forwaring"
+${GSW_HOME}/app/db/fwd_influx/fwd_influx &
+echo $! >> ui_pids
+
+# start Grafana on remote machine
+echo "remotely starting Grafana on $GRAFANA"
+${GSW_HOME}/app/db/grafana/remote_start.sh $GRAFANA $USER
+
+# start the engine command server
+echo "starting engine command HTPP server"
+${GSW_HOME}/app/propulsion/ec_server.py > /dev/null &
+echo $! >> ui_pids

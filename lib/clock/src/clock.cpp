@@ -140,7 +140,7 @@ RetType CountdownClock::parse_cmd(clock_cmd_t* cmd) {
                 ret = FAILURE;
             } else {
                 // set a new T0 if we were already holding
-                if(curr_time > data->t0 + data->hold) {
+                if(curr_time > ref_t0 + data->hold) {
                     data->t0 = curr_time - data->hold;
                 }
 

@@ -1,13 +1,35 @@
 #!/bin/bash
 
+if ! [ -v GSW_HOME ]
+then
+    echo environment not set, must run '. setenv' first
+fi
+
+cd ${GSW_HOME}/startup/default
+
+set -e
+
+if [ -f ui_pids ]
+then
+    echo "UI already running!"
+    exit
+fi
+
 # start InfluxDB
-${GSW_HOME}/app/InfluxDB/run_influx/run_influx.sh -config ${GSW_HOME}/app/InfluxDB/run_influx/influxdb.conf &
+echo "starting InfluxDB locally"
+${GSW_HOME}/app/db/run_influx/run_influx.sh > /dev/null &
+echo $! >> ui_pids
+sleep 3 
 
 # clear InfluxDB
-${GSW_HOME}/app/InfluxDB/fwd_influx/clear_influx.sh &
+echo "clearing InfluxDB"
+${GSW_HOME}/app/db/fwd_influx/clear_influx.sh
 
 # start Grafana
-${GSW_HOME}/app/InfluxDB/grafana/start.sh &
+echo "starting Grafana locally"
+${GSW_HOME}/app/db/grafana/start.sh
 
 # start measurement forwarding to InfluxDB
-${GSW_HOME}/app/InfluxDB/fwd_influx/fwd_influx &
+echo "starting database forwaring"
+${GSW_HOME}/app/db/fwd_influx/fwd_influx &
+echo $! >> ui_pids

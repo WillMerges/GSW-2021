@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e
+
+if ! [ -v GSW_HOME ]
+then
+    echo environment not set, must run '. setenv' first
+fi
+
+cd ${GSW_HOME}/startup/propulsion
+
+
+if [ -f sim_pids ]
+then
+    echo "SIM is already running!"
+    exit
+fi
+
+# Start the engine controller simulator
+echo "starting engine controller simulator"
+${GSW_HOME}/sim/ec_sim/ec_sim > /dev/null &
+echo $! >> sim_pids
