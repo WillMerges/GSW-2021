@@ -10,4 +10,4 @@ else
     USER=$1
 fi
 
-ssh $USER@grafana.local "gsw; app/db/grafana/stop.sh"
+ssh $USER@grafana.local -t bash -ic "gsw; ${GSW_HOME}/app/db/grafana/stop.sh"

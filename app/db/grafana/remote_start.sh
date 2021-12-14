@@ -16,4 +16,4 @@ else
     USER=$2
 fi
 
-ssh $USER@$2 "gsw; app/db/grafana/start.sh"
+ssh $USER@$1 -t bash -ic "gsw; ${GSW_HOME}/app/db/grafana/start.sh"

@@ -3,6 +3,7 @@
 if ! [ -v GSW_HOME ]
 then
     echo environment not set, must run '. setenv' first
+    exit
 fi
 
 # Stop advertising over mDNS

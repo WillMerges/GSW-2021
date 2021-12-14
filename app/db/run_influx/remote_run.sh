@@ -16,4 +16,4 @@ else
     USER=$2
 fi
 
-ssh $USER@$1 "gsw; app/db/run_influx/run_influx.sh"
+ssh $USER@$1 -t bash -ic "gsw; ${GSW_HOME}/app/db/run_influx/run_influx.sh"
