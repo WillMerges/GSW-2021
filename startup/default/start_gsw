@@ -46,6 +46,7 @@ ${GSW_HOME}/proc/shmctl/shmctl -on
 echo "starting decom process"
 ${GSW_HOME}/proc/decom/decom &
 echo $! | cat - pidlist > temp && mv temp pidlist
+sleep 1
 
 # start the uplink process
 echo "starting uplink process"
