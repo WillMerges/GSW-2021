@@ -11,7 +11,7 @@ ON = 1          # on state
 OFF = 0         # off state
 
 # Run through a basic program
-# Format is [absolute time in ms (from start of program)] [control] [state]
+# Format is [absolute time in ms (time referenced from countdown clock)] [control] [state]
 0 PURGE ON
 3000 OX ON
 3000 PURGE OFF

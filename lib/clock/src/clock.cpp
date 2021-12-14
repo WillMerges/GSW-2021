@@ -175,7 +175,7 @@ RetType CountdownClock::parse_cmd(clock_cmd_t* cmd) {
     return ret;
 }
 
-RetType CountdownClock::read_time(int64_t* time, int64_t* hold_time, bool* hold_set) {
+RetType CountdownClock::read_time(int64_t* time, bool* stopped, int64_t* hold_time, bool* hold_set) {
     MsgLogger logger("CountdownClock", "read_time");
 
     clock_shm_t* data = (clock_shm_t*)shm->data;
@@ -184,13 +184,13 @@ RetType CountdownClock::read_time(int64_t* time, int64_t* hold_time, bool* hold_
         return FAILURE;
     }
 
+    uint32_t curr_time = systime();
+
     // lock shared memory
     if(0 != sem_wait(&(data->sem))) {
         logger.log_message("Error locking semaphore");
         return FAILURE;
     }
-
-    uint32_t curr_time = systime();
 
     if(hold_time && hold_set) {
         *hold_set = data->hold_set;
@@ -198,6 +198,8 @@ RetType CountdownClock::read_time(int64_t* time, int64_t* hold_time, bool* hold_
             *hold_time = ((int64_t)data->hold);
         }
     }
+
+    *stopped = data->stopped;
 
     if(data->stopped) {
         *time = ((int64_t)data->stop_time) - ((int64_t)data->t0) ;

@@ -103,10 +103,10 @@ int main() {
     // set socket options so we can use the same port
     // allows us to reuse ports with different procs (e.g. decom and this sim)
     int on = 1;
-    if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
-        printf("socket option REUSEADDR failed\n");
-        return -1;
-    }
+    // if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
+    //     printf("socket option REUSEADDR failed\n");
+    //     return -1;
+    // }
 
     on = 1;
     if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) < 0) {

@@ -14,6 +14,7 @@
 #include "lib/dls/dls.h"
 #include "common/types.h"
 #include "common/time.h"
+#include "lib/clock/clock.h"
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -26,6 +27,7 @@
 using namespace dls;
 using namespace vcm;
 using namespace nm;
+using namespace countdown_clock;
 
 // amount of time to wait for telemetry to indicate command was accepted
 #define TIMEOUT 500 // ms
@@ -33,13 +35,12 @@ using namespace nm;
 // measurement to look for sequence number of command in
 #define SEQUENCE_ACK_MEASUREMENT "SEQ_NUM"
 
-
 // maps macros
 std::unordered_map<std::string, std::string> macros;
 
 // engine controller command
 typedef struct command_s{
-    uint32_t time;
+    int64_t time;
     uint16_t control;
     uint16_t state;
 
@@ -52,6 +53,9 @@ typedef struct command_s{
 
 // keys are time, values are commands
 std::vector<command_t> commands;
+
+// Countdown Clock
+CountdownClock cl;
 
 
 // parse the program file
@@ -151,7 +155,7 @@ RetType parse() {
             command_t cmd;
             cmd.control = (uint16_t)control;
             cmd.state = (uint16_t)state;
-            cmd.time = (uint32_t)abs_time;
+            cmd.time = (int64_t)abs_time;
             commands.push_back(cmd);
         }
     }
@@ -185,6 +189,19 @@ int main(int argc, char* argv[]) {
         printf("failed to parse program\n");
         logger.log_message("failed to parse program\n");
 
+        return -1;
+    }
+
+    // Open the countdown clock
+    if(FAILURE == cl.init()) {
+        logger.log_message("failed to initialize countdown clock");
+        printf("failed to initialize countdown clock\n");
+        return -1;
+    }
+
+    if(FAILURE == cl.open()) {
+        logger.log_message("failed to open countdown clock");
+        printf("failed to open countdown clock\n");
         return -1;
     }
 
@@ -237,7 +254,24 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    // wait until the clock is started
+    int64_t curr_time;
+    bool stopped = true;
+    while(stopped) {
+        if(FAILURE == cl.read_time(&curr_time, &stopped)) {
+            logger.log_message("failed to read countdown clock");
+            printf("failed to read countdown clock");
+
+            return -1;
+        }
+        usleep(1000); // sleep 1 ms
+    }
+
+    printf("no longer sleeping\n");
+
     // get the current sequence number
+    // TODO there could be an issue of sequence numbers if multiple commands execute at once
+    //      e.g. the one we read is out of date
     unsigned int seq_num;
     if(SUCCESS != tlm.get_uint(meas, &seq_num)) {
         // this shouldn't happen
@@ -248,21 +282,41 @@ int main(int argc, char* argv[]) {
     }
 
     // execute all parsed commands
-    uint32_t start = systime();
-    uint32_t elapsed;
     ec_command_t cmd;
     long cmd_num;
-    for(command_t c : commands) {
+    command_t c;
+    for(int i = 0; i < (int)commands.size(); i++) {
+        c = commands[i];
+
+        if(FAILURE == cl.read_time(&curr_time, &stopped)) {
+            logger.log_message("failed to read countdown clock");
+            printf("failed to read countdown clock");
+
+            return -1;
+        }
+
+        if(stopped) {
+            logger.log_message("clock was stopped, exiting");
+            printf("clock was stopped, exiting");
+
+            return -1;
+        }
+
+        printf("curr time: %li\n", curr_time);
+        printf("command time: %li\n", c.time);
+
+        if(curr_time < c.time) {
+            // we need to wait to execute this
+            usleep((c.time - curr_time) * 1000);
+            i--;
+            continue;
+        }
+
+        // generate command
         cmd_num = seq_num + 1;
         cmd.seq_num = (uint32_t)cmd_num;
         cmd.control = c.control;
         cmd.state = c.state;
-
-        elapsed = systime() - start;
-        if(elapsed < c.time) {
-            // we need to wait to execute this
-            usleep((c.time - elapsed) * 1000);
-        }
 
         // send the command over the network
         if(FAILURE == net.QueueUDPMessage((char*)&cmd, sizeof(cmd))) {

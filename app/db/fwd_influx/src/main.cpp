@@ -84,12 +84,13 @@ void* clock_thread(void*) {
     int64_t clock_time;
     int64_t hold_time;
     bool hold_set;
+    bool stopped;
 
     while(!killed) {
         msg = veh->device;
         msg += " ";
 
-        if(FAILURE != cl.read_time(&clock_time, &hold_time, &hold_set)) {
+        if(FAILURE != cl.read_time(&clock_time, &stopped, &hold_time, &hold_set)) {
             cl.to_str(clock_time, &val);
             msg += "CLOCK=\"";
             msg += val;

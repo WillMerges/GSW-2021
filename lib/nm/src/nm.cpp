@@ -112,10 +112,10 @@ RetType NetworkManager::Open() {
     // TODO this is (hopefully) just for simulation
     // related release notes -> https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=c617f398edd4db2b8567a28e899a88f8f574798d
     int on = 1;
-    if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
-        logger.log_message("failed to set socket to reusreaddr");
-        return FAILURE;
-    }
+    // if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0) {
+    //     logger.log_message("failed to set socket to reuseaddr");
+    //     return FAILURE;
+    // }
 
     on = 1;
     if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) < 0) {
