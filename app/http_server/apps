@@ -1,0 +1,8 @@
+# Contains applications that 'setup_links.py' should make symlinks for
+# Lines are entries of the form: [name] [location]
+# 'name' is the name of the symlink to place in 'links/' and 'location' is the
+# location of the program in relation to $GSW_HOME
+
+ec_cmd app/propulsion/ec_cmd/ec_cmd
+ec_program app/propulsion/ec_program/ec_program
+clock_ctrl app/clock_ctrl/clock_ctrl

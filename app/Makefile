@@ -10,6 +10,7 @@ all:
 	-$(MAKE) -C propulsion all
 	-$(MAKE) -C clock_view all
 	-$(MAKE) -C clock_ctrl all
+	-$(MAKE) -C http_server all
 
 clean:
 	-$(MAKE) -C view_log clean
@@ -21,3 +22,4 @@ clean:
 	-$(MAKE) -C propulsion clean
 	-$(MAKE) -C clock_view clean
 	-$(MAKE) -C clock_ctrl clean
+	-$(MAKE) -C http_server clean 

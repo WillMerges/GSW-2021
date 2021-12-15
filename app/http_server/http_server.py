@@ -1,15 +1,17 @@
 #!/usr/bin/python
 #
-# File:     ec_server.py
+# File:     http_server.py
 #
 # Purpose:  listens for HTTP PUSH requests with text/plain content.
-#           Content is plaintext arguments to execute "ec_cmd/ec_cmd" with.
-#           If process returns an error sends an HTTP 418 (I'm a teapot),
-#           otherwise a 200 (OK). Will also respond to OPTIONS requests, but
+#           Content is an application name and arguments to execute.
+#           Searches for applications in 'links' to execute.
+#           If process returns an error (non-zero return) sends an
+#           HTTP 418 (I'm a teapot), otherwise sends a 200 (OK).
+#           Will also respond to HTTP OPTIONS requests, but
 #           no other HTTP functions are supported.
 #
 #
-# Usage:    ./ec_server.py <port>
+# Usage:    ./http_server.py <port>
 #           'port' is optional port to listen to HTTP requests over,
 #           uses 8080 by default
 #
@@ -26,7 +28,7 @@ import sys
 import time
 
 # how many separate requests can we handle at once
-NUM_SERVERS = 5
+NUM_SERVERS = 15
 
 class S(BaseHTTPRequestHandler):
     def _set_headers(self):
@@ -50,16 +52,7 @@ class S(BaseHTTPRequestHandler):
             return
 
         self.data_string = self.rfile.read(int(self.headers["Content-Length"]))
-
-        tokens = self.data_string.split()
-        if len(tokens) == 2:
-            cmd = "ec_cmd/ec_cmd " + self.data_string
-        elif len(tokens) == 1:
-            cmd = "cat ec_program/programs/" + self.data_string + " | ec_program/ec_program"
-        else:
-            self.send_response(418) # I'm a teapot
-            self.end_headers()
-            return
+        cmd = self.data_string
 
         print(cmd)
 
@@ -90,6 +83,13 @@ def run(port, server_class=HTTPServer, handler_class=S):
     httpd.serve_forever()
 
 if __name__ == "__main__":
+    home = os.getenv("GSW_HOME")
+    if home is None:
+        print("GSW_HOME not set, must run '. setenv' first!")
+        exit(-1)
+
+    os.chdir(home + "/app/http_server/links")
+
     if len(sys.argv) == 2:
         port = int(sys.argv[1])
     else:

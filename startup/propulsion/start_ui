@@ -40,6 +40,6 @@ echo "remotely starting Grafana on $GRAFANA"
 ${GSW_HOME}/app/db/grafana/remote_start.sh $GRAFANA $USER
 
 # start the engine command server
-echo "starting engine command HTPP server"
-${GSW_HOME}/app/propulsion/ec_server.py > /dev/null &
+echo "starting command HTPP server to receive engine commands"
+${GSW_HOME}/app/http_server/http_server.py > /dev/null &
 echo $! >> ui_pids

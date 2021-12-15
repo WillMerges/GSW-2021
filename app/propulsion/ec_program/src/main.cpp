@@ -264,14 +264,18 @@ int main(int argc, char* argv[]) {
 
             return -1;
         }
+
+        printf("still stopped\n");
+        fflush(stdout);
         usleep(1000); // sleep 1 ms
     }
 
     printf("no longer sleeping\n");
+    fflush(stdout);
 
     // get the current sequence number
     // TODO there could be an issue of sequence numbers if multiple commands execute at once
-    //      e.g. the one we read is out of date
+    //      e.g. the one we read is out of date (have a way to lock physical resources?)
     unsigned int seq_num;
     if(SUCCESS != tlm.get_uint(meas, &seq_num)) {
         // this shouldn't happen
@@ -296,8 +300,8 @@ int main(int argc, char* argv[]) {
         }
 
         if(stopped) {
-            logger.log_message("clock was stopped, exiting");
-            printf("clock was stopped, exiting");
+            logger.log_message("clock was stopped, exiting program");
+            printf("clock was stopped, exiting program\n");
 
             return -1;
         }
