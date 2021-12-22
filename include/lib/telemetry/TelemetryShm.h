@@ -143,6 +143,10 @@ public:
 
     // if the shm is currently locked for a reader
     bool read_locked;
+
+    // array of booleans, true if packet was updated in last call to 'read_lock'
+    // index is packet ID
+    bool* updated;
 private:
     // info block for locking main shared memory
     typedef struct {

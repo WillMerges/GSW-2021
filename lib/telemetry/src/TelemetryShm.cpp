@@ -106,6 +106,10 @@ TelemetryShm::~TelemetryShm() {
     if(last_nonces) {
         free(last_nonces);
     }
+
+    if(updated) {
+        free(updated);
+    }
 }
 
 RetType TelemetryShm::init(VCM* vcm) {
@@ -114,6 +118,10 @@ RetType TelemetryShm::init(VCM* vcm) {
     // create and zero last_nonces
     last_nonces = (uint32_t*)malloc(num_packets * sizeof(uint32_t));
     memset(last_nonces, 0, num_packets * sizeof(uint32_t));
+
+    // create and zero updated array
+    updated = (bool*)malloc(num_packets * sizeof(bool));
+    memset(updated, 0, num_packets * sizeof(bool));
 
     // create master Shm object
     // use an id guaranteed unused so we can use the same file name for all blocks
@@ -398,6 +406,7 @@ RetType TelemetryShm::clear(uint32_t packet_id, uint8_t val) {
     return SUCCESS;
 }
 
+// TODO add a pointer argument to track which packets changed!
 RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t timeout) {
     MsgLogger logger("TelemetryShm", "read_lock(2 args)");
 
@@ -419,6 +428,9 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
         logger.log_message("shared memory block is null");
         return FAILURE;
     }
+
+    // zero the updated array to track what changed in this lock
+    memset(updated, 0, num_packets * sizeof(bool));
 
     // set timeout if there is one
     // NOTE: we use an absolute value for 'timespec' NOT relative
@@ -458,15 +470,6 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
         // update the stored master nonce
         last_nonce = info->nonce;
 
-        // the only time this is zero is if we received a signal at some point
-        // if we continue on, we will block instead of exiting
-        if(last_nonce == 0) {
-            // we should just unlock and exit
-            logger.log_message("received signal, exiting early");
-            read_unlock(true);
-            return INTERRUPTED;
-        }
-
         // if reading in standard mode we never block so don't check
         // actually we want to update our last nonces so keep going for now
         // if(read_mode == STANDARD_READ) {
@@ -489,7 +492,8 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
                 // we found a nonce that changed!
                 // important to not just return here since we may have other stored nonces to update
                 last_nonces[id] = *nonce;
-                block = false;;
+                block = false;
+                updated[id] = true;
             }
         }
 
@@ -560,6 +564,9 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
         return FAILURE;
     }
 
+    // zero the updated array to track what packets changed
+    memset(updated, 0, num_packets * sizeof(bool));
+
     // set timeout if there is one
     // NOTE: we use an absolute value for 'timespec' NOT relative
     // see 'man futex' under FUTEX_WAIT section
@@ -592,8 +599,15 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
 
         // if reading in standard mode we never block so don't check
         if(read_mode == STANDARD_READ) {
-            // update the master nonce and leave
+            // update the master nonce
             last_nonce = info->nonce;
+
+            // update all the stored packet nonces
+            for(size_t i = 0; i < num_packets; i++) {
+                last_nonces[i] = *((uint32_t*)(info_blocks[i]->data));
+                updated[i] = true;
+            }
+
             read_locked = true;
             return SUCCESS;
         }
@@ -635,6 +649,7 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
             // update all the stored packet nonces
             for(size_t i = 0; i < num_packets; i++) {
                 last_nonces[i] = *((uint32_t*)(info_blocks[i]->data));
+                updated[i] = true;
             }
 
             // update the master nonce
