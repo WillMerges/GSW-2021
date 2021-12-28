@@ -9,6 +9,7 @@
 #include "common/types.h"
 #include "lib/nm/NmShm.h"
 #include "lib/clock/clock.h"
+#include "lib/vlock/vlock.h"
 
 // run as shmctl -on or shmctl -off to create and destroy shared memory
 // option -f argument to specify VCM config file (current default used otherwise)
@@ -120,6 +121,15 @@ int main(int argc, char* argv[]) {
             logger.log_message("created countdown clock shared memory");
         }
 
+        if(FAILURE == vlock::create_shm()) {
+            printf("failed to create vlock shared memory\n");
+            logger.log_message("failed to create vlock shared memory");
+            ret = FAILURE;
+        } else {
+            printf("created vlock shared memory\n");
+            logger.log_message("created vlock shared memory");
+        }
+
         return ret;
     } else if(off) {
         printf("destroying shared memory\n");
@@ -159,6 +169,12 @@ int main(int argc, char* argv[]) {
                 logger.log_message("failed to destroy countdown clock shared memory");
                 ret = FAILURE;;
             }
+        }
+
+        if(FAILURE == vlock::destroy_shm()) {
+            printf("failed to destroy vlock shared memory\n");
+            logger.log_message("failed to destroy vlock shared memory");
+            ret = FAILURE;
         }
 
         return ret;

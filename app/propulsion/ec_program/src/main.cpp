@@ -15,6 +15,7 @@
 #include "common/types.h"
 #include "common/time.h"
 #include "lib/clock/clock.h"
+#include "lib/vlock/vlock.h"
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -23,6 +24,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 
 using namespace dls;
 using namespace vcm;
@@ -57,6 +59,19 @@ std::vector<command_t> commands;
 // Countdown Clock
 CountdownClock cl;
 
+
+// signal handler
+void sighandler(int signum) {
+    MsgLogger logger("SHMCTRL", "sighandler");
+
+    // unlock the engine controller resource
+    if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER)) {
+        printf("failed to unlock engine controller resource\n");
+        logger.log_message("failed to unlock engine controller resource");
+    }
+
+    exit(signum);
+}
 
 // parse the program file
 RetType parse() {
@@ -182,6 +197,29 @@ int main(int argc, char* argv[]) {
 
             return -1;
         }
+    }
+
+    // initialize the vlock library
+    if(SUCCESS != vlock::init()) {
+        printf("failed to init vlock library\n");
+        logger.log_message("failed to init vlock library");
+
+        return -1;
+    }
+
+    // add signal handlers
+    signal(SIGINT, sighandler);
+    signal(SIGTERM, sighandler);
+    signal(SIGSEGV, sighandler);
+    signal(SIGFPE, sighandler);
+    signal(SIGABRT, sighandler);
+
+    // lock the engine controller resource
+    if(SUCCESS != vlock::try_lock(vlock::ENGINE_CONTROLLER)) {
+        printf("failed to lock engine controller resource\n");
+        logger.log_message("failed to lock engine controller resource");
+
+        return -1;
     }
 
     // try and parse program
@@ -359,5 +397,13 @@ int main(int argc, char* argv[]) {
                 continue;
             } // okay if we get timeout, catch it next time around
         }
+    }
+
+    // unlock the engine controller resource
+    if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER)) {
+        printf("failed to unlock engine controller resource\n");
+        logger.log_message("failed to unlock engine controller resource");
+
+        return -1;
     }
 }

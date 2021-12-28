@@ -1,17 +1,17 @@
-# shared memory control
+# vlock test
 
-TARGET = shmctl
+TARGET = test
 
 CXX = g++
-CC = g++
+CC = gcc
 
 OPTIONS +=
 
 CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
-CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -ggdb
+CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
 LDFLAGS = -L$(GSW_HOME)/lib/bin/ -Wl,-rpath=$(GSW_HOME)/lib/bin/
 
-LIBS = -ldls -lvcm -ltelemetry -lconvert -lnm -lclock -lvlock -lshm
+LIBS = -lvlock -lshm -ldls -lrt
 
 CPP_FILES := $(wildcard src/*.cpp)
 C_FILES := $(wildcard src/*.c)

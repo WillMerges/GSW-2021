@@ -6,6 +6,7 @@ all:
 	-$(MAKE) -C vcm_test all
 	-$(MAKE) -C log2csv all
 	-$(MAKE) -C mdns_publish all
+	-$(MAKE) -C vlock_test all
 
 clean:
 	-$(MAKE) -C shmtest clean
@@ -13,3 +14,4 @@ clean:
 	-$(MAKE) -C vcm_test clean
 	-$(MAKE) -C log2csv clean
 	-$(MAKE) -C mdns_publish clean
+	-$(MAKE) -C vlock_test clean
