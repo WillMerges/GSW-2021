@@ -139,8 +139,11 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
             file.flush();
         }
 
-        file << "end of log file\n";
-        file.flush();
+        if(!binary) {
+            file << "end of log file\n";
+            file.flush();
+        }
+
         file.close();
 
         file_index++;
