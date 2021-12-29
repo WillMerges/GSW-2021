@@ -1,7 +1,7 @@
 # Make all application subdirs
 
 all:
-	-$(MAKE) -C view_log all
+	-$(MAKE) -C log_view all
 	-$(MAKE) -C mem_view all
 	-$(MAKE) -C val_view all
 	-$(MAKE) -C db all
@@ -13,7 +13,7 @@ all:
 	-$(MAKE) -C http_server all
 
 clean:
-	-$(MAKE) -C view_log clean
+	-$(MAKE) -C log_view clean
 	-$(MAKE) -C mem_view clean
 	-$(MAKE) -C val_view clean
 	-$(MAKE) -C db clean

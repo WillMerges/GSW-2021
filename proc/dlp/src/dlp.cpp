@@ -14,7 +14,7 @@
 #include <csignal>
 #include <vector>
 
-#define MAX_LINES_PER_FILE 4096
+#define MAX_LINES_PER_FILE 16
 
 using namespace dls;
 
@@ -138,6 +138,11 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
             fflush(stdout);
             file.flush();
         }
+
+        file << "end of log file\n";
+        file.flush();
+        file.close();
+
         file_index++;
         filename = outfile_name;
         filename += std::to_string(file_index);
