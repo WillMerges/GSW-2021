@@ -156,3 +156,5 @@ RetType vlock::unlock(vlock_t resource) {
 
     return SUCCESS;
 }
+
+#undef INIT
