@@ -26,11 +26,6 @@ fi
 # clean out old logs
 #${GSW_HOME}/log/clean.sh
 
-# create the system log fifo
-echo "creating log FIFO"
-${GSW_HOME}/log/fifo.sh -make
-sleep 0.5
-
 # start data logging process
 echo "starting data logging process"
 # this is a hack to redirect to a fifo pipe w/o blocking

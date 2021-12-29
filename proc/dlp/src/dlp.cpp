@@ -14,7 +14,7 @@
 #include <csignal>
 #include <vector>
 
-#define MAX_LINES_PER_FILE 16
+#define MAX_LINES_PER_FILE 512
 
 using namespace dls;
 

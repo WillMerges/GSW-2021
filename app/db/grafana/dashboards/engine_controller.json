@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 3,
-  "iteration": 1640762701152,
+  "iteration": 1640806049700,
   "links": [],
   "panels": [
     {
@@ -2403,7 +2403,7 @@
       "options": {
         "showLabels": false,
         "showTime": false,
-        "sortOrder": "Descending",
+        "sortOrder": "Ascending",
         "wrapLogMessage": true
       },
       "pluginVersion": "7.3.7",
@@ -2528,9 +2528,9 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
-          "text": "shutoff_all.ec",
-          "value": "shutoff_all.ec"
+          "selected": true,
+          "text": "simple1.ec",
+          "value": "simple1.ec"
         },
         "datasource": "InfluxDB",
         "definition": "",
@@ -2578,5 +2578,5 @@
   "timezone": "",
   "title": "Engine Controller",
   "uid": "yg3nqk27k",
-  "version": 43
+  "version": 45
 }

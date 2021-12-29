@@ -36,10 +36,6 @@ rm $FILE
 # destroy shared memory
 ${GSW_HOME}/proc/shmctl/shmctl -off
 
-# kill the system log FIFO
-echo "stopping log FIFO"
-${GSW_HOME}/log/fifo.sh -delete
-
 # convert logs to CSV
 echo "converting logs to CSV"
 ${GSW_HOME}/proc/tool/log2csv/log2csv ${GSW_HOME}/log
