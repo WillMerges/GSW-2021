@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 3,
-  "iteration": 1639533819347,
+  "iteration": 1640762701152,
   "links": [],
   "panels": [
     {
@@ -2367,6 +2367,89 @@
       "title": "Hold",
       "transparent": true,
       "type": "cloudspout-button-panel"
+    },
+    {
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 22,
+        "x": 0,
+        "y": 15
+      },
+      "id": 39,
+      "options": {
+        "showLabels": false,
+        "showTime": false,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT log FROM logs",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "logs",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "",
+      "type": "logs"
     }
   ],
   "refresh": "500ms",
@@ -2412,12 +2495,12 @@
         "name": "GroundStationIP",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "gs.local",
             "value": "gs.local"
           }
         ],
-        "query": "gs.local",
+        "query": "127.0.0.1",
         "skipUrlSync": false,
         "type": "textbox"
       },
@@ -2445,7 +2528,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "shutoff_all.ec",
           "value": "shutoff_all.ec"
         },
@@ -2495,5 +2578,5 @@
   "timezone": "",
   "title": "Engine Controller",
   "uid": "yg3nqk27k",
-  "version": 39
+  "version": 43
 }
