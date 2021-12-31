@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
         }
 
         if(ifap->ifa_flags & IFF_UP &&
-           // !(ifap->ifa_flags & IFF_LOOPBACK) &&
+           !(ifap->ifa_flags & IFF_LOOPBACK) &&
            !(ifap->ifa_flags & IFF_NOARP) &&
            ifap->ifa_flags & IFF_RUNNING) {
                // publish this address
