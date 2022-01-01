@@ -60,15 +60,21 @@ std::vector<command_t> commands;
 CountdownClock cl;
 
 
-// signal handler
-void sighandler(int signum) {
-    MsgLogger logger("SHMCTRL", "sighandler");
+void release_resources() {
+    MsgLogger logger("EC_PROGRAM", "release_resources");
 
     // unlock the engine controller resource
     if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER)) {
         printf("failed to unlock engine controller resource\n");
         logger.log_message("failed to unlock engine controller resource");
     }
+}
+
+// signal handler
+void sighandler(int signum) {
+    MsgLogger logger("SHMCTRL", "sighandler");
+
+    release_resources();
 
     exit(signum);
 }
@@ -227,6 +233,7 @@ int main(int argc, char* argv[]) {
         printf("failed to parse program\n");
         logger.log_message("failed to parse program\n");
 
+        release_resources();
         return -1;
     }
 
@@ -234,12 +241,16 @@ int main(int argc, char* argv[]) {
     if(FAILURE == cl.init()) {
         logger.log_message("failed to initialize countdown clock");
         printf("failed to initialize countdown clock\n");
+
+        release_resources();
         return -1;
     }
 
     if(FAILURE == cl.open()) {
         logger.log_message("failed to open countdown clock");
         printf("failed to open countdown clock\n");
+
+        release_resources();
         return -1;
     }
 
@@ -253,6 +264,7 @@ int main(int argc, char* argv[]) {
     // init VCM
     if(veh->init() == FAILURE) {
         logger.log_message("failed to initialize VCM");
+        release_resources();
         return -1;
     }
 
@@ -262,6 +274,7 @@ int main(int argc, char* argv[]) {
         logger.log_message("failed to initialize telemetry viewer");
         printf("failed to initialize telemetry viewer\n");
 
+        release_resources();
         return -1;
     }
 
@@ -271,6 +284,7 @@ int main(int argc, char* argv[]) {
         logger.log_message("failed to open network interface");
         printf("failed to open network interface\n");
 
+        release_resources();
         return -1;
     }
 
@@ -280,6 +294,7 @@ int main(int argc, char* argv[]) {
         printf("failed to add measurement: %s\n", SEQUENCE_ACK_MEASUREMENT);
         logger.log_message("failed to add sequence number measurement");
 
+        release_resources();
         return -1;
     }
     tlm.set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
@@ -289,6 +304,7 @@ int main(int argc, char* argv[]) {
         printf("have not received any telemetry, cannot execute program\n");
         logger.log_message("no telemetry received, cannot execute program");
 
+        release_resources();
         return -1;
     }
 
@@ -300,6 +316,7 @@ int main(int argc, char* argv[]) {
             logger.log_message("failed to read countdown clock");
             printf("failed to read countdown clock");
 
+            release_resources();
             return -1;
         }
 
@@ -320,6 +337,7 @@ int main(int argc, char* argv[]) {
         printf("failed to get measurement: %s\n", SEQUENCE_ACK_MEASUREMENT);
         logger.log_message("failed to get sequence number measurement");
 
+        release_resources();
         return -1;
     }
 
