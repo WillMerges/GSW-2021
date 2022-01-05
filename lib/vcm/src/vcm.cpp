@@ -41,7 +41,8 @@ VCM::VCM() {
     }
     config_file = env;
     config_file += "/";
-    config_file += DEFAULT_CONFIG_FILE;
+    config_file += DEFAULT_CONFIG_DIR;
+    config_file += "/config";
 
     // init
     // NEW CHANGE: user has to call init themself

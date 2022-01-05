@@ -17,7 +17,7 @@
 #include <vector>
 #include "common/types.h"
 
-#define DEFAULT_CONFIG_FILE "data/config"
+#define DEFAULT_CONFIG_DIR "data/default"
 
 // responsible for translating config file into addresses in shared mem
 // address 0x00 is the first byte in shared mem
