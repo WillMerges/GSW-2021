@@ -27,11 +27,17 @@ TelemetryViewer::TelemetryViewer() {
 }
 
 TelemetryViewer::~TelemetryViewer() {
-    if(shm.read_locked) {
-        // if we're sure we locked shared memory, read unlock
-        // this is unlikely to happen as most processes should use a signal handler
-        // and unlock it themselves before exiting
-        shm.read_unlock();
+    if(shm != NULL) {
+        if(shm->read_locked) {
+            // if we're sure we locked shared memory, read unlock
+            // this is unlikely to happen as most processes should use a signal handler
+            // and unlock it themselves before exiting
+            shm->read_unlock();
+        }
+
+        if(rm_shm) {
+            delete shm;
+        }
     }
 
     if(packet_ids != NULL) {
@@ -53,7 +59,7 @@ TelemetryViewer::~TelemetryViewer() {
     }
 }
 
-RetType TelemetryViewer::init() {
+RetType TelemetryViewer::init(TelemetryShm* shm) {
     MsgLogger logger("TelemetryViewer", "init");
 
     VCM* vcm = new VCM();
@@ -64,18 +70,23 @@ RetType TelemetryViewer::init() {
         return FAILURE;
     }
 
-    return init(vcm);
+    return init(vcm, shm);
 }
 
-RetType TelemetryViewer::init(VCM* vcm) {
+RetType TelemetryViewer::init(VCM* vcm, TelemetryShm* shm) {
     MsgLogger logger("TelemetryViewer", "init");
 
-    if(shm.init(vcm) == FAILURE) {
+    if(shm == NULL) {
+        shm = new TelemetryShm();
+        rm_shm = true;
+    }
+
+    if(shm->init(vcm) == FAILURE) {
         logger.log_message("failed to initialize telemetry shared memory");
         return FAILURE;
     }
 
-    if(shm.open() == FAILURE) {
+    if(shm->open() == FAILURE) {
         logger.log_message("failed to attach to telemetry shared memory");
         return FAILURE;
     }
@@ -169,7 +180,7 @@ void TelemetryViewer::set_update_mode(update_mode_t mode) {
             break;
     }
 
-    shm.set_read_mode(shm_mode);
+    shm->set_read_mode(shm_mode);
 }
 
 RetType TelemetryViewer::update(uint32_t timeout) {
@@ -177,17 +188,17 @@ RetType TelemetryViewer::update(uint32_t timeout) {
 
     RetType status;
     if(check_all) {
-        status = shm.read_lock(timeout);
+        status = shm->read_lock(timeout);
         if(status != SUCCESS) {
             return status; // could be BLOCKED or FAILURE
         }
     } else {
-        status = shm.read_lock(packet_ids, num_packets, timeout);
+        status = shm->read_lock(packet_ids, num_packets, timeout);
         if(status != SUCCESS) {
             return status; // could be blocked or failure
         }
         // while(1) {
-        //     status = shm.read_lock(packet_ids, num_packets, timeout);
+        //     status = shm->read_lock(packet_ids, num_packets, timeout);
         //     if(status != SUCCESS) {
         //         return status; // could be BLOCKED or FAILURE
         //     }
@@ -199,9 +210,9 @@ RetType TelemetryViewer::update(uint32_t timeout) {
         //     if((update_mode == BLOCKING_UPDATE) && (vcm->num_packets > 32)) {
         //         bool updated = false;
         //         for(size_t i = 0; i < num_packets && !updated; i++) {
-        //             if(FAILURE == shm.packet_updated(packet_ids[i], &updated)) {
+        //             if(FAILURE == shm->packet_updated(packet_ids[i], &updated)) {
         //                 // unlock shared mem
-        //                 if(FAILURE == shm.read_unlock()) {
+        //                 if(FAILURE == shm->read_unlock()) {
         //                     logger.log_message("failed to unlock shared memory");
         //                     return FAILURE;
         //                 }
@@ -225,11 +236,11 @@ RetType TelemetryViewer::update(uint32_t timeout) {
     unsigned int id;
     for(size_t i = 0; i < num_packets; i++) {
         id = packet_ids[i];
-        memcpy(packet_buffers[id], shm.get_buffer(id), packet_sizes[id]);
+        memcpy(packet_buffers[id], shm->get_buffer(id), packet_sizes[id]);
     }
 
     // unlock shared memory
-    if(FAILURE == shm.read_unlock()) {
+    if(FAILURE == shm->read_unlock()) {
         logger.log_message("failed to unlock shared memory");
         return FAILURE;
     }
@@ -238,7 +249,7 @@ RetType TelemetryViewer::update(uint32_t timeout) {
 }
 
 void TelemetryViewer::sighandler() {
-    shm.sighandler();
+    shm->sighandler();
 }
 
 RetType TelemetryViewer::latest_data(measurement_info_t* meas, uint8_t** data) {
@@ -255,7 +266,7 @@ RetType TelemetryViewer::latest_data(measurement_info_t* meas, uint8_t** data) {
     long int best = INT_MAX;
     uint32_t curr;
     for(size_t i = 0; i < locs.size(); i++) {
-        if(shm.update_value(locs[i].packet_index, &curr) == FAILURE) {
+        if(shm->update_value(locs[i].packet_index, &curr) == FAILURE) {
             logger.log_message("unable to retrieve update value for packet");
             return FAILURE;
         }

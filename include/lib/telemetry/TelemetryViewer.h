@@ -26,10 +26,12 @@ public:
     ~TelemetryViewer();
 
     // initialize the telemetry viewer for vehicle specified by VCM
-    RetType init(VCM* vcm);
+    // if 'shm' is not specified, creates a new TelemetryShm object
+    RetType init(VCM* vcm, TelemetryShm* shm = NULL);
 
     // init using use the default VCM
-    RetType init();
+    // if 'shm' is not specified, creates a new TelemetryShm object
+    RetType init(TelemetryShm* shm = NULL);
 
     // remove all measurements currently viewable
     void remove_all();
@@ -87,7 +89,9 @@ public:
     RetType get_raw(std::string& meas, uint8_t* buffer);
 
 private:
-    TelemetryShm shm;
+    TelemetryShm* shm;
+    bool rm_shm = false;
+
     VCM* vcm;
 
     update_mode_t update_mode;
