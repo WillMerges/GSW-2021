@@ -6,6 +6,7 @@
 #include <sstream>
 #include <exception>
 #include <unordered_map>
+#include <unordered_set>
 #include <endian.h>
 #include <arpa/inet.h>
 
@@ -105,6 +106,9 @@ RetType VCM::init() {
         return FAILURE;
     }
 
+    // hash set to check uniqueness of telemetry packet ports
+    std::unordered_set<uint16_t> port_set;
+
     // read the config file
     for(std::string line; std::getline(*f,line); ) {
         if(line == "" || !line.rfind("#",0)) { // blank or comment '#'
@@ -170,6 +174,12 @@ RetType VCM::init() {
                 return FAILURE;
             }
 
+            if(port_set.find(packet->port) != port_set.end()) {
+                logger.log_message("Telemetry packets must have unique port numbers");
+                return FAILURE;
+            }
+
+            port_set.insert(packet->port);
 
             bool done = false;
             // we don't allow comments or empty lines after starting a packet
