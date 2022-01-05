@@ -1,0 +1,6 @@
+# Rules to calculate values for virtual telemetry
+
+# lines of the form
+# [VIRTUAL TELEMETRY VALUE] [CONVERT FUNCTION] [FUNCTION ARGUMENTS (measurement names)]
+
+VIRTUAL_VALUE COPY TEST

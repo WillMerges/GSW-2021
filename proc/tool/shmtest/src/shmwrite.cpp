@@ -35,8 +35,14 @@ int main() {
     uint8_t* buffer;
     for(unsigned int i = 0; i < vcm.num_packets; i++) {
         info = vcm.packets[i];
+        
+        if(info.port == 0) {
+            // skip the virtual telemetry packet
+            continue;
+        }
+
         buffer = (uint8_t*)malloc(sizeof(info->size));
-        memset(buffer, 0xCF,info->size);
+        memset(buffer, 0xCF, info->size);
         mem.write(i, buffer);
         free(buffer);
     }

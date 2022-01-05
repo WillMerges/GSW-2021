@@ -11,6 +11,7 @@ build:
 	-$(MAKE) -C telemetry all
 	-$(MAKE) -C clock all
 	-$(MAKE) -C vlock all
+	-$(MAKE) -C calc all
 
 copy:
 	rm -rf bin || true > /dev/null
@@ -28,6 +29,7 @@ clean:
 	-$(MAKE) -C python clean
 	-$(MAKE) -C clock clean
 	-$(MAKE) -C vlock clean 
+	-$(MAKE) -C calc clean 
 	rm -r bin
 
 # build special library used by Python ctypes
