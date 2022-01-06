@@ -21,7 +21,7 @@ using namespace vcm;
 
 // directly copy a measurement
 // 'out' must be the same size as 'in'
-RetType COPY(arg_t& out, std::vector<arg_t>& args) {
+RetType COPY(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
     MsgLogger logger("CALC", "COPY");
 
     if(args.size() != 1) {
@@ -30,14 +30,15 @@ RetType COPY(arg_t& out, std::vector<arg_t>& args) {
     }
 
     measurement_info_t* in = args[0].meas;
-    uint8_t* src = args[0].addr;
+    const uint8_t* src = args[0].addr;
 
-    if(out.meas->size != in->size) {
+    if(meas->size != in->size) {
         logger.log_message("Size mismatch");
         return FAILURE;
     }
 
-    memcpy((void*)(out.addr), (void*)src, out.meas->size);
+    // need a special function for writing single measurement to shared memory!
+    memcpy((void*)(dst), (void*)src, meas->size);
 
     return SUCCESS;
 }
@@ -84,6 +85,7 @@ RetType calc::parse_vfile(VCM* veh, std::vector<vcalc_t>* entries) {
             return FAILURE;
         }
 
+        // first string is output measurement
         entry.out = veh->get_info(fst);
         if(entry.out == NULL) {
             logger.log_message("No such measurement: " + fst);

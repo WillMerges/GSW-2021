@@ -77,16 +77,18 @@ RetType TelemetryViewer::init(VCM* vcm, TelemetryShm* shm) {
     MsgLogger logger("TelemetryViewer", "init");
 
     if(shm == NULL) {
-        shm = new TelemetryShm();
+        this->shm = new TelemetryShm();
         rm_shm = true;
+    } else {
+        this->shm = shm;
     }
 
-    if(shm->init(vcm) == FAILURE) {
+    if(this->shm->init(vcm) == FAILURE) {
         logger.log_message("failed to initialize telemetry shared memory");
         return FAILURE;
     }
 
-    if(shm->open() == FAILURE) {
+    if(this->shm->open() == FAILURE) {
         logger.log_message("failed to attach to telemetry shared memory");
         return FAILURE;
     }
@@ -252,7 +254,7 @@ void TelemetryViewer::sighandler() {
     shm->sighandler();
 }
 
-RetType TelemetryViewer::latest_data(measurement_info_t* meas, uint8_t** data) {
+RetType TelemetryViewer::latest_data(measurement_info_t* meas, const uint8_t** data) {
     MsgLogger logger("TelemetryViewer", "latest_data");
 
     std::vector<location_info_t> locs = meas->locations;
@@ -286,7 +288,7 @@ RetType TelemetryViewer::latest_data(measurement_info_t* meas, uint8_t** data) {
 RetType TelemetryViewer::get_str(measurement_info_t* meas, std::string* val) {
     MsgLogger logger("TelemetryViewer", "get_str");
 
-    uint8_t* data;
+    const uint8_t* data;
     if(latest_data(meas, &data) == FAILURE) {
         logger.log_message("failed to locate latest data for measurement");
         return FAILURE;
@@ -303,7 +305,7 @@ RetType TelemetryViewer::get_str(measurement_info_t* meas, std::string* val) {
 RetType TelemetryViewer::get_float(measurement_info_t* meas, float* val) {
     MsgLogger logger("TelemetryViewer", "get_float");
 
-    uint8_t* data;
+    const uint8_t* data;
     if(latest_data(meas, &data) == FAILURE) {
         logger.log_message("failed to locate latest data for measurement");
         return FAILURE;
@@ -320,7 +322,7 @@ RetType TelemetryViewer::get_float(measurement_info_t* meas, float* val) {
 RetType TelemetryViewer::get_double(measurement_info_t* meas, double* val) {
     MsgLogger logger("TelemetryViewer", "get_double");
 
-    uint8_t* data;
+    const uint8_t* data;
     if(latest_data(meas, &data) == FAILURE) {
         logger.log_message("failed to locate latest data for measurement");
         return FAILURE;
@@ -337,7 +339,7 @@ RetType TelemetryViewer::get_double(measurement_info_t* meas, double* val) {
 RetType TelemetryViewer::get_int(measurement_info_t* meas, int* val) {
     MsgLogger logger("TelemetryViewer", "get_int");
 
-    uint8_t* data;
+    const uint8_t* data;
     if(latest_data(meas, &data) == FAILURE) {
         logger.log_message("failed to locate latest data for measurement");
         return FAILURE;
@@ -354,7 +356,7 @@ RetType TelemetryViewer::get_int(measurement_info_t* meas, int* val) {
 RetType TelemetryViewer::get_uint(measurement_info_t* meas, unsigned int* val) {
     MsgLogger logger("TelemetryViewer", "get_uint");
 
-    uint8_t* data;
+    const uint8_t* data;
     if(latest_data(meas, &data) == FAILURE) {
         logger.log_message("failed to locate latest data for measurement");
         return FAILURE;
@@ -371,7 +373,7 @@ RetType TelemetryViewer::get_uint(measurement_info_t* meas, unsigned int* val) {
 RetType TelemetryViewer::get_raw(measurement_info_t* meas, uint8_t* buffer) {
     MsgLogger logger("TelemetryViewer", "get_raw");
 
-    uint8_t* data;
+    const uint8_t* data;
     if(latest_data(meas, &data) == FAILURE) {
         logger.log_message("failed to locate latest data for measurement");
         return FAILURE;

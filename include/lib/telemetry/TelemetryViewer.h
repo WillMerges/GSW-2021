@@ -90,6 +90,9 @@ public:
     RetType get_uint(std::string& meas, unsigned int* val);
     RetType get_raw(std::string& meas, uint8_t* buffer);
 
+    // set 'data' to the most recently updated memory containing 'measurement'
+    RetType latest_data(measurement_info_t* meas, const uint8_t** data);
+
 private:
     TelemetryShm* shm;
     bool rm_shm = false;
@@ -104,9 +107,6 @@ private:
 
     uint8_t** packet_buffers;
     size_t* packet_sizes;
-
-    // set 'data' to the most recently updated memory containing 'measurement'
-    RetType latest_data(measurement_info_t* meas, uint8_t** data);
 
     // command to execute to start the reaper process
     std::string reaper_cmd;

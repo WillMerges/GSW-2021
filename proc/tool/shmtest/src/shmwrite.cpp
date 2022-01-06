@@ -33,7 +33,7 @@ int main() {
 
     packet_info_t* info;
     uint8_t* buffer;
-    for(unsigned int i = 0; i < vcm.num_packets; i++) {
+    for(uint32_t i = 0; i < vcm.num_packets; i++) {
         info = vcm.packets[i];
         
         if(info->port == 0) {
