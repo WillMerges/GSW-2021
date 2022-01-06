@@ -89,7 +89,9 @@ namespace vcm {
         uint16_t port; // port that receiver will route communications to
         uint32_t multicast_addr;
         protocol_t protocol;
+        std::string config_dir;
         std::string config_file;
+        std::string vcalc_file;
         std::string device;
 
         endianness_t recv_endianness; // endianness of the receiver

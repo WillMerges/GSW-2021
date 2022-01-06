@@ -27,10 +27,12 @@ public:
 
     // initialize the telemetry viewer for vehicle specified by VCM
     // if 'shm' is not specified, creates a new TelemetryShm object
+    // NOTE: if shm is not NULL, it should already be opened
     RetType init(VCM* vcm, TelemetryShm* shm = NULL);
 
     // init using use the default VCM
     // if 'shm' is not specified, creates a new TelemetryShm object
+    // NOTE: if shm is not NULL, it should already be opened
     RetType init(TelemetryShm* shm = NULL);
 
     // remove all measurements currently viewable

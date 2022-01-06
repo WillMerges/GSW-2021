@@ -12,7 +12,6 @@
 #include <fstream>
 #include <sstream>
 #include <string.h>
-#include <stdarg.h>
 
 using namespace calc;
 using namespace dls;
@@ -22,59 +21,52 @@ using namespace vcm;
 
 // directly copy a measurement
 // 'out' must be the same size as 'in'
-RetType COPY(measurement_info_t* out, uint8_t* dst, ...) {
+RetType COPY(arg_t& out, std::vector<arg_t>& args) {
     MsgLogger logger("CALC", "COPY");
 
-    va_list args;
-    va_start(args, dst);
+    if(args.size() != 1) {
+        logger.log_message("Incorrect number of args");
+        return FAILURE;
+    }
 
-    measurement_info_t* in = va_arg(args, measurement_info_t*);
-    uint8_t* src = va_arg(args, uint8_t*);
+    measurement_info_t* in = args[0].meas;
+    uint8_t* src = args[0].addr;
 
-    va_end(args);
-
-    if(out->size != in->size) {
+    if(out.meas->size != in->size) {
         logger.log_message("Size mismatch");
         return FAILURE;
     }
 
-    memcpy((void*)dst, (void*)src, out->size);
+    memcpy((void*)(out.addr), (void*)src, out.meas->size);
 
     return SUCCESS;
 }
 
-
-// Parse default virtual telemetry file
-RetType parse_vfile(VCM* veh, std::vector<vcalc_t>* entries) {
-    MsgLogger logger("CALC", "parse_vfile(2)");
-
-    char* env = getenv("GSW_HOME");
-    if(env == NULL) {
-        logger.log_message("GSW_HOME environment variable not set!");
-        return FAILURE;
-    }
-
-    std::string file = env;
-    file += "data/default/virtual";
-
-    return parse_vfile(file.c_str(), veh, entries);
+// define hash function for vcalc_t
+namespace std {
+    template<>
+    struct hash<vcalc_t> {
+        inline size_t operator()(const vcalc_t& v) const {
+            return v.unique_id;
+        }
+    };
 }
 
 // Parse virtual telemetry file
-RetType parse_vfile(const char* filename, VCM* veh, std::vector<vcalc_t>* entries) {
-    MsgLogger logger("CALC", "parse_vfile(3)");
+RetType calc::parse_vfile(VCM* veh, std::vector<vcalc_t>* entries) {
+    MsgLogger logger("CALC", "parse_vfile");
 
     // open the file
-    std::ifstream* f = new std::ifstream(filename);
+    std::ifstream* f = new std::ifstream(veh->vcalc_file.c_str());
     if(!f) {
         logger.log_message("Failed to open file");
         return FAILURE;
     }
 
-    entries = new std::vector<vcalc_t>;
     vcalc_t entry;
 
     // start parsing
+    size_t unique_id = 0;
     for(std::string line; std::getline(*f,line); ) {
         if(line == "" || !line.rfind("#",0)) { // blank or comment '#'
             continue;
@@ -118,7 +110,14 @@ RetType parse_vfile(const char* filename, VCM* veh, std::vector<vcalc_t>* entrie
             }
 
             entry.args.push_back(info);
+
+            next = "";
+            ss >> next;
         }
+
+        // add a unique id to this entry
+        entry.unique_id = unique_id;
+        unique_id++;
 
         // add the current line's entry and reset
         entries->push_back(entry);

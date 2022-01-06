@@ -36,7 +36,7 @@ int main() {
     for(unsigned int i = 0; i < vcm.num_packets; i++) {
         info = vcm.packets[i];
         
-        if(info.port == 0) {
+        if(info->port == 0) {
             // skip the virtual telemetry packet
             continue;
         }

@@ -20,6 +20,9 @@ name = sample_device
 # endianness (coming FROM the receiver, not of the ground station platform) [big or little], if not set defaults to little endian
 endianness = big
 
+# Virtual telemetry conversion file
+vcalc = virtual
+
 # [measurement name] [total measurement size in bytes (including padding)] [most sig padding (bits)] [least sig (bits)] [optional type of int, float, or string, default is int] [optional signed or unsigned, default is signed]
 # signed/unsigned cannot be specified without a type
 TEST 4 0 0 int signed

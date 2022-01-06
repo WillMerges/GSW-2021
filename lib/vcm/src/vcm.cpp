@@ -23,6 +23,7 @@ VCM::VCM() {
     // packet_size = 0;
     num_packets = 0;
     device = "";
+    vcalc_file = "";
     recv_endianness = GSW_LITTLE_ENDIAN; // default is little endian
 
     if(__BYTE_ORDER == __BIG_ENDIAN) {
@@ -40,10 +41,10 @@ VCM::VCM() {
         logger.log_message("GSW_HOME environment variable not set!");
         throw new std::runtime_error("Environment error in VCM");
     }
-    config_file = env;
-    config_file += "/";
-    config_file += DEFAULT_CONFIG_DIR;
-    config_file += "/config";
+    config_dir = env;
+    config_dir += "/";
+    config_dir += DEFAULT_CONFIG_DIR;
+    config_file = config_dir + "/config";
 
     // init
     // NEW CHANGE: user has to call init themself
@@ -160,6 +161,11 @@ RetType VCM::init() {
                     logger.log_message("Unrecogonized endianness on line: " + line);
                     return FAILURE;
                 }
+            } else if(fst == "vcalc") {
+                vcalc_file = config_dir + "/" + third;
+            } else {
+                logger.log_message("Invalid line: " + line);
+                return FAILURE;
             }
         } else if(snd == "{") { // start of a telemetry packet
             packet_info_t* packet = new packet_info_t;
