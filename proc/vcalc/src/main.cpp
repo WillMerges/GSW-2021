@@ -110,10 +110,14 @@ int main(int argc, char** argv) {
     for(vcalc_t v : entries) {
         // allocate buffers for each output location
         for(location_info_t loc : v.out->locations) {
-            if(packet_buffers[loc.packet_index] == NULL) {
-                packet_buffers[loc.packet_index] = new uint8_t[veh->packets[loc.packet_index]->size];
-                memset(packet_buffers[loc.packet_index], 0, veh->packets[loc.packet_index]->size);
-            } // otherwise we've already allocated this buffer
+            // the measurement may exists in a virtual packet and in regular telemetry
+            // we only want to allocate buffers for virtual packets
+            if(veh->packets[loc.packet_index]->is_virtual) {
+                if(packet_buffers[loc.packet_index] == NULL) {
+                    packet_buffers[loc.packet_index] = new uint8_t[veh->packets[loc.packet_index]->size];
+                    memset(packet_buffers[loc.packet_index], 0, veh->packets[loc.packet_index]->size);
+                } // otherwise we've already allocated this buffer
+            }
         }
 
         // iterate through each argument
@@ -179,9 +183,14 @@ int main(int argc, char** argv) {
                             arg_list.push_back(arg);
                         }
 
-                        // run the calculation for each output location
-                        // TODO make this better? e.g. calculate once write multiple times?
+                        // run the calculation for each virtual output location
                         for(location_info_t loc : calculation.out->locations) {
+                            if(!veh->packets[loc.packet_index]->is_virtual) {
+                                // regular telemetry, don't write anything
+                                continue;
+                            }
+
+                            // TODO make this better? e.g. calculate once then write multiple times?
                             ret = (*(calculation.convert_function))(calculation.out, packet_buffers[loc.packet_index] + loc.offset, arg_list);
                             if(ret != SUCCESS) {
                                 logger.log_message("calculation failed");
