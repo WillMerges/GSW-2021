@@ -53,21 +53,26 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    if(veh->vcalc_file == "") {
+        logger.log_message("no vcalc file specified");
+        return 1;
+    }
+
     // setup telemetry shm
     if(tshm.init(veh) != SUCCESS) {
         logger.log_message("failed to init telemetry shm");
-        return FAILURE;
+        return -1;
     }
 
     if(tshm.open() != SUCCESS) {
         logger.log_message("failed to open telemetry shm");
-        return FAILURE;
+        return -1;
     }
 
     // setup telemetry viewer
     if(tlm.init(veh, &tshm)) {
         logger.log_message("failed to init telemetry viewer");
-        return FAILURE;
+        return -1;
     }
 
     // add signal handlers
