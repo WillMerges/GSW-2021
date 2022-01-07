@@ -23,6 +23,7 @@ using namespace convert;
 VCM* veh = NULL;
 
 // Conversion functions //
+// TODO put these in another file to link with //
 
 // directly copy a measurement
 // 'out' must be the same size as 'in'
