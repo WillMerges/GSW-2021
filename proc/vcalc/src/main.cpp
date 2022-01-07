@@ -16,6 +16,7 @@
 #include "lib/dls/dls.h"
 #include <unordered_set>
 #include <signal.h>
+#include <string.h>
 
 using namespace dls;
 using namespace vcm;
@@ -111,6 +112,7 @@ int main(int argc, char** argv) {
         for(location_info_t loc : v.out->locations) {
             if(packet_buffers[loc.packet_index] == NULL) {
                 packet_buffers[loc.packet_index] = new uint8_t[veh->packets[loc.packet_index]->size];
+                memset(packet_buffers[loc.packet_index], 0, veh->packets[loc.packet_index]->size);
             } // otherwise we've already allocated this buffer
         }
 

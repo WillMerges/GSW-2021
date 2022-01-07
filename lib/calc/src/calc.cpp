@@ -9,6 +9,7 @@
 *********************************************************************/
 #include "lib/calc/calc.h"
 #include "lib/dls/dls.h"
+#include "lib/convert/convert.h"
 #include <fstream>
 #include <sstream>
 #include <string.h>
@@ -16,6 +17,10 @@
 using namespace calc;
 using namespace dls;
 using namespace vcm;
+using namespace convert;
+
+// static data //
+VCM* veh = NULL;
 
 // Conversion functions //
 
@@ -39,6 +44,41 @@ RetType COPY(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
 
     // need a special function for writing single measurement to shared memory!
     memcpy((void*)(dst), (void*)src, meas->size);
+
+    return SUCCESS;
+}
+
+RetType SUM_UINT(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
+    MsgLogger logger("CALC", "INTSUM");
+
+    uint32_t sum = 0;
+    uint32_t temp;
+
+    // sum all arguments
+    for(arg_t arg : args) {
+        if(convert_uint(veh, arg.meas, arg.addr, &temp) != SUCCESS) {
+            logger.log_message("conversion failed");
+            return FAILURE;
+        }
+
+        sum += temp;
+    }
+
+    uint8_t* sumb = (uint8_t*)&sum;
+
+    // write out sum to output measurement
+    if(veh->sys_endianness != veh->recv_endianness) {
+        for(size_t i = 0; i < sizeof(uint32_t); i++) {
+            dst[meas->size - i] = sumb[i];
+        }
+
+        // zero the rest
+        memset(dst, 0, meas->size - sizeof(uint32_t));
+    } else {
+        for(size_t i = 0; i < sizeof(uint32_t); i++) {
+            dst[i] = sumb[i];
+        }
+    }
 
     return SUCCESS;
 }
@@ -95,8 +135,11 @@ RetType calc::parse_vfile(VCM* veh, std::vector<vcalc_t>* entries) {
         // Find our conversion function
         if(snd == "COPY") {
             entry.convert_function = &COPY;
+        } else if(snd == "SUM_UINT") {
+            entry.convert_function = &SUM_UINT;
         } else {
             logger.log_message("No such conversion function: " + snd);
+            return FAILURE;
         }
 
         // The rest of the tokens are arguments
