@@ -11,8 +11,8 @@ char result[MAX_CONVERSION_SIZE];
 // TODO maybe have a fancy function with va_args, idk
 
 
-RetType convert::convert_double(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const uint8_t* data, double* dst) {
-    MsgLogger logger("CONVERT", "convert_double");
+RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const uint8_t* data, double* dst) {
+    MsgLogger logger("CONVERT", "convert_to");
 
     if(measurement->type != FLOAT_TYPE) {
         logger.log_message("Measurement must be a float type!");
@@ -42,8 +42,8 @@ RetType convert::convert_double(vcm::VCM* vcm, vcm::measurement_info_t* measurem
     return SUCCESS;
 }
 
-RetType convert::convert_float(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const uint8_t* data, float* dst) {
-    MsgLogger logger("CONVERT", "convert_float");
+RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const uint8_t* data, float* dst) {
+    MsgLogger logger("CONVERT", "convert_to");
 
     if(measurement->type != FLOAT_TYPE) {
         logger.log_message("Measurement must be a float type!");
@@ -73,8 +73,8 @@ RetType convert::convert_float(vcm::VCM* vcm, vcm::measurement_info_t* measureme
     return SUCCESS;
 }
 
-RetType convert::convert_uint(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const uint8_t* data, uint32_t* dst) {
-    MsgLogger logger("CONVERT", "convert_uint");
+RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const uint8_t* data, uint32_t* dst) {
+    MsgLogger logger("CONVERT", "convert_to");
 
     if(measurement->type != INT_TYPE || measurement->sign != UNSIGNED_TYPE) {
         logger.log_message("Measurement must be an unsigned integer!");
@@ -104,8 +104,8 @@ RetType convert::convert_uint(vcm::VCM* vcm, vcm::measurement_info_t* measuremen
     return SUCCESS;
 }
 
-RetType convert::convert_int(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const uint8_t* data, int32_t* dst) {
-    MsgLogger logger("CONVERT", "convert_int");
+RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const uint8_t* data, int32_t* dst) {
+    MsgLogger logger("CONVERT", "convert_to");
 
     if(measurement->type != INT_TYPE || measurement->sign != UNSIGNED_TYPE) {
         logger.log_message("Measurement must be an unsigned integer!");
@@ -140,8 +140,8 @@ RetType convert::convert_int(vcm::VCM* vcm, vcm::measurement_info_t* measurement
 //       but that would be weird to have them not the same length
 // TODO this function could use some cleaning, uses malloc when it doesnt need to, some unnecessary code from it being refactored so many times
 // TODO now that other convert functions exist, maybe call them and then just convert to a string (sprintf)
-RetType convert::convert_str(VCM* vcm, measurement_info_t* measurement, const uint8_t* data, std::string* dst) {
-    MsgLogger logger("CONVERT", "convert_str");
+RetType convert::convert_to(VCM* vcm, measurement_info_t* measurement, const uint8_t* data, std::string* dst) {
+    MsgLogger logger("CONVERT", "convert_to");
 
     switch(measurement->type) {
         // all integer types, will try to put it a standard integer type of the same size or larger than the measurement size
@@ -235,5 +235,145 @@ RetType convert::convert_str(VCM* vcm, measurement_info_t* measurement, const ui
     }
 
     *dst = result;
+    return SUCCESS;
+}
+
+
+// write out each character in 'str' to 'output'
+// NOTE: measurement size must be at least as large as the string
+// ignore endianness for strings
+RetType convert::convert_from(vcm::VCM*, vcm::measurement_info_t* measurement, uint8_t* output, std::string& val) {
+    MsgLogger logger("CONVERT", "convert_from(str)");
+
+    if(measurement->size < val.size() + 1) {
+        logger.log_message("measurement too small to hold string");
+        return FAILURE;
+    }
+
+    // endianness doesn't matter for strings
+    size_t i = 0;
+    for(; i < measurement->size; i++) {
+        output[i] = (uint8_t)(val[i]);
+    }
+
+    // add null-terminator
+    output[i] = '\0';
+
+    return SUCCESS;
+}
+
+RetType convert::convert_from(vcm::VCM* vcm, vcm::measurement_info_t* measurement, uint8_t* output, uint32_t val) {
+    MsgLogger logger("CONVERT", "convert_from(uint32)");
+
+    if(measurement->size < sizeof(uint32_t)) {
+        logger.log_message("measurement too small to hold uint32");
+        return FAILURE;
+    }
+
+    uint8_t* valb = (uint8_t*)&val;
+
+    if(vcm->sys_endianness != vcm->recv_endianness) {
+        // pad the beginning with zeros
+        memset(output, 0, measurement->size - sizeof(uint32_t));
+
+        size_t i = 0;
+        for(; i < sizeof(uint32_t); i++) {
+            output[measurement->size - sizeof(uint32_t) + i] = valb[sizeof(uint32_t) - i - 1];
+        }
+
+    } else {
+        size_t i = 0;
+        for(; i < sizeof(uint32_t); i++) {
+            output[i] = valb[i];
+        }
+
+        // zero the rest of the output
+        memset(output + i, 0, measurement->size - sizeof(uint32_t));
+    }
+
+    return SUCCESS;
+}
+
+RetType convert::convert_from(vcm::VCM* vcm, vcm::measurement_info_t* measurement, uint8_t* output, int32_t val) {
+    MsgLogger logger("CONVERT", "convert_from(int32)");
+
+    if(measurement->size < sizeof(int32_t)) {
+        logger.log_message("measurement too small to hold int32");
+        return FAILURE;
+    }
+
+    uint8_t* valb = (uint8_t*)&val;
+
+    if(vcm->sys_endianness != vcm->recv_endianness) {
+        // pad the beginning with zeros
+        memset(output, 0, measurement->size - sizeof(int32_t));
+
+        size_t i = 0;
+        for(; i < sizeof(int32_t); i++) {
+            output[measurement->size - sizeof(int32_t) + i] = valb[sizeof(int32_t) - i - 1];
+        }
+
+    } else {
+        size_t i = 0;
+        for(; i < sizeof(int32_t); i++) {
+            output[i] = valb[i];
+        }
+
+        // zero the rest of the output
+        memset(output + i, 0, measurement->size - sizeof(int32_t));
+    }
+
+    return SUCCESS;
+}
+
+RetType convert::convert_from(vcm::VCM* vcm, vcm::measurement_info_t* measurement, uint8_t* output, float val) {
+    MsgLogger logger("CONVERT", "convert_from(float)");
+
+    if(measurement->size != sizeof(float)) {
+        logger.log_message("measurement not the same size as float");
+        return FAILURE;
+    }
+
+    uint8_t* valb = (uint8_t*)&val;
+
+    if(vcm->sys_endianness != vcm->recv_endianness) {
+        size_t i = 0;
+        for(; i < sizeof(float); i++) {
+            output[i] = valb[sizeof(float) - i - 1];
+        }
+
+    } else {
+        size_t i = 0;
+        for(; i < sizeof(float); i++) {
+            output[i] = valb[i];
+        }
+    }
+
+    return SUCCESS;
+}
+
+RetType convert::convert_from(vcm::VCM* vcm, vcm::measurement_info_t* measurement, uint8_t* output, double& val) {
+    MsgLogger logger("CONVERT", "convert_from(double)");
+
+    if(measurement->size != sizeof(double)) {
+        logger.log_message("measurement not the same size as double");
+        return FAILURE;
+    }
+
+    uint8_t* valb = (uint8_t*)&val;
+
+    if(vcm->sys_endianness != vcm->recv_endianness) {
+        size_t i = 0;
+        for(; i < sizeof(double); i++) {
+            output[i] = valb[sizeof(double) - i - 1];
+        }
+
+    } else {
+        size_t i = 0;
+        for(; i < sizeof(double); i++) {
+            output[i] = valb[i];
+        }
+    }
+
     return SUCCESS;
 }

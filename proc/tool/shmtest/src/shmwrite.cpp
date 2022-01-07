@@ -35,8 +35,8 @@ int main() {
     uint8_t* buffer;
     for(uint32_t i = 0; i < vcm.num_packets; i++) {
         info = vcm.packets[i];
-        
-        if(info->port == 0) {
+
+        if(info->is_virtual) {
             // skip the virtual telemetry packet
             continue;
         }

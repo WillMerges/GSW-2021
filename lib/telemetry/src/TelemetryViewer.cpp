@@ -286,7 +286,7 @@ RetType TelemetryViewer::latest_data(measurement_info_t* meas, const uint8_t** d
 }
 
 RetType TelemetryViewer::get_str(measurement_info_t* meas, std::string* val) {
-    MsgLogger logger("TelemetryViewer", "get_str");
+    MsgLogger logger("TelemetryViewer", "get");
 
     const uint8_t* data;
     if(latest_data(meas, &data) == FAILURE) {
@@ -294,7 +294,7 @@ RetType TelemetryViewer::get_str(measurement_info_t* meas, std::string* val) {
         return FAILURE;
     }
 
-    if(convert_str(vcm, meas, data, val) == FAILURE) {
+    if(convert_to(vcm, meas, data, val) == FAILURE) {
         logger.log_message("failed to convert measurement to string");
         return FAILURE;
     }
@@ -303,7 +303,7 @@ RetType TelemetryViewer::get_str(measurement_info_t* meas, std::string* val) {
 }
 
 RetType TelemetryViewer::get_float(measurement_info_t* meas, float* val) {
-    MsgLogger logger("TelemetryViewer", "get_float");
+    MsgLogger logger("TelemetryViewer", "get");
 
     const uint8_t* data;
     if(latest_data(meas, &data) == FAILURE) {
@@ -311,7 +311,7 @@ RetType TelemetryViewer::get_float(measurement_info_t* meas, float* val) {
         return FAILURE;
     }
 
-    if(convert_float(vcm, meas, data, val) == FAILURE) {
+    if(convert_to(vcm, meas, data, val) == FAILURE) {
         logger.log_message("failed to convert measurement to float");
         return FAILURE;
     }
@@ -320,7 +320,7 @@ RetType TelemetryViewer::get_float(measurement_info_t* meas, float* val) {
 }
 
 RetType TelemetryViewer::get_double(measurement_info_t* meas, double* val) {
-    MsgLogger logger("TelemetryViewer", "get_double");
+    MsgLogger logger("TelemetryViewer", "get");
 
     const uint8_t* data;
     if(latest_data(meas, &data) == FAILURE) {
@@ -328,7 +328,7 @@ RetType TelemetryViewer::get_double(measurement_info_t* meas, double* val) {
         return FAILURE;
     }
 
-    if(convert_double(vcm, meas, data, val) == FAILURE) {
+    if(convert_to(vcm, meas, data, val) == FAILURE) {
         logger.log_message("failed to convert measurement to double");
         return FAILURE;
     }
@@ -337,7 +337,7 @@ RetType TelemetryViewer::get_double(measurement_info_t* meas, double* val) {
 }
 
 RetType TelemetryViewer::get_int(measurement_info_t* meas, int* val) {
-    MsgLogger logger("TelemetryViewer", "get_int");
+    MsgLogger logger("TelemetryViewer", "get");
 
     const uint8_t* data;
     if(latest_data(meas, &data) == FAILURE) {
@@ -345,7 +345,7 @@ RetType TelemetryViewer::get_int(measurement_info_t* meas, int* val) {
         return FAILURE;
     }
 
-    if(convert_int(vcm, meas, data, val) == FAILURE) {
+    if(convert_to(vcm, meas, data, val) == FAILURE) {
         logger.log_message("failed to convert measurement to int");
         return FAILURE;
     }
@@ -354,7 +354,7 @@ RetType TelemetryViewer::get_int(measurement_info_t* meas, int* val) {
 }
 
 RetType TelemetryViewer::get_uint(measurement_info_t* meas, unsigned int* val) {
-    MsgLogger logger("TelemetryViewer", "get_uint");
+    MsgLogger logger("TelemetryViewer", "get");
 
     const uint8_t* data;
     if(latest_data(meas, &data) == FAILURE) {
@@ -362,7 +362,7 @@ RetType TelemetryViewer::get_uint(measurement_info_t* meas, unsigned int* val) {
         return FAILURE;
     }
 
-    if(convert_uint(vcm, meas, data, val) == FAILURE) {
+    if(convert_to(vcm, meas, data, val) == FAILURE) {
         logger.log_message("failed to convert measurement to uint");
         return FAILURE;
     }
@@ -387,7 +387,7 @@ RetType TelemetryViewer::get_raw(measurement_info_t* meas, uint8_t* buffer) {
 }
 
 RetType TelemetryViewer::get_str(std::string& meas, std::string* val) {
-    MsgLogger logger("TelemetryViewer", "get_str");
+    MsgLogger logger("TelemetryViewer", "get");
 
     measurement_info_t* m_info = vcm->get_info(meas);
     if(m_info == NULL) {
@@ -399,7 +399,7 @@ RetType TelemetryViewer::get_str(std::string& meas, std::string* val) {
 }
 
 RetType TelemetryViewer::get_float(std::string& meas, float* val) {
-    MsgLogger logger("TelemetryViewer", "get_float");
+    MsgLogger logger("TelemetryViewer", "get");
 
     measurement_info_t* m_info = vcm->get_info(meas);
     if(m_info == NULL) {
@@ -411,7 +411,7 @@ RetType TelemetryViewer::get_float(std::string& meas, float* val) {
 }
 
 RetType TelemetryViewer::get_double(std::string& meas, double* val) {
-    MsgLogger logger("TelemetryViewer", "get_double");
+    MsgLogger logger("TelemetryViewer", "get");
 
     measurement_info_t* m_info = vcm->get_info(meas);
     if(m_info == NULL) {
@@ -423,7 +423,7 @@ RetType TelemetryViewer::get_double(std::string& meas, double* val) {
 }
 
 RetType TelemetryViewer::get_int(std::string& meas, int* val) {
-    MsgLogger logger("TelemetryViewer", "get_int");
+    MsgLogger logger("TelemetryViewer", "get");
 
     measurement_info_t* m_info = vcm->get_info(meas);
     if(m_info == NULL) {
@@ -435,7 +435,7 @@ RetType TelemetryViewer::get_int(std::string& meas, int* val) {
 }
 
 RetType TelemetryViewer::get_uint(std::string& meas, unsigned int* val) {
-    MsgLogger logger("TelemetryViewer", "get_uint");
+    MsgLogger logger("TelemetryViewer", "get");
 
     measurement_info_t* m_info = vcm->get_info(meas);
     if(m_info == NULL) {

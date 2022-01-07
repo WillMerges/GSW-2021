@@ -56,7 +56,7 @@ RetType SUM_UINT(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& arg
 
     // sum all arguments
     for(arg_t arg : args) {
-        if(convert_uint(veh, arg.meas, arg.addr, &temp) != SUCCESS) {
+        if(convert_to(veh, arg.meas, arg.addr, &temp) != SUCCESS) {
             logger.log_message("conversion failed");
             return FAILURE;
         }
@@ -64,23 +64,10 @@ RetType SUM_UINT(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& arg
         sum += temp;
     }
 
-    uint8_t* sumb = (uint8_t*)&sum;
-
     // write out sum to output measurement
-
-    // TODO find a way around endianness reversing?
-    // e.g. for all virtual measurements, use system endianness (would mean VCM would have to check a virtual measurement is ONLY in virtual packets)
-    if(veh->sys_endianness != veh->recv_endianness) {
-        for(size_t i = 0; i < sizeof(uint32_t); i++) {
-            dst[meas->size - i] = sumb[i];
-        }
-
-        // zero the rest
-        memset(dst, 0, meas->size - sizeof(uint32_t));
-    } else {
-        for(size_t i = 0; i < sizeof(uint32_t); i++) {
-            dst[i] = sumb[i];
-        }
+    if(convert_from(veh, meas, dst, sum) != SUCCESS) {
+        logger.log_message("failed to convert sum to uint32");
+        return FAILURE;
     }
 
     return SUCCESS;

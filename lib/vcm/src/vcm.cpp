@@ -171,21 +171,28 @@ RetType VCM::init() {
             packet_info_t* packet = new packet_info_t;
             packet->size = 0;
 
-            // get the network port for this packet
-            // this is the port the packet is sent TO
-            try {
-                packet->port = std::stoi(fst, NULL, 10);
-            } catch(std::invalid_argument& ia) {
-                logger.log_message("Invalid port in line: " + line);
-                return FAILURE;
-            }
+            if(fst == "virtual") {
+                packet->port = 0;
+                packet->is_virtual = true;
+            } else {
+                packet->is_virtual = false;
 
-            if(port_set.find(packet->port) != port_set.end()) {
-                logger.log_message("Telemetry packets must have unique port numbers");
-                return FAILURE;
-            }
+                // get the network port for this packet
+                // this is the port the packet is sent TO
+                try {
+                    packet->port = std::stoi(fst, NULL, 10);
+                } catch(std::invalid_argument& ia) {
+                    logger.log_message("Invalid port in line: " + line);
+                    return FAILURE;
+                }
 
-            port_set.insert(packet->port);
+                if(port_set.find(packet->port) != port_set.end()) {
+                    logger.log_message("Telemetry packets must have unique port numbers");
+                    return FAILURE;
+                }
+
+                port_set.insert(packet->port);
+            }
 
             bool done = false;
             // we don't allow comments or empty lines after starting a packet

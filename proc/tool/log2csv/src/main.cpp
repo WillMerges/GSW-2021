@@ -158,7 +158,7 @@ int main(int argc, char** argv) {
                     meas = veh->get_info(m);
                     data = rec->data + (*packet_map)[m];
 
-                    if(convert_str(veh, meas, data, &val) != SUCCESS) {
+                    if(convert_to(veh, meas, data, &val) != SUCCESS) {
                         printf("failed to convert value in file: %s\n", filename.c_str());
                         val = "";
                         // try the next measurement

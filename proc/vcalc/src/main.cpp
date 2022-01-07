@@ -98,7 +98,7 @@ int main(int argc, char** argv) {
     bool* used_packets = new bool[veh->num_packets];
 
     // output buffers
-    uint8_t* packet_buffers[veh->num_packets];
+    uint8_t** packet_buffers = new uint8_t*[veh->num_packets];
 
     // set defaults
     for(uint32_t i = 0; i < veh->num_packets; i++) {

@@ -233,7 +233,7 @@ int main(int argc, char* argv[]) {
 
             /**
             if(meas == "UPTIME") {
-                if(SUCCESS == convert_uint(veh, m_info, buff, &timestamp)) {
+                if(SUCCESS == convert_to(veh, m_info, buff, &timestamp)) {
                     use_timestamp = 1;
                 }
             }

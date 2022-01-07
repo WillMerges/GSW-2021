@@ -29,8 +29,8 @@ class TelemetryViewer(object):
         lib.TelemetryViewer_update.argtypes = [ctypes.c_void_p]
         lib.TelemetryViewer_update.restype = ctypes.c_int
 
-        lib.TelemetryViewer_get_str.argtypes = [ctypes.c_void_p, ctypes.c_wchar_p]
-        lib.TelemetryViewer_get_str.restype = ctypes.c_char_p
+        lib.TelemetryViewer_get.argtypes = [ctypes.c_void_p, ctypes.c_wchar_p]
+        lib.TelemetryViewer_get.restype = ctypes.c_char_p
 
         self.obj = lib.TelemetryViewer_new()
 
@@ -49,8 +49,8 @@ class TelemetryViewer(object):
     def update(self):
         return lib.TelemetryViewer_update(self.obj)
 
-    def get_str(self, measurement):
-        return lib.TelemetryViewer_get_str(self.obj, measurement)
+    def get(self, measurement):
+        return lib.TelemetryViewer_get(self.obj, measurement)
 
 
 if __name__ == "__main__":
@@ -65,4 +65,4 @@ if __name__ == "__main__":
 
     while 1:
         tm.update()
-        print(tm.get_str("UPTIME"))
+        print(tm.get("UPTIME"))

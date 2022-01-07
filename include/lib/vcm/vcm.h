@@ -48,6 +48,7 @@ namespace vcm {
         size_t size;
         uint32_t timeout; // time before packet is considered stale (in milliseconds) TODO implement this
         uint16_t port; // in host order (NOT network order)
+        bool is_virtual;
     } packet_info_t;
 
     typedef struct {
