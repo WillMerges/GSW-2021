@@ -3,12 +3,14 @@
 #include "lib/vcm/vcm.h"
 #include "lib/telemetry/TelemetryViewer.h"
 #include "lib/dls/dls.h"
+#include "lib/vlock/vlock.h"
 #include "common/types.h"
 #include "common/time.h"
 #include <errno.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string>
+#include <signal.h>
 
 // send a command to the engine controller
 // usage: ./ec_cmd [control] [state] <VCM config file>
@@ -23,6 +25,12 @@ using namespace nm;
 
 // measurement to look for sequence number of command in
 #define SEQUENCE_ACK_MEASUREMENT "SEQ_NUM"
+
+
+void sighandler(int) {
+    // don't exit, ignore the signal
+    return;
+}
 
 int main(int argc, char* argv[]) {
     MsgLogger logger("EC_CMD", "main");
@@ -110,6 +118,21 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    // add signal handlers to ignore signals
+    signal(SIGINT, sighandler);
+    signal(SIGTERM, sighandler);
+    signal(SIGSEGV, sighandler);
+    signal(SIGFPE, sighandler);
+    signal(SIGABRT, sighandler);
+
+    // obtain the engine controller command resouce
+    if(SUCCESS != vlock::try_lock(vlock::ENGINE_CONTROLLER_COMMAND)) {
+        printf("failed to obtain engine controller command resource\n");
+        logger.log_message("failed to obtain engine controller command resource");
+
+        return -1;
+    }
+
     // get the current sequence number
     unsigned int seq_num;
     if(SUCCESS != tlm.get_uint(meas, &seq_num)) {
@@ -142,7 +165,7 @@ int main(int argc, char* argv[]) {
     // wait for our command to be acknowledged
     uint32_t start = systime();
     uint32_t time_remaining = TIMEOUT;
-    while(seq_num < cmd_num) {
+    while(seq_num != cmd_num) {
         uint32_t now = systime();
         if(now >= start + TIMEOUT) {
             logger.log_message("timed out waiting for acknowledgement");
@@ -158,7 +181,7 @@ int main(int argc, char* argv[]) {
             logger.log_message("failde to update telemetry");
 
             continue;
-        }
+        } // otherwise success or timeout
 
         if(FAILURE == tlm.get_uint(meas, &seq_num)) {
             // this shouldn't happen
@@ -170,6 +193,15 @@ int main(int argc, char* argv[]) {
     }
 
     printf("command acknowledged\n");
+
+
+    // release the engine controller command resouce
+    if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER_COMMAND)) {
+        printf("failed to unlock engine controller command resource\n");
+        logger.log_message("failed to unlock engine controller command resource");
+
+        return -1;
+    }
 
     return 0;
 }

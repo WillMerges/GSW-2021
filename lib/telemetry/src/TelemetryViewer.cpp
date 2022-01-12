@@ -192,12 +192,12 @@ RetType TelemetryViewer::update(uint32_t timeout) {
     if(check_all) {
         status = shm->read_lock(timeout);
         if(status != SUCCESS) {
-            return status; // could be BLOCKED or FAILURE
+            return status; // could be BLOCKED or FAILURE or TIMEOUT
         }
     } else {
         status = shm->read_lock(packet_ids, num_packets, timeout);
         if(status != SUCCESS) {
-            return status; // could be blocked or failure
+            return status; // could be BLOCKED or FAILURE or TIMEOUT
         }
         // while(1) {
         //     status = shm->read_lock(packet_ids, num_packets, timeout);

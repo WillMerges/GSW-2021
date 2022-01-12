@@ -13,6 +13,7 @@
 #include "lib/vlock/vlock.h"
 #include "lib/dls/dls.h"
 #include "lib/shm/shm.h"
+#include "common/time.h"
 #include <string>
 
 using namespace dls;
@@ -129,8 +130,50 @@ RetType vlock::try_lock(vlock_t resource) {
     }
 
     if(0 != sem_trywait(&(locks[resource]))) {
-        // either locked or error
+        if(errno == EAGAIN) {
+            return LOCKED;
+        } else {
+            logger.log_message("sem_trywait error");
+            return FAILURE;
+        }
+    }
+
+    return SUCCESS;
+}
+
+RetType vlock::lock(vlock_t resource, uint32_t wait) {
+    MsgLogger logger("VLOCK", "lock");
+
+    if(!locks) {
+        logger.log_message("Shared memory not attached, cannot lock");
         return FAILURE;
+    }
+
+    if(resource >= NUM_RESOURCES) {
+        logger.log_message("Invalid resource, cannot lock");
+        return FAILURE;
+    }
+
+    if(wait == 0) {
+        // wait indefinitely
+        if(0 != sem_wait(&(locks[resource]))) {
+            logger.log_message("wait failed");
+            return FAILURE;
+        }
+    } else {
+        struct timespec time;
+        uint32_t abs_time = systime() + wait;
+        time.tv_sec = (abs_time / 1000);
+        time.tv_nsec = (abs_time % 1000) * 1000000;
+
+        if(0 != sem_timedwait(&(locks[resource]), &time)) {
+            if(errno == ETIMEDOUT) {
+                return LOCKED;
+            } else {
+                logger.log_message("sem_timedwait error");
+                return FAILURE;
+            }
+        }
     }
 
     return SUCCESS;
@@ -150,7 +193,7 @@ RetType vlock::unlock(vlock_t resource) {
     }
 
     if(0 != sem_post(&(locks[resource]))) {
-        // either locked or error
+        logger.log_message("sem_post failure");
         return FAILURE;
     }
 

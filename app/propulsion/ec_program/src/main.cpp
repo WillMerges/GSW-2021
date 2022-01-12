@@ -5,7 +5,7 @@
 *           executes all commands. Programs are either interpretted from standard
 *           input or read from a file.
 *
-*  Usage:   ./ec_program <program> <-f VCM config file>
+*  Usage:   ./ec_program <-f VCM config file>
 */
 #include "lib/ec/ec.h"
 #include "lib/nm/nm.h"
@@ -37,9 +37,6 @@ using namespace countdown_clock;
 // measurement to look for sequence number of command in
 #define SEQUENCE_ACK_MEASUREMENT "SEQ_NUM"
 
-// maps macros
-std::unordered_map<std::string, std::string> macros;
-
 // engine controller command
 typedef struct command_s{
     int64_t time;
@@ -53,6 +50,9 @@ typedef struct command_s{
     }
 } command_t;
 
+// maps macros
+std::unordered_map<std::string, std::string> macros;
+
 // keys are time, values are commands
 std::vector<command_t> commands;
 
@@ -64,15 +64,21 @@ void release_resources() {
     MsgLogger logger("EC_PROGRAM", "release_resources");
 
     // unlock the engine controller resource
-    if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER)) {
+    if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER_PROGRAM)) {
         printf("failed to unlock engine controller resource\n");
         logger.log_message("failed to unlock engine controller resource");
     }
 }
 
+static bool ignore_sig = false;
+
 // signal handler
 void sighandler(int signum) {
     MsgLogger logger("SHMCTRL", "sighandler");
+
+    if(ignore_sig) {
+        return;
+    }
 
     release_resources();
 
@@ -191,6 +197,8 @@ RetType parse() {
 int main(int argc, char* argv[]) {
     MsgLogger logger("EC_PROGRAM", "main");
 
+    logger.log_message("executing engine controller program");
+
     // interpret the next argument as a config_file location if available
     std::string config_file = "";
     if(argc > 2) {
@@ -220,13 +228,19 @@ int main(int argc, char* argv[]) {
     signal(SIGFPE, sighandler);
     signal(SIGABRT, sighandler);
 
-    // lock the engine controller resource
-    if(SUCCESS != vlock::try_lock(vlock::ENGINE_CONTROLLER)) {
+    // we need to ignore any signals until we know we have the lock
+    // if we get a signal before trying the lock we may decrement the lock when we didn't own it
+    ignore_sig = true;
+
+    // lock the engine controller program resource
+    if(SUCCESS != vlock::try_lock(vlock::ENGINE_CONTROLLER_PROGRAM)) {
         printf("failed to lock engine controller resource\n");
         logger.log_message("failed to lock engine controller resource");
 
         return -1;
     }
+
+    ignore_sig = false;
 
     // try and parse program
     if(SUCCESS != parse()) {
@@ -325,9 +339,6 @@ int main(int argc, char* argv[]) {
         usleep(1000); // sleep 1 ms
     }
 
-    printf("no longer sleeping\n");
-    fflush(stdout);
-
     // get the current sequence number
     // TODO there could be an issue of sequence numbers if multiple commands execute at once
     //      e.g. the one we read is out of date (have a way to lock physical resources?)
@@ -362,9 +373,6 @@ int main(int argc, char* argv[]) {
             return -1;
         }
 
-        printf("curr time: %li\n", curr_time);
-        printf("command time: %li\n", c.time);
-
         if(curr_time < c.time) {
             // we need to wait to execute this
             usleep((c.time - curr_time) * 1000);
@@ -378,6 +386,20 @@ int main(int argc, char* argv[]) {
         cmd.control = c.control;
         cmd.state = c.state;
 
+        // until our command has been ACK'd we don't want to exit on a signal
+        // this way we can be sure to unlock things
+        ignore_sig = true;
+
+        // lock the engine controller so no other commands are sent
+        if(SUCCESS != vlock::lock(vlock::ENGINE_CONTROLLER_COMMAND, 1)) {
+            // either error or it took longer than 1ms to obtain the lock
+            logger.log_message("failed to obtain engine controller command resource");
+            printf("ailed to obtain engine controller command resource\n");
+
+            release_resources();
+            return -1;
+        }
+
         // send the command over the network
         if(FAILURE == net.QueueUDPMessage((char*)&cmd, sizeof(cmd))) {
             printf("failed to queue message to network interface\n");
@@ -389,7 +411,7 @@ int main(int argc, char* argv[]) {
         // wait for our command to be acknowledged
         uint32_t start = systime();
         uint32_t time_remaining = TIMEOUT;
-        while(seq_num < cmd_num) {
+        while(seq_num != cmd_num) {
             uint32_t now = systime();
             if(now >= start + TIMEOUT) {
                 logger.log_message("timed out waiting for acknowledgement");
@@ -405,7 +427,7 @@ int main(int argc, char* argv[]) {
                 logger.log_message("failde to update telemetry");
 
                 continue;
-            }
+            } // otherwise success or timeout
 
             if(FAILURE == tlm.get_uint(meas, &seq_num)) {
                 // this shouldn't happen
@@ -415,12 +437,25 @@ int main(int argc, char* argv[]) {
                 continue;
             } // okay if we get timeout, catch it next time around
         }
+
+        // unlock the command resource
+        if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER_COMMAND)) {
+            logger.log_message("failed to unlock engine controller command resource");
+            printf("failed to unlock engine controller command resource\n");
+
+            release_resources();
+
+            return -1;
+        }
+
+        // re-enable exiting on signal
+        ignore_sig = false;
     }
 
-    // unlock the engine controller resource
-    if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER)) {
+    // unlock the engine controller program resource
+    if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER_PROGRAM)) {
         printf("failed to unlock engine controller resource\n");
-        logger.log_message("failed to unlock engine controller resource");
+        logger.log_message("failed to unlock engine controller program resource");
 
         return -1;
     }
