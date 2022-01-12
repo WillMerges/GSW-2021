@@ -9,13 +9,28 @@
 // solenoid states
 #define NUM_SOLENOIDS 4
 // solenoids start at control number 100, e.g. solenoid 0 is 100, 1 is 101 ...
-uint16_t solenoid_control_start = 100; // this is an arbitrary number
+static const uint16_t solenoid_control_start = 100; // this is an arbitrary number
 uint8_t solenoids[NUM_SOLENOIDS];
 
 // igniter states
 #define NUM_IGNITERS 1
-uint16_t igniter_control_start = 200; // this is an arbitrary number
+static const uint16_t igniter_control_start = 200; // this is an arbitrary number
 uint8_t igniters[NUM_IGNITERS];
+
+// light states
+static const uint16_t green_ctrl = 300;
+static const uint16_t yellow_ctrl = 301;
+static const uint16_t red_ctrl = 302;
+static const uint16_t buzzer_ctrl = 303;
+
+typedef struct {
+    uint8_t green;
+    uint8_t yellow;
+    uint8_t red;
+    uint8_t buzzer;
+} light_state_t;
+
+light_state_t light_states = {0, 0, 0, 0};
 
 // IPv4 address of the ground station
 const char* gs_ip = "127.0.0.1";
@@ -26,7 +41,8 @@ uint32_t seq_num = 0;
 // port numbers of telemetry packets sent TO the ground station
 #define SOLENOID_PORT 8081
 #define IGNITER_PORT  8082
-#define CMD_ACK_PORT  8083
+#define LIGHT_PORT    8083
+#define CMD_ACK_PORT  8084
 
 // port to bind the engine controller to
 #define EC_PORT 8080
@@ -68,6 +84,15 @@ void send_igniter_state() {
                     (struct sockaddr*)&dst_addr, sizeof(dst_addr));
 }
 
+void send_light_state() {
+    // send to wherever we got the packet from, but to the predefined port
+    dst_addr.sin_port = htons(LIGHT_PORT);
+
+    // should really check return, but this is just a sim
+    sendto(sockfd, (void*)&light_states, sizeof(light_state_t), 0,
+                (struct sockaddr*)&dst_addr, sizeof(dst_addr));
+}
+
 // print the state of the engine controller
 void print_state() {
     // clear the screen
@@ -82,6 +107,12 @@ void print_state() {
     for(int i = 0; i < NUM_IGNITERS; i++) {
         printf("igniter %d: 0x%02x\n", i, igniters[i]);
     }
+
+    // print light states
+    printf("light green: 0x%02x\n", light_states.green);
+    printf("light yellow: 0x%02x\n", light_states.yellow);
+    printf("light red: 0x%02x\n", light_states.red);
+    printf("light buzzer: 0x%02x\n", light_states.buzzer);
 
     // print highest sequence number
     printf("sequence: %u\n", seq_num);
@@ -124,6 +155,7 @@ int main() {
     ack_cmd();
     send_solenoid_state();
     send_igniter_state();
+    send_light_state();
 
     // listen for command packets
     uint8_t recv_buffer[sizeof(ec_command_t)];
@@ -168,6 +200,26 @@ int main() {
             igniters[igniter_num] = cmd->state;
 
             send_igniter_state();
+        }
+
+        bool light_cmd = true;
+        switch(cmd->control) {
+            case green_ctrl:
+                light_states.green = cmd->state;
+                break;
+            case yellow_ctrl:
+                light_states.yellow = cmd->state;
+                break;
+            case red_ctrl:
+                light_states.red = cmd->state;
+                break;
+            default:
+                light_cmd = false;
+                break;
+        }
+
+        if(light_cmd) {
+            send_light_state();
         }
     }
 }
