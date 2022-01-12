@@ -30,7 +30,7 @@ fi
 echo "starting data logging process"
 # this is a hack to redirect to a fifo pipe w/o blocking
 #${GSW_HOME}/proc/dlp/dlp -v | tee > ${GSW_HOME}/log/system.fifo &
-${GSW_HOME}/proc/dlp/dlp -v &
+${GSW_HOME}/proc/dlp/dlp &
 echo $! | cat - pidlist > temp && mv temp pidlist
 sleep 0.5
 
