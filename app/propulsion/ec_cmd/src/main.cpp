@@ -99,6 +99,14 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    // initialize vlock lib
+    if(SUCCESS != vlock::init()) {
+        logger.log_message("failed to init vlock lib");
+        printf("failed to init vlock lib\n");
+
+        return -1;
+    }
+
     // add sequence number measurement
     std::string meas = SEQUENCE_ACK_MEASUREMENT;
     if(FAILURE == tlm.add(meas)) {
@@ -140,6 +148,12 @@ int main(int argc, char* argv[]) {
         printf("failed to get measurement: %s\n", SEQUENCE_ACK_MEASUREMENT);
         logger.log_message("failed to get sequence number measurement");
 
+        // release the engine controller command resouce
+        if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER_COMMAND)) {
+            printf("failed to unlock engine controller command resource\n");
+            logger.log_message("failed to unlock engine controller command resource");
+        }
+
         return -1;
     }
 
@@ -157,6 +171,12 @@ int main(int argc, char* argv[]) {
         printf("failed to queue message to network interface\n");
         logger.log_message("failed to queue message to network interface");
 
+        // release the engine controller command resouce
+        if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER_COMMAND)) {
+            printf("failed to unlock engine controller command resource\n");
+            logger.log_message("failed to unlock engine controller command resource");
+        }
+
         return -1;
     }
 
@@ -170,6 +190,12 @@ int main(int argc, char* argv[]) {
         if(now >= start + TIMEOUT) {
             logger.log_message("timed out waiting for acknowledgement");
             printf("timed out waiting for acknowledgement\n");
+
+            // release the engine controller command resouce
+            if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER_COMMAND)) {
+                printf("failed to unlock engine controller command resource\n");
+                logger.log_message("failed to unlock engine controller command resource");
+            }
 
             return -1;
         } else {

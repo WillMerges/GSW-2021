@@ -213,6 +213,9 @@ int main() {
             case red_ctrl:
                 light_states.red = cmd->state;
                 break;
+            case buzzer_ctrl:
+                light_states.buzzer = cmd->state;
+                break;
             default:
                 light_cmd = false;
                 break;

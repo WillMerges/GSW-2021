@@ -44,16 +44,16 @@ SOLENOID4
 IGNITER1
 }
 
-# sequence number only
-8083 {
-SEQ_NUM
-}
-
 # light tower
-8084 {
+8083 {
 LED_G
 LED_Y
 LED_R
 LED_BUZZ
+}
+
+# sequence number only
+8084 {
+SEQ_NUM
 }
 
