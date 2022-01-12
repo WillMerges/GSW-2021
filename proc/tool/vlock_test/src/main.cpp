@@ -27,12 +27,12 @@ int main(int argc, char* argv[]) {
     }
 
     if(lock) {
-        if(SUCCESS != vlock::try_lock(vlock::ENGINE_CONTROLLER)) {
+        if(SUCCESS != vlock::try_lock(vlock::ENGINE_CONTROLLER_PROGRAM)) {
             printf("Lock failed\n");
             return -1;
         }
     } else {
-        if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER)) {
+        if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER_PROGRAM)) {
             printf("Unlock failed\n");
             return -1;
         }
