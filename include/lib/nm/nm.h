@@ -34,7 +34,7 @@ namespace nm {
         // if 'rx_timeout' is set to -1 (or anything less than 0), all calls to receive will be blocking
         // if a multicast address other than 0 is specified, the network manager will listen on that group
         // the multicast address is expected in network order
-        NetworkManager(uint16_t src_port, uint16_t dst_port, const char* name, uint8_t* buffer,
+        NetworkManager(uint16_t src_port, const char* name, uint8_t* buffer,
                     size_t size, uint32_t multicast_addr = 0, ssize_t rx_timeout = -1);
 
         // destructor

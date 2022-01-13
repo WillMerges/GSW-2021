@@ -16,7 +16,7 @@ using namespace dls;
 using namespace shm;
 using namespace vcm;
 
-NetworkManager::NetworkManager(uint16_t src_port, uint16_t dst_port, const char* name, uint8_t* buffer, size_t size, uint32_t multicast_addr, ssize_t rx_timeout) {
+NetworkManager::NetworkManager(uint16_t src_port, const char* name, uint8_t* buffer, size_t size, uint32_t multicast_addr, ssize_t rx_timeout) {
     mqueue_name = "/";
     mqueue_name += name;
 
@@ -24,7 +24,7 @@ NetworkManager::NetworkManager(uint16_t src_port, uint16_t dst_port, const char*
     rx_size = size;
 
     this->src_port = src_port;
-    this->dst_port = dst_port;
+    // this->dst_port = dst_port;
     this->rx_timeout = rx_timeout;
 
     open = false;
@@ -253,7 +253,8 @@ RetType NetworkManager::Send() {
         }
 
         // send to the dst port
-        device_addr.sin_port = htons(dst_port);
+        // ^^^ actually, use whatever port the receiver sent telemetry from
+        // device_addr.sin_port = htons(dst_port);
 
         ssize_t sent = -1;
         sent = sendto(sockfd, (char*)tx_buffer, read, 0,
