@@ -175,14 +175,21 @@ int main() {
 
         // look at the command packet
         ec_command_t* cmd = (ec_command_t*)recv_buffer;
-        if(cmd->seq_num <= seq_num) {
-            // we should have already parsed this command, or it got dropped
+        if(cmd->seq_num != seq_num + 1) {
+            // this is not the right command, send the current sequence number
+            ack_cmd();
             continue;
         }
 
         // otherwise we have a new command to carry out
         seq_num = cmd->seq_num;
         ack_cmd();
+
+        // all of our states are 0 or 1 and we store them in 8 bit numbers
+        // if we get a state over 8 bits, just ignore it
+        if((cmd->state >> 8) > 0) {
+            continue;
+        }
 
         if(cmd->control >= solenoid_control_start &&
                 cmd->control < solenoid_control_start + NUM_SOLENOIDS) {
