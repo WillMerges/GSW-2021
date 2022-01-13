@@ -68,8 +68,9 @@ int main(int argc, char** argv) {
     signal(SIGABRT, sighandler);
 
     // send and receive from same port (but never receive as of right now)
+    // ^^^ actually let the OS decide which port to bind to by calling 'bind' with a port of 0
     // net = new NetworkManager(veh->port, veh->port, (veh->device).c_str(), NULL, 0);
-    net = new NetworkManager(veh->port, veh->port, (veh->device).c_str(), NULL, 0);
+    net = new NetworkManager(0, veh->port, (veh->device).c_str(), NULL, 0);
 
     if(net->Open() == FAILURE) {
         logger.log_message("failed to open Network Manager");
