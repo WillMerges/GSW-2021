@@ -1,0 +1,46 @@
+# Engine Controller
+
+protocol = udp
+port = 8080
+
+name = engine_controller_sim
+
+endianness = little
+
+multicast = 224.0.0.1
+
+# [measurement name] [total measurement size in bytes (including padding)] [most sig padding (bits)] [least sig (bits)] [optional type of int, float, or string, default is int] [optional signed or unsigned, default is signed]
+# signed/unsigned cannot be specified without a type
+
+## measurements ##
+
+# relays
+SOLENOID1 2 0 0 int unsigned
+SOLENOID2 2 0 0 int unsigned
+SOLENOID3 2 0 0 int unsigned
+IGNITER1 2 0 0 int unsigned
+
+# dummy light tower
+LED_G 2 0 0 int unsigned
+LED_Y 2 0 0 int unsigned
+LED_R 2 0 0 int unsigned
+LED_BUZZ 2 0 0 int unsigned
+
+# command sequence number
+SEQ_NUM 4 0 0 int unsigned
+
+
+## telemetry packets ##
+
+# solenoids
+8080 {
+SOLENOID1
+SOLENOID2
+SOLENOID3
+IGNITER1
+LED_G
+LED_Y
+LED_R
+LED_BUZZ
+SEQ_NUM
+}
