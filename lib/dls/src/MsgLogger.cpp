@@ -21,7 +21,8 @@ MsgLogger::MsgLogger(std::string func_name): Logger(MESSAGE_MQUEUE_NAME) {
 // | [timestamp] | (class name, function name) | message |
 RetType MsgLogger::log_message(std::string msg) {
     gettimeofday(&curr_time, NULL);
-    std::string new_msg = "[" + std::to_string(curr_time.tv_sec) + "] ";
+    std::string new_msg = "[" + std::to_string(curr_time.tv_sec) + "."
+                              + std::to_string(curr_time.tv_usec) + "] ";
 
     new_msg += "("+class_name;
     if(class_name != "" && func_name != "") {
