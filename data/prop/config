@@ -32,12 +32,27 @@ SEQ_NUM 4 0 0 int unsigned
 
 ## telemetry packets ##
 
-# solenoids
+# sequence number only
 8080 {
+SEQ_NUM
+}
+
+# solenoids
+8081 {
 SOLENOID1
 SOLENOID2
 SOLENOID3
+SEQ_NUM
+}
+
+# igniters
+8082 {
 IGNITER1
+SEQ_NUM
+}
+
+# light tower
+8083 {
 LED_G
 LED_Y
 LED_R
