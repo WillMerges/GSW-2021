@@ -27,7 +27,7 @@ VCM* veh = NULL;
 
 // directly copy a measurement
 // 'out' must be the same size as 'in'
-RetType COPY(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
+static inline RetType COPY(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
     MsgLogger logger("CALC", "COPY");
 
     if(args.size() != 1) {
@@ -49,7 +49,7 @@ RetType COPY(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
     return SUCCESS;
 }
 
-RetType SUM_UINT(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
+static inline RetType SUM_UINT(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
     MsgLogger logger("CALC", "INTSUM");
 
     uint32_t sum = 0;
