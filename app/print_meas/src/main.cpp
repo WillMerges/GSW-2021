@@ -114,6 +114,8 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    tlm.set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
+
     std::string str;
 
     while(1) {

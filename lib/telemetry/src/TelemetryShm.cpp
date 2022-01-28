@@ -115,9 +115,12 @@ TelemetryShm::~TelemetryShm() {
 RetType TelemetryShm::init(VCM* vcm) {
     num_packets = vcm->num_packets;
 
-    // create and zero last_nonces
+    // create and set last_nonces
     last_nonces = (uint32_t*)malloc(num_packets * sizeof(uint32_t));
-    memset(last_nonces, 0, num_packets * sizeof(uint32_t));
+    // memset(last_nonces, 0, num_packets * sizeof(uint32_t));
+    for(size_t i = 0; i < num_packets; i++) {
+        last_nonces[i] = 1;
+    }
 
     // create and zero updated array
     updated = (bool*)malloc(num_packets * sizeof(bool));
@@ -203,8 +206,8 @@ RetType TelemetryShm::create() {
             return FAILURE;
         }
 
-        // 'info blocks' are single nonces now, so just zero them
-        *((uint32_t*)info_blocks[i]->data) = 0x0;
+        // 'info blocks' are single nonces now, initialize them to 1
+        *((uint32_t*)info_blocks[i]->data) = 1;
 
         // we should unatach after setting the default
         // although we technically still could stay attached and be okay
