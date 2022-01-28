@@ -200,10 +200,10 @@ int main(int argc, char** argv) {
                             if(ret != SUCCESS) {
                                 logger.log_message("calculation failed");
                                 // do nothing
-                            } else {
+                            } else if(ret != NOCHANGE) {
                                 // we changed a measurement in our buffer, mark it to be written to shared memory
                                 output_packets.insert(loc.packet_index);
-                            }
+                            } // else convert function said not to write anything but didn't fail
                         }
                     }
                 }

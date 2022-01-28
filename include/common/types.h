@@ -7,7 +7,8 @@ typedef enum {
     BLOCKED = 1,
     INTERRUPTED = 2,
     TIMEOUT = 3,
-    LOCKED = 4
+    LOCKED = 4,
+    NOCHANGE = 5
 } RetType;
 
 #endif
