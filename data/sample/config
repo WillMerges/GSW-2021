@@ -59,3 +59,11 @@ virtual {
 VIRTUAL_VALUE
 VIRTUAL_VALUE2
 }
+
+virtual {
+VIRTUAL_VALUE
+}
+
+virtual {
+VIRTUAL_VALUE2
+}
