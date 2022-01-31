@@ -87,6 +87,7 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
     }
 
     uint8_t val[sizeof(uint32_t)];
+    memset(val, 0, sizeof(uint32_t));
     // size_t addr = (size_t)measurement->addr;
     // const uint8_t* buff = (const uint8_t*)data;
 
@@ -107,8 +108,8 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
 RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement, const uint8_t* data, int32_t* dst) {
     MsgLogger logger("CONVERT", "convert_to");
 
-    if(measurement->type != INT_TYPE || measurement->sign != UNSIGNED_TYPE) {
-        logger.log_message("Measurement must be an unsigned integer!");
+    if(measurement->type != INT_TYPE || measurement->sign != SIGNED_TYPE) {
+        logger.log_message("Measurement must be a signed integer!");
         return FAILURE;
     }
 
@@ -118,6 +119,7 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
     }
 
     uint8_t val[sizeof(int32_t)];
+    memset(val, 0, sizeof(int32_t));
     // size_t addr = (size_t)measurement->addr;
     // const uint8_t* buff = (const uint8_t*)data;
 
@@ -147,32 +149,24 @@ RetType convert::convert_to(VCM* vcm, measurement_info_t* measurement, const uin
         // all integer types, will try to put it a standard integer type of the same size or larger than the measurement size
         // distinguishes between signed and unsigned
         case INT_TYPE: {
-            if(measurement->size > (sizeof(long int))) {
-                logger.log_message("Measurement size too great to convert to integer");
-                return FAILURE;
-            }
-
-            // assume unsigned and signed are the same size (potential problem)
-            unsigned char val[sizeof(long int)]; // always assume it's the biggest (don't care about a few bytes)
-            memset(val, 0, sizeof(long int));
-
-            // size_t addr = (size_t)measurement->addr;
-            // const unsigned char* buff = (const unsigned char*)data;
-
-            if(vcm->recv_endianness != vcm->sys_endianness) {
-                for(size_t i = 0; i < measurement->size; i++) {
-                    val[sizeof(long int) - i - 1] = data[i];
-                }
-            } else {
-                for(size_t i = 0; i < measurement->size; i++) {
-                    val[i] = data[i];
-                }
-            }
-
             if(measurement->sign == SIGNED_TYPE) { // signed
-                snprintf(result, MAX_CONVERSION_SIZE, "%li", *((int64_t*)val));
+                int32_t val;
+                RetType ret = convert_to(vcm, measurement, data, &val);
+
+                if(ret != SUCCESS) {
+                    return ret;
+                }
+
+                snprintf(result, MAX_CONVERSION_SIZE, "%i", val);
             } else { // unsigned
-                snprintf(result, MAX_CONVERSION_SIZE, "%lu", *((uint64_t*)val));
+                uint32_t val;
+                RetType ret = convert_to(vcm, measurement, data, &val);
+
+                if(ret != SUCCESS) {
+                    return ret;
+                }
+
+                snprintf(result, MAX_CONVERSION_SIZE, "%u", val);
             }
 
             }
@@ -180,38 +174,29 @@ RetType convert::convert_to(VCM* vcm, measurement_info_t* measurement, const uin
 
         // encompasses 4-byte floats and 8-byte doubles
         case FLOAT_TYPE: {
-            size_t convert_size = 0;
             if(measurement->size == sizeof(float)) {
-                convert_size = sizeof(float);
-            } else if(measurement->size == sizeof(double)) {
-                convert_size = sizeof(double);
-            }
+                float val;
+                RetType ret = convert_to(vcm, measurement, data, &val);
 
-            if(convert_size == 0) {
-                logger.log_message("Unable to convert floating type to float or double");
+                if(ret != SUCCESS) {
+                    return ret;
+                }
+
+                snprintf(result, MAX_CONVERSION_SIZE, "%f", val);
+            } else if(measurement->size == sizeof(double)) {
+                double val;
+                RetType ret = convert_to(vcm, measurement, data, &val);
+
+                if(ret != SUCCESS) {
+                    return ret;
+                }
+
+                snprintf(result, MAX_CONVERSION_SIZE, "%f", val);
+            } else {
+                logger.log_message("size of float type measurement does not match float or double");
                 return FAILURE;
             }
 
-            unsigned char* val = (unsigned char*)malloc(convert_size);
-            memset(val, 0, convert_size);
-
-            // size_t addr = (size_t)measurement->addr;
-            // const unsigned char* buff = (const unsigned char*)data;
-
-            if(vcm->recv_endianness != vcm->sys_endianness) {
-                for(size_t i = 0; i < measurement->size; i++) {
-                    val[convert_size - i - 1] = data[i];
-                }
-            } else {
-                for(size_t i = 0; i < measurement->size; i++) {
-                    val[i] = data[i];
-                }
-            }
-
-            // sign doesn't exist for floating point
-            snprintf(result, MAX_CONVERSION_SIZE, "%f", *((float*)val));
-
-            free(val);
             }
             break;
 

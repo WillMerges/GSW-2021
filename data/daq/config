@@ -1,0 +1,72 @@
+# DAQ (Data Acquisition System)
+
+protocol = udp
+port = 8080
+
+name = daq
+
+endianness = little 
+
+#multicast = 224.0.0.1
+
+# [measurement name] [total measurement size in bytes (including padding)] [most sig padding (bits)] [least sig (bits)] [optional type of int, float, or string, default is int] [optional signed or unsigned, default is signed]
+# signed/unsigned cannot be specified without a type
+
+## measurements ##
+
+MILLISEC    4 0 0 int unsigned
+MICROSEC    4 0 0 int unsigned
+SEQ_NUM     4 0 0 int unsigned
+ADC0_STATUS 3 0 0 int unsigned
+ADC0_CH1    3 0 0 int unsigned
+ADC0_CH2    3 0 0 int unsigned
+ADC0_CH3    3 0 0 int unsigned
+ADC0_CH4    3 0 0 int unsigned
+ADC1_STATUS 3 0 0 int unsigned
+ADC1_CH1    3 0 0 int unsigned
+ADC1_CH2    3 0 0 int unsigned
+ADC1_CH3    3 0 0 int unsigned
+ADC1_CH4    3 0 0 int unsigned
+TC_1        4 0 0 int unsigned
+TC_2        4 0 0 int unsigned
+TC_3        4 0 0 int unsigned
+TC_4        4 0 0 int unsigned
+
+
+
+## telemetry packets ##
+
+# ADC0
+8080 {
+MILLISEC
+MICROSEC
+SEQ_NUM
+ADC0_STATUS
+ADC0_CH1
+ADC0_CH2
+ADC0_CH3
+ADC0_CH4
+}
+
+# ADC1
+8081 {
+MILLISEC
+MICROSEC
+SEQ_NUM
+ADC1_STATUS
+ADC1_CH1
+ADC1_CH2
+ADC1_CH3
+ADC1_CH4
+}
+
+# thermocouples
+8082 {
+MILLISEC
+MICROSEC
+SEQ_NUM
+TC_1
+TC_2
+TC_3
+TC_4
+}

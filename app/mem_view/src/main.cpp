@@ -148,6 +148,6 @@ int main(int argc, char* argv[]) {
             printf("\033[2J");
         }
 
-        usleep(1000);
+        usleep(75000);
     }
 }
