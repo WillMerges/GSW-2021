@@ -24,6 +24,7 @@ using namespace convert;
 int main(int argc, char** argv) {
     if(argc < 2) {
         printf("usage: ./log2csv [log file directory] (vcm config file path)");
+        return -1;
     }
 
     char* dir = argv[1];
@@ -131,6 +132,13 @@ int main(int argc, char** argv) {
             std::string id_str = rec->device->substr(first, second);
             if(EOF == sscanf(id_str.c_str(), "(%u)", &packet_id)) {
                 printf("scanf error in file: %s\n", filename.c_str());
+
+                // look for the next record
+                continue;
+            }
+
+            if(packet_id > veh->num_packets - 1) {
+                printf("invalid packet id parsed from device name\n");
 
                 // look for the next record
                 continue;

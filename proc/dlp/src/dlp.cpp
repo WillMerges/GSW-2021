@@ -14,7 +14,8 @@
 #include <csignal>
 #include <vector>
 
-#define MAX_LINES_PER_FILE 512
+#define MAX_LINES_PER_FILE 512  // limit text files to 512 lines
+#define MAX_FILE_SIZE (1 << 23) // limit binary files to 2^23 bytes
 
 using namespace dls;
 
@@ -102,8 +103,14 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
         }
 
         ssize_t read = -1;
-        unsigned int writes = 0;
-        while(writes < MAX_LINES_PER_FILE) {
+        size_t writes = 0;
+        size_t max = MAX_FILE_SIZE;
+
+        if(!binary) {
+            max = MAX_LINES_PER_FILE;
+        }
+
+        while(writes < max) {
             // gettimeofday(&curr_time, NULL);
             // std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
 
@@ -129,11 +136,18 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
             if(binary) {
                 //file << timestamp;
                 file.write(buffer, read);
+
+                // count bytes for raw binary log files
+                writes += read;
             } else {
                 //file << timestamp << " " << buffer << '\n';
                 file << buffer << '\n';
+
+                // count lines for text log files
+                writes++;
             }
-            writes++;
+
+
 
             fflush(stdout);
             file.flush();
