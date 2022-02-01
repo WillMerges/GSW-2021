@@ -62,6 +62,7 @@ TelemetryViewer::~TelemetryViewer() {
 RetType TelemetryViewer::init(TelemetryShm* shm) {
     MsgLogger logger("TelemetryViewer", "init");
 
+    // TODO this is never deleted, memory leak
     VCM* vcm = new VCM();
 
     if(FAILURE == vcm->init() )

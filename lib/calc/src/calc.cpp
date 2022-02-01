@@ -21,6 +21,8 @@ using namespace convert;
 
 // static data //
 VCM* veh = NULL;
+// TODO this needs to be set somewhere!
+// in some kind of init function?
 
 // Conversion functions //
 // TODO put these in another file to link with //
@@ -44,6 +46,7 @@ static inline RetType COPY(measurement_info_t* meas, uint8_t* dst, std::vector<a
     }
 
     // need a special function for writing single measurement to shared memory!
+    // ^^^ actually we're just writing to a passed in buffer, this is fine
     memcpy((void*)(dst), (void*)src, meas->size);
 
     return SUCCESS;
