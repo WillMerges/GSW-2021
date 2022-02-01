@@ -24,14 +24,14 @@ namespace calc {
     typedef struct {
         measurement_info_t* meas;
         const uint8_t* addr;
-    } arg_t;
+    } arg_t; // argument to a conversion function
 
     typedef struct {
         size_t unique_id;
         measurement_info_t* out;
         RetType (*convert_function)(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args);
         std::vector<measurement_info_t*> args;
-    } vcalc_t;
+    } vcalc_t; // virtual calculation information
 
     // parse the default file into 'entries'
     RetType parse_vfile(VCM* veh, std::vector<vcalc_t>* entries);

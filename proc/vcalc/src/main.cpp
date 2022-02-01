@@ -105,10 +105,21 @@ int main(int argc, char** argv) {
     // output buffers
     uint8_t** packet_buffers = new uint8_t*[veh->num_packets];
 
+    // loggers to write packets out
+    std::vector<PacketLogger*> loggers;
+
+    // sizes of each packet
+    std::vector<size_t> packet_sizes;
+
     // set defaults
     for(uint32_t i = 0; i < veh->num_packets; i++) {
         used_packets[i] = false;
         packet_buffers[i] = NULL;
+
+        PacketLogger* logger = new PacketLogger(veh->device + "(" + std::to_string(i) + ")");
+        loggers.push_back(logger);
+
+        packet_sizes.push_back(veh->packets[i]->size);
     }
 
     // add events for each packet
@@ -119,8 +130,8 @@ int main(int argc, char** argv) {
             // we only want to allocate buffers for virtual packets
             if(veh->packets[loc.packet_index]->is_virtual) {
                 if(packet_buffers[loc.packet_index] == NULL) {
-                    packet_buffers[loc.packet_index] = new uint8_t[veh->packets[loc.packet_index]->size];
-                    memset(packet_buffers[loc.packet_index], 0, veh->packets[loc.packet_index]->size);
+                    packet_buffers[loc.packet_index] = new uint8_t[packet_sizes[loc.packet_index]];
+                    memset(packet_buffers[loc.packet_index], 0, packet_sizes[loc.packet_index]);
                 } // otherwise we've already allocated this buffer
             }
         }
@@ -134,10 +145,16 @@ int main(int argc, char** argv) {
 
                     // mark this packet to check for updates
                     used_packets[loc.packet_index] = true;
+
+                    // make sure we don't add this trigger for the same packet again
+                    // e.g. if both arguments are from the same packet, only need one trigger
+                    ids[loc.packet_index].insert(v.unique_id);
                 }
             }
         }
     }
+
+    delete ids;
 
     // track which packets to check for updates
     std::vector<uint32_t> arg_packets;
@@ -150,6 +167,8 @@ int main(int argc, char** argv) {
             arg_packets.push_back(i);
         }
     }
+
+    delete used_packets;
 
     // set update mode to blocking
     tlm.set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
@@ -216,6 +235,12 @@ int main(int argc, char** argv) {
         for(uint32_t packet_index : output_packets) {
             if(tshm.write(packet_index, packet_buffers[packet_index]) != SUCCESS) {
                 logger.log_message("failed to write buffer to shared memory");
+                // do nothing
+            }
+
+            // always log packets
+            if(loggers[packet_index]->log_packet(packet_buffers[packet_index], packet_sizes[packet_index]) != SUCCESS) {
+                logger.log_message("failed to log virtual packet to filesystem");
                 // do nothing
             }
         }
