@@ -27,12 +27,12 @@ extern "C" {
 
         // leave this to be cleaned up on the stack
         // TODO this doesn't work as of now, TelemetryViewer saves the pointer not a copy
-        VCM vcm(config_file_str);
-        if(FAILURE == vcm.init()) {
+        VCM* vcm = new VCM(config_file_str);
+        if(FAILURE == vcm->init()) {
             return FAILURE;
         }
 
-        return tv->init(&vcm);
+        return tv->init(vcm);
     }
 
     void TelemetryViewer_remove_all(TelemetryViewer* tv) {

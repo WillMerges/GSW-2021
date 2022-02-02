@@ -10,72 +10,17 @@
 #include "lib/calc/calc.h"
 #include "lib/dls/dls.h"
 #include "lib/convert/convert.h"
+#include "lib/calc/vfunc.h"
 #include <fstream>
 #include <sstream>
-#include <string.h>
 
 using namespace calc;
 using namespace dls;
 using namespace vcm;
 using namespace convert;
 
-// static data //
+// globally defined
 VCM* veh = NULL;
-// TODO this needs to be set somewhere!
-// in some kind of init function?
-
-// Conversion functions //
-// TODO put these in another file to link with //
-
-// directly copy a measurement
-// 'out' must be the same size as 'in'
-static inline RetType COPY(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
-    MsgLogger logger("CALC", "COPY");
-
-    if(args.size() != 1) {
-        logger.log_message("Incorrect number of args");
-        return FAILURE;
-    }
-
-    measurement_info_t* in = args[0].meas;
-    const uint8_t* src = args[0].addr;
-
-    if(meas->size != in->size) {
-        logger.log_message("Size mismatch");
-        return FAILURE;
-    }
-
-    // need a special function for writing single measurement to shared memory!
-    // ^^^ actually we're just writing to a passed in buffer, this is fine
-    memcpy((void*)(dst), (void*)src, meas->size);
-
-    return SUCCESS;
-}
-
-static inline RetType SUM_UINT(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
-    MsgLogger logger("CALC", "INTSUM");
-
-    uint32_t sum = 0;
-    uint32_t temp;
-
-    // sum all arguments
-    for(arg_t arg : args) {
-        if(convert_to(veh, arg.meas, arg.addr, &temp) != SUCCESS) {
-            logger.log_message("conversion failed");
-            return FAILURE;
-        }
-
-        sum += temp;
-    }
-
-    // write out sum to output measurement
-    if(convert_from(veh, meas, dst, sum) != SUCCESS) {
-        logger.log_message("failed to convert sum to uint32");
-        return FAILURE;
-    }
-
-    return SUCCESS;
-}
 
 // define hash function for vcalc_t
 namespace std {
@@ -90,6 +35,9 @@ namespace std {
 // Parse virtual telemetry file
 RetType calc::parse_vfile(VCM* veh, std::vector<vcalc_t>* entries) {
     MsgLogger logger("CALC", "parse_vfile");
+
+    // set the global VCM to the passed in one
+    ::veh = veh;
 
     // open the file
     std::ifstream* f = new std::ifstream(veh->vcalc_file.c_str());
@@ -127,11 +75,17 @@ RetType calc::parse_vfile(VCM* veh, std::vector<vcalc_t>* entries) {
         }
 
         // Find our conversion function
-        if(snd == "COPY") {
-            entry.convert_function = &COPY;
-        } else if(snd == "SUM_UINT") {
-            entry.convert_function = &SUM_UINT;
-        } else {
+        entry.convert_function = NULL;
+        vfunc_t vfunc;
+        size_t i = 0;
+        do {
+            vfunc = vfunc_list[i];
+            if(snd == vfunc.name) {
+                entry.convert_function = vfunc.func;
+            }
+        } while(vfunc.name != NULL && vfunc.func != NULL);
+
+        if(!entry.convert_function) {
             logger.log_message("No such conversion function: " + snd);
             return FAILURE;
         }
