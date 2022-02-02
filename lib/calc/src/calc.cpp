@@ -78,12 +78,21 @@ RetType calc::parse_vfile(VCM* veh, std::vector<vcalc_t>* entries) {
         entry.convert_function = NULL;
         vfunc_t vfunc;
         size_t i = 0;
-        do {
+        while(1) {
             vfunc = vfunc_list[i];
+
+            if(vfunc.name == NULL && vfunc.func == NULL) {
+                // end of list
+                break;
+            }
+
             if(snd == vfunc.name) {
                 entry.convert_function = vfunc.func;
+                break;
             }
-        } while(vfunc.name != NULL && vfunc.func != NULL);
+
+            i++;
+        }
 
         if(!entry.convert_function) {
             logger.log_message("No such conversion function: " + snd);

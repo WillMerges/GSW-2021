@@ -24,6 +24,9 @@ using namespace vcm;
 using namespace convert;
 
 // CONVERSION FUNCTIONS //
+// global VCM used by calculation functions
+// set by the 'parse_vfile' function of "calc.cpp"
+extern VCM* veh;
 
 // directly copy a measurement
 // 'out' must be the same size as 'in'
@@ -76,7 +79,7 @@ static RetType SUM_UINT(measurement_info_t* meas, uint8_t* dst, std::vector<arg_
 }
 
 // converts a raw ADC DAQ reading to a voltage
-static RetType DAQ_ADC_SCALE(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t> args) {
+static RetType DAQ_ADC_SCALE(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
     MsgLogger logger("CALC", "DAQ_ADC_VOTLAGE");
 
     // assume we have the right number of args
