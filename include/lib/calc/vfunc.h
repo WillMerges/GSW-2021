@@ -23,10 +23,6 @@ using namespace dls;
 using namespace vcm;
 using namespace convert;
 
-// global VCM used by calculation functions
-// set by the 'parse_vfile' function of "calc.cpp"
-extern VCM* veh;
-
 // CONVERSION FUNCTIONS //
 
 // directly copy a measurement

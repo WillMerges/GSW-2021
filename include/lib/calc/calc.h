@@ -35,6 +35,10 @@ namespace calc {
 
     // parse the default file into 'entries'
     RetType parse_vfile(VCM* veh, std::vector<vcalc_t>* entries);
+
+    // global VCM used by calculation functions
+    // set by the 'parse_vfile' function
+    extern VCM* veh;
 }
 
 
