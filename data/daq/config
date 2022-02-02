@@ -7,6 +7,8 @@ name = daq
 
 endianness = little 
 
+vcalc = virtual
+
 #multicast = 224.0.0.1
 
 # [measurement name] [total measurement size in bytes (including padding)] [most sig padding (bits)] [least sig (bits)] [optional type of int, float, or string, default is int] [optional signed or unsigned, default is signed]
@@ -14,6 +16,7 @@ endianness = little
 
 ## measurements ##
 
+# physical telemetry (off the network)
 MILLISEC    4 0 0 int unsigned
 MICROSEC    4 0 0 int unsigned
 SEQ_NUM     4 0 0 int unsigned
@@ -31,6 +34,16 @@ TC_1        4 0 0 int unsigned
 TC_2        4 0 0 int unsigned
 TC_3        4 0 0 int unsigned
 TC_4        4 0 0 int unsigned
+
+# virtual measurements (calculated from physical telemetry)
+ADC0_CH1_VOLTS 8 0 0 float
+ADC0_CH2_VOLTS 8 0 0 float
+ADC0_CH3_VOLTS 8 0 0 float
+ADC0_CH4_VOLTS 8 0 0 float
+ADC1_CH1_VOLTS 8 0 0 float
+ADC1_CH2_VOLTS 8 0 0 float
+ADC1_CH3_VOLTS 8 0 0 float
+ADC1_CH4_VOLTS 8 0 0 float
 
 
 
@@ -69,4 +82,20 @@ TC_1
 TC_2
 TC_3
 TC_4
+}
+
+# calculated ADC0 voltages
+virtual {
+ADC0_CH1_VOLTS
+ADC0_CH2_VOLTS
+ADC0_CH3_VOLTS
+ADC0_CH4_VOLTS
+}
+
+# calcualted ADC1 voltages
+virtual {
+ADC1_CH1_VOLTS
+ADC1_CH2_VOLTS
+ADC1_CH3_VOLTS
+ADC1_CH4_VOLTS
 }

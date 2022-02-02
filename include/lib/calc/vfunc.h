@@ -75,6 +75,36 @@ static RetType SUM_UINT(measurement_info_t* meas, uint8_t* dst, std::vector<arg_
     return SUCCESS;
 }
 
+// converts a raw ADC DAQ reading to a voltage
+static RetType DAQ_ADC_SCALE(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t> args) {
+    MsgLogger logger("CALC", "DAQ_ADC_VOTLAGE");
+
+    // assume we have the right number of args
+    // TODO can we check this at parse time of the virtual file?
+    // or just assume the user knows what their doing and let it crash
+
+    uint32_t data;
+    // TODO add unlikely macro here (or forgo error checking, needs to be fast)
+    if(convert_to(veh, args[0].meas, args[0].addr, &data) != SUCCESS) {
+        logger.log_message("conversion failed");
+        return FAILURE;
+    }
+
+
+    // voltage reference
+    static const double vref = 2.434; // volts
+
+    double result = (double)data * vref / (double)(1 << 23);
+
+    // TODO add unlikely macro here (or forgo error checking, needs to be fast)
+    if(convert_from(veh, meas, dst, result) != SUCCESS) {
+        logger.log_message("failed to write out result");
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
 // functions mapped to names //
 typedef struct {
     const char* name;
@@ -85,6 +115,7 @@ const vfunc_t vfunc_list[] =
 {
     {"COPY", &COPY},
     {"SUM_UINT", &SUM_UINT},
+    {"DAQ_ADC_SCALE", &DAQ_ADC_SCALE},
     {NULL, NULL}
 };
 
