@@ -154,7 +154,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    delete ids;
+    delete[] ids;
 
     // track which packets to check for updates
     std::vector<uint32_t> arg_packets;
@@ -168,7 +168,7 @@ int main(int argc, char** argv) {
         }
     }
 
-    delete used_packets;
+    delete[] used_packets;
 
     // set update mode to blocking
     tlm.set_update_mode(TelemetryViewer::BLOCKING_UPDATE);

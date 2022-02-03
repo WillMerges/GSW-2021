@@ -15,7 +15,7 @@
 #include <vector>
 
 #define MAX_LINES_PER_FILE 512  // limit text files to 512 lines
-#define MAX_FILE_SIZE (1 << 23) // limit binary files to 2^23 bytes
+#define MAX_FILE_SIZE (1 << 32) // limit binary files to 2^32 bytes
 
 using namespace dls;
 
