@@ -25,17 +25,18 @@ namespace nm {
 
         // construct a network manager named 'name'
         // this name must match any associated network interfaces
-        // binds to 'src_port' (e.g. received packets dst = port, sent packets src = port)
-        // sends any outgoing packets to 'dst_port'
+        // binds to 'port' (e.g. received packets dst = port, sent packets src = port)
         // ports in host order
         // places received data in 'buffer' of 'size' bytes
         // if buffer is NULL or size is 0, calling 'Receive' discards the packet
         // a receive attempt will timeout after 'rx_timeout' milliseconds
+        // if 'dev_port' is set, sets the port for the control device, packets from
+        // with this src port will be used as the address to send packets to when 'Send' is called
         // if 'rx_timeout' is set to -1 (or anything less than 0), all calls to receive will be blocking
         // if a multicast address other than 0 is specified, the network manager will listen on that group
         // the multicast address is expected in network order
-        NetworkManager(uint16_t src_port, const char* name, uint8_t* buffer,
-                    size_t size, uint32_t multicast_addr = 0, ssize_t rx_timeout = -1);
+        NetworkManager(uint16_t port, const char* name, uint8_t* buffer,
+                    size_t size, uint16_t dev_port = 0, uint32_t multicast_addr = 0, ssize_t rx_timeout = -1);
 
         // destructor
         ~NetworkManager();
@@ -62,8 +63,8 @@ namespace nm {
         struct sockaddr_in device_addr; // address of the device we're listening to (filled in by recvfrom)
         int sockfd;
 
-        uint16_t src_port;
-        uint16_t dst_port;
+        uint16_t port;
+        uint16_t dev_port;
 
         uint8_t* rx_buffer;
         size_t rx_size;

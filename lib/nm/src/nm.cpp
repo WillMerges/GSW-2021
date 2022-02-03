@@ -16,15 +16,16 @@ using namespace dls;
 using namespace shm;
 using namespace vcm;
 
-NetworkManager::NetworkManager(uint16_t src_port, const char* name, uint8_t* buffer, size_t size, uint32_t multicast_addr, ssize_t rx_timeout) {
+NetworkManager::NetworkManager(uint16_t port, const char* name, uint8_t* buffer, size_t size, uint16_t dev_port, uint32_t multicast_addr, ssize_t rx_timeout) {
     mqueue_name = "/";
     mqueue_name += name;
 
     rx_buffer = buffer;
     rx_size = size;
 
-    this->src_port = src_port;
-    // this->dst_port = dst_port;
+    this->port = port;
+    this->dev_port = dev_port;
+    this->multicast_addr = multicast_addr;
     this->rx_timeout = rx_timeout;
 
     open = false;
@@ -33,15 +34,6 @@ NetworkManager::NetworkManager(uint16_t src_port, const char* name, uint8_t* buf
     if(buffer == NULL) {
         size = 0;
     }
-
-    this->multicast_addr = multicast_addr;
-
-    // in_buffer = new char[vcm->packet_size];
-    // in_size = 0;
-
-    // if(SUCCESS != Open()) {
-    //     throw new std::runtime_error("failed to open network manager");
-    // }
 }
 
 NetworkManager::~NetworkManager() {
@@ -149,7 +141,7 @@ RetType NetworkManager::Open() {
     struct sockaddr_in myaddr;
     myaddr.sin_addr.s_addr = htonl(INADDR_ANY); // use any interface we have available (likely just 1 ip)
     myaddr.sin_family = AF_INET;
-    myaddr.sin_port = htons(src_port); // bind OUR port (we receive and send from this port instead of letting the OS pick)
+    myaddr.sin_port = htons(port); // bind OUR port (we receive and send from this port, unless it's 0 and the OS assigns us one)
     int rc = bind(sockfd, (struct sockaddr*) &myaddr, sizeof(myaddr));
     if(rc) {
         logger.log_message("socket bind failed");
@@ -247,7 +239,7 @@ RetType NetworkManager::Send() {
         // if the port is still zeroed we haven't received a packet yet
         // which means we don't have a valid IP address to send to
         if(0 == device_addr.sin_addr.s_addr) {
-            logger.log_message("receiver has not yet sent a packet providing an"
+            logger.log_message("receiver device has not yet sent a packet providing an"
                                 " address, failed to send UDP message");
             return FAILURE;
         }
@@ -287,8 +279,10 @@ RetType NetworkManager::Receive(size_t* received) {
         return FAILURE; // no packet
     }
 
-    // update shared memory with the address we just receive from
-    shm.update(&device_addr);
+    // update shared memory with the address we just received from if the port mathces 'dev_port'
+    if(dev_port == ntohs(device_addr.sin_port)) {
+        shm.update(&device_addr);
+    }
 
     // // set in size to the size of the buffer if we received too much data for our buffer
     // if(n > MAX_MSG_SIZE) {

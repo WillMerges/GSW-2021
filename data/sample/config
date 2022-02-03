@@ -4,10 +4,10 @@
 # specify the protocol for packets to use (must be set at some point)
 protocol = udp
 
-# specify the port the ground station should send packets TO and FROM
-# (e.g. src port = dst port for outgoing packet)
-# ports are in the range 1 to (2^16 - 1)
-# the IP address to send to will be stripped from packets from the receiver
+# the port the device should send packets FROM (e.g. src port from device is 'port')
+# packets from this port will have their address copied and any outgoing packets will
+# be sent to that port
+# if their are multiple devices, whichever device(s) receive should send packets from this port
 port = 8080
 
 # set a multicast address that the receiver will send packets to (ground software should listen on this address)
