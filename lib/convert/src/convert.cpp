@@ -81,7 +81,7 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
         return FAILURE;
     }
 
-    if(measurement->size > sizeof(int32_t)) {
+    if(measurement->size > sizeof(uint32_t)) {
         logger.log_message("measurement too large to fit into integer");
         return FAILURE;
     }
