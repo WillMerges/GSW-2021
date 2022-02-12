@@ -22,7 +22,8 @@ RetType Logger::Open() {
     }
 
     // turned non blocking on so if the queue is full it won't be logged (could be a potential issue if messages are being dropped)
-    mq = mq_open(queue_name.c_str(), O_WRONLY|O_NONBLOCK); // TODO consider adding O_CREAT here
+    // turned off O_NONBLOCK
+    mq = mq_open(queue_name.c_str(), O_WRONLY); // TODO consider adding O_CREAT here
     if((mqd_t)-1 == mq) {
         // no sense in logging this because it is the logger!
         return FAILURE;
