@@ -5,7 +5,7 @@ port = 8080
 
 name = daq
 
-endianness = little 
+endianness = big 
 
 vcalc = virtual
 
@@ -36,14 +36,14 @@ TC_3        4 0 0 int unsigned
 TC_4        4 0 0 int unsigned
 
 # virtual measurements (calculated from physical telemetry)
-ADC0_CH1_VOLTS 8 0 0 float
-ADC0_CH2_VOLTS 8 0 0 float
-ADC0_CH3_VOLTS 8 0 0 float
-ADC0_CH4_VOLTS 8 0 0 float
-ADC1_CH1_VOLTS 8 0 0 float
-ADC1_CH2_VOLTS 8 0 0 float
-ADC1_CH3_VOLTS 8 0 0 float
-ADC1_CH4_VOLTS 8 0 0 float
+ADC0_CH1_MVOLTS 8 0 0 float
+ADC0_CH2_MVOLTS 8 0 0 float
+ADC0_CH3_MVOLTS 8 0 0 float
+ADC0_CH4_MVOLTS 8 0 0 float
+ADC1_CH1_MVOLTS 8 0 0 float
+ADC1_CH2_MVOLTS 8 0 0 float
+ADC1_CH3_MVOLTS 8 0 0 float
+ADC1_CH4_MVOLTS 8 0 0 float
 
 
 
@@ -86,16 +86,16 @@ TC_4
 
 # calculated ADC0 voltages
 virtual {
-ADC0_CH1_VOLTS
-ADC0_CH2_VOLTS
-ADC0_CH3_VOLTS
-ADC0_CH4_VOLTS
+ADC0_CH1_MVOLTS
+ADC0_CH2_MVOLTS
+ADC0_CH3_MVOLTS
+ADC0_CH4_MVOLTS
 }
 
 # calcualted ADC1 voltages
 virtual {
-ADC1_CH1_VOLTS
-ADC1_CH2_VOLTS
-ADC1_CH3_VOLTS
-ADC1_CH4_VOLTS
+ADC1_CH1_MVOLTS
+ADC1_CH2_MVOLTS
+ADC1_CH3_MVOLTS
+ADC1_CH4_MVOLTS
 }

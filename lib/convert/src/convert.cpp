@@ -30,7 +30,7 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
 
     if(vcm->recv_endianness != vcm->sys_endianness) {
         for(size_t i = 0; i < measurement->size; i++) {
-            val[sizeof(uint32_t) - i - 1] = data[i];
+            val[measurement->size - i - 1] = data[i];
         }
     } else {
         for(size_t i = 0; i < measurement->size; i++) {
@@ -61,7 +61,7 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
 
     if(vcm->recv_endianness != vcm->sys_endianness) {
         for(size_t i = 0; i < measurement->size; i++) {
-            val[sizeof(uint32_t) - i - 1] = data[i];
+            val[measurement->size - i - 1] = data[i];
         }
     } else {
         for(size_t i = 0; i < measurement->size; i++) {
@@ -93,7 +93,7 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
 
     if(vcm->recv_endianness != vcm->sys_endianness) {
         for(size_t i = 0; i < measurement->size; i++) {
-            val[sizeof(uint32_t) - i - 1] = data[i];
+            val[measurement->size - i - 1] = data[i];
         }
     } else {
         for(size_t i = 0; i < measurement->size; i++) {
@@ -123,9 +123,18 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
     // size_t addr = (size_t)measurement->addr;
     // const uint8_t* buff = (const uint8_t*)data;
 
+    uint8_t sign_byte;
+    if(vcm->recv_endianness == GSW_BIG_ENDIAN) {
+        // sign byte is first
+        sign_byte = data[0];
+    } else {
+        // sign byte is last
+        sign_byte = data[measurement->size - 1];
+    }
+
     if(vcm->recv_endianness != vcm->sys_endianness) {
         for(size_t i = 0; i < measurement->size; i++) {
-            val[sizeof(int32_t) - i - 1] = data[i];
+            val[measurement->size - i - 1] = data[i];
         }
     } else {
         for(size_t i = 0; i < measurement->size; i++) {
@@ -134,6 +143,11 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
     }
 
     *dst = *((int32_t*)val);
+
+    if(sign_byte & (1 << 7)) {
+        *dst *= -1;
+    }
+
     return SUCCESS;
 }
 

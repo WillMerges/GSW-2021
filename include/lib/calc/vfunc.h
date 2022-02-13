@@ -78,7 +78,7 @@ static RetType SUM_UINT(measurement_info_t* meas, uint8_t* dst, std::vector<arg_
     return SUCCESS;
 }
 
-// converts a raw ADC DAQ reading to a voltage
+// converts a raw ADC DAQ reading to a voltage (in millivolts)
 static RetType DAQ_ADC_SCALE(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
     MsgLogger logger("CALC", "DAQ_ADC_VOTLAGE");
 
@@ -97,7 +97,7 @@ static RetType DAQ_ADC_SCALE(measurement_info_t* meas, uint8_t* dst, std::vector
     // voltage reference
     static const double vref = 2.442; // volts
 
-    double result = (double)data * vref / (double)(1 << 23);
+    double result = (double)data * vref / (double)(1 << 23) * 1000;
 
     // TODO add unlikely macro here (or forgo error checking, needs to be fast)
     if(convert_from(veh, meas, dst, result) != SUCCESS) {
