@@ -124,6 +124,9 @@ RetType CountdownClock::parse_cmd(clock_cmd_t* cmd) {
                         data->hold_set = false;
                     }
                 }
+            } else {
+                logger.log_message("clock already started");
+                ret = FAILURE;
             }
             break;
         case STOP_CLOCK:
@@ -135,6 +138,9 @@ RetType CountdownClock::parse_cmd(clock_cmd_t* cmd) {
                 if(data->hold_set && curr_time >= data->t0 + data->hold) {
                     data->t0 = data->stop_time - data->hold;
                 }
+            } else {
+                logger.log_message("clock already stopped");
+                ret = FAILURE;
             }
             break;
         case SET_HOLD_CLOCK:
@@ -175,16 +181,24 @@ RetType CountdownClock::parse_cmd(clock_cmd_t* cmd) {
                         data->stop_time = data->stop_time + (data->t0 - ref_t0);
                     }
                 }
+            } else {
+                logger.log_message("no hold set, cannot release");
+                ret = FAILURE;
             }
             break;
         case SET_CLOCK:
+            if(!data->stopped) {
+                logger.log_message("clock must be stopped in order to set");
+                ret = FAILURE;
+                break;
+            }
+
             // set a new t0
             data->t0 = ((int64_t)curr_time) - cmd->arg;
 
-            // if we were stopped, set a new reference time
-            if(data->stopped) {
-                data->stop_time = curr_time;
-            }
+            // set a new reference time to calculate from since we changed t0
+            data->stop_time = curr_time;
+
             break;
         case NUM_CLOCK_CMDS:
             // do nothing

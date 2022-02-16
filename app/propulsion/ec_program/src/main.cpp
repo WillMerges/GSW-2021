@@ -325,9 +325,8 @@ int main(int argc, char* argv[]) {
     // wait until the clock is started
     int64_t curr_time;
     bool stopped = true;
-    bool holding = true;
-    while(stopped || holding) {
-        if(FAILURE == cl.read_time(&curr_time, &stopped, &holding)) {
+    while(stopped) {
+        if(FAILURE == cl.read_time(&curr_time, &stopped)) {
             logger.log_message("failed to read countdown clock");
             printf("failed to read countdown clock");
 
@@ -373,22 +372,23 @@ int main(int argc, char* argv[]) {
     for(size_t i = first_cmd; i < commands.size(); i++) {
         c = commands[i];
 
-        if(FAILURE == cl.read_time(&curr_time, &stopped, &holding)) {
+        if(FAILURE == cl.read_time(&curr_time, &stopped)) {
             logger.log_message("failed to read countdown clock");
             printf("failed to read countdown clock");
 
             return -1;
         }
 
-        if(stopped || holding) {
-            logger.log_message("clock was stopped or halted, exiting program");
-            printf("clock was stopped or halted, exiting program\n");
+        if(stopped) {
+            logger.log_message("clock was stopped, exiting program");
+            printf("clock was stopped, exiting program\n");
 
             return -1;
         }
 
         if(curr_time < c.time) {
             // we need to wait to execute this
+            // NOTE: if the clock is reset during this time, we may miss the command
             usleep((c.time - curr_time) * 1000);
             i--;
             continue;
