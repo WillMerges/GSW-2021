@@ -1,6 +1,8 @@
 // forwards packets from shared mem. to InfluxDB using UDP line protocol
-// run as ./fwd_influx [-f config_file]
+// run as ./fwd_influx [-f config_file] [-r rate in HZ]
 // if config file not specified with -f option, uses the default location
+// if a rate is specified with the -f option, the forwards will be rate limited
+// NOTE: rate limiting is limited to microsecond accuracy
 //
 // if there is a measurement called "UPTIME" it will be used as a timestamp
 // "UPTIME" is expected to be in units of milliseconds
@@ -38,7 +40,9 @@ using namespace countdown_clock;
 // #define INFLUXDB_ADDR "127.0.0.1"
 #define INFLUXDB_HOST "influx.local"
 
-#define NANOSEC_PER_MILLISEC (10^6)
+#define MILLISEC_PER_SEC     1000
+#define MICROSEC_PER_SEC     1000000
+#define NANOSEC_PER_MILLISEC 1000000
 
 #define CLOCK_PERIOD 100 // send clock update every 100 ms
 
@@ -120,7 +124,7 @@ void* clock_thread(void*) {
             // continue on
         }
 
-        usleep(CLOCK_PERIOD * 1000);
+        usleep(CLOCK_PERIOD * MILLISEC_PER_SEC);
     }
 
     return NULL;
@@ -132,6 +136,7 @@ int main(int argc, char* argv[]) {
     logger.log_message("starting database forwarding");
 
     std::string config_file = "";
+    int rate = 0;
 
     for(int i = 1; i < argc; i++) {
         if(!strcmp(argv[i], "-f")) {
@@ -141,6 +146,14 @@ int main(int argc, char* argv[]) {
                 return -1;
             } else {
                 config_file = argv[++i];
+            }
+        } else if(!strcmp(argv[i], "-r")) {
+            if(i + 1 > argc) {
+                logger.log_message("must specify a rate after using the -r option");
+                printf("must specify a rate after using the -r option\n");
+                return -1;
+            } else {
+                rate = std::stoi(argv[++i], NULL, 10);
             }
         } else {
             std::string msg = "Invalid argument: ";
@@ -205,6 +218,12 @@ int main(int argc, char* argv[]) {
     // uint32_t timestamp = 0;
     // unsigned char use_timestamp = 0;
 
+    // calculate the period to sleep for depending on rate limiting
+    useconds_t period = 0;
+    if(rate > 0) {
+        period = MICROSEC_PER_SEC / rate;
+    }
+
     // start the thread to send clock updates
     pthread_t clock_tid;
     pthread_create(&clock_tid, NULL, &clock_thread, NULL);
@@ -254,6 +273,7 @@ int main(int argc, char* argv[]) {
         }
 
         // TODO this probably didn't work because there's an extra comman at the end of the measurements line
+        // ^^ actually it's because I think the NANOSEC_PER_MILLISEC #define was wrong, it used to be (10^6) which is xor not power, it's worth trying this again
         // we can add a timestamp in nano-seconds to the end of the line in Influx line protocol
         //if(use_timestamp) {
         //    uint64_t nanosec_time = timestamp;
@@ -269,6 +289,11 @@ int main(int argc, char* argv[]) {
             logger.log_message("Failed to send UDP message");
             printf("Failed to send UDP message\n");
             // continue on
+        }
+
+        // sleep depending on rate limiting
+        if(period) {
+            usleep(period);
         }
     }
 }
