@@ -325,8 +325,9 @@ int main(int argc, char* argv[]) {
     // wait until the clock is started
     int64_t curr_time;
     bool stopped = true;
-    while(stopped) {
-        if(FAILURE == cl.read_time(&curr_time, &stopped)) {
+    bool holding = true;
+    while(stopped || holding) {
+        if(FAILURE == cl.read_time(&curr_time, &stopped, &holding)) {
             logger.log_message("failed to read countdown clock");
             printf("failed to read countdown clock");
 
@@ -334,41 +335,54 @@ int main(int argc, char* argv[]) {
             return -1;
         }
 
-        printf("still stopped\n");
         fflush(stdout);
         usleep(1000); // sleep 1 ms
+    }
+
+    // get rid of all the commands that happened prior to the current time
+    // this stops us from starting the clock halfway through a program and executing all the beginning commands at once
+    // NOTE: it's valid for a user to start a program when the clock is part way through that program
+    size_t first_cmd;
+    for(first_cmd = 0; first_cmd < commands.size(); first_cmd++) {
+        if(commands[first_cmd].time < curr_time) {
+            // this command has already passed, don't execute it
+        } else {
+            // stop at the first command that occurs after the current time
+            // since commands are sorted, this is a valid assumption
+            break;
+        }
+    }
+
+    if(first_cmd > 0) {
+        logger.log_message("some commands have already passed, those commands will not be executed");
+        printf("some commands have already passed, those commands will not be executed\n");
     }
 
     // get the current sequence number
     // TODO there could be an issue of sequence numbers if multiple commands execute at once
     //      e.g. the one we read is out of date (have a way to lock physical resources?)
+    // ^^^ we lock the ENGINE_CONTROLLER_PROGRAM resource so no one else should be commanded
+    // someone could potentially send a command (e.g. with ec_cmd) and that should cause a failed ack
+    // ^^^ moved this after we lock everything, so this should be fine
     unsigned int seq_num;
-    if(SUCCESS != tlm.get_uint(meas, &seq_num)) {
-        // this shouldn't happen
-        printf("failed to get measurement: %s\n", SEQUENCE_ACK_MEASUREMENT);
-        logger.log_message("failed to get sequence number measurement");
-
-        release_resources();
-        return -1;
-    }
 
     // execute all parsed commands
     ec_command_t cmd;
     long cmd_num;
     command_t c;
-    for(int i = 0; i < (int)commands.size(); i++) {
+    for(size_t i = first_cmd; i < commands.size(); i++) {
         c = commands[i];
 
-        if(FAILURE == cl.read_time(&curr_time, &stopped)) {
+        if(FAILURE == cl.read_time(&curr_time, &stopped, &holding)) {
             logger.log_message("failed to read countdown clock");
             printf("failed to read countdown clock");
 
             return -1;
         }
 
-        if(stopped) {
-            logger.log_message("clock was stopped, exiting program");
-            printf("clock was stopped, exiting program\n");
+        if(stopped || holding) {
+            logger.log_message("clock was stopped or halted, exiting program");
+            printf("clock was stopped or halted, exiting program\n");
 
             return -1;
         }
@@ -381,8 +395,6 @@ int main(int argc, char* argv[]) {
         }
 
         // generate command
-        cmd_num = seq_num + 1;
-        cmd.seq_num = (uint32_t)cmd_num;
         cmd.control = c.control;
         cmd.state = c.state;
 
@@ -399,6 +411,19 @@ int main(int argc, char* argv[]) {
             release_resources();
             return -1;
         }
+
+        // get the current sequence number
+        if(SUCCESS != tlm.get_uint(meas, &seq_num)) {
+            // this shouldn't happen
+            printf("failed to get measurement: %s\n", SEQUENCE_ACK_MEASUREMENT);
+            logger.log_message("failed to get sequence number measurement");
+
+            release_resources();
+            return -1;
+        }
+
+        cmd_num = seq_num + 1;
+        cmd.seq_num = (uint32_t)cmd_num;
 
         // send the command over the network
         if(FAILURE == net.QueueUDPMessage((char*)&cmd, sizeof(cmd))) {

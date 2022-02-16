@@ -200,7 +200,7 @@ RetType CountdownClock::parse_cmd(clock_cmd_t* cmd) {
     return ret;
 }
 
-RetType CountdownClock::read_time(int64_t* time, bool* stopped, int64_t* hold_time, bool* hold_set) {
+RetType CountdownClock::read_time(int64_t* time, bool* stopped, bool* holding, int64_t* hold_time, bool* hold_set) {
     MsgLogger logger("CountdownClock", "read_time");
 
     clock_shm_t* data = (clock_shm_t*)shm->data;
@@ -224,13 +224,22 @@ RetType CountdownClock::read_time(int64_t* time, bool* stopped, int64_t* hold_ti
         }
     }
 
-    *stopped = data->stopped;
+    if(holding) {
+        *holding = false;
+    }
+
+    if(stopped) {
+        *stopped = data->stopped;
+    }
 
     if(data->stopped) {
         *time = ((int64_t)data->stop_time) - ((int64_t)data->t0) ;
     } else {
         if(data->hold_set && curr_time > (data->t0 + data->hold)) {
             *time = (int64_t)(data->hold);
+            if(holding) {
+                *holding = true;
+            }
         } else {
             *time = ((int64_t)curr_time) - ((int64_t)data->t0);
         }

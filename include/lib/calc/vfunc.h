@@ -97,7 +97,7 @@ static RetType DAQ_ADC_SCALE(measurement_info_t* meas, uint8_t* dst, std::vector
     // voltage reference
     static const double vref = 2.442; // volts
 
-    double result = (double)data * vref / (double)(1 << 23) * 1000;
+    double result = (double)data * vref / (double)(1 << 23);
 
     // TODO add unlikely macro here (or forgo error checking, needs to be fast)
     if(convert_from(veh, meas, dst, result) != SUCCESS) {

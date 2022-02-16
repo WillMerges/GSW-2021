@@ -39,9 +39,10 @@ int main() {
     int64_t hold_time;
     bool hold_set;
     bool stopped;
+    bool holding;
     std::string str;
     while(1) {
-        if(FAILURE != cl.read_time(&t_time, &stopped, &hold_time, &hold_set)) {
+        if(FAILURE != cl.read_time(&t_time, &stopped, &holding, &hold_time, &hold_set)) {
             // clear the screen
             printf("\033[2J");
 
@@ -53,6 +54,14 @@ int main() {
                 printf("hold: %s\n", str.c_str());
             } else {
                 printf("hold: -----\n");
+            }
+
+            if(stopped) {
+                printf("stopped\n");
+            }
+
+            if(holding) {
+                printf("holding\n");
             }
         }
 

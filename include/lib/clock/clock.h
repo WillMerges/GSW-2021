@@ -67,7 +67,7 @@ namespace countdown_clock {
         // Read the current time on the countdown clock
         // If both 'hold_time' and 'hold_set' are not NULL, returns the current hold
         // NOTE: blocking function
-        RetType read_time(int64_t* time, bool* stopped = NULL, int64_t* hold_time = NULL, bool* hold_set = NULL);
+        RetType read_time(int64_t* time, bool* stopped = NULL, bool* holding = NULL, int64_t* hold_time = NULL, bool* hold_set = NULL);
 
         // Block until a certain time
         // NOTE: blocking function
