@@ -132,21 +132,38 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
         sign_byte = data[measurement->size - 1];
     }
 
+    if(sign_byte & (1 << 7)) {
+        // negative, 1 extend
+        sign_byte = 0xFF;
+    } else {
+        sign_byte = 0x00;
+    }
+
     if(vcm->recv_endianness != vcm->sys_endianness) {
-        for(size_t i = 0; i < measurement->size; i++) {
+        size_t i;
+        for(i = 0; i < measurement->size; i++) {
             val[measurement->size - i - 1] = data[i];
         }
+
+        for(; i < sizeof(int32_t); i++) {
+            val[i] = sign_byte;
+        }
     } else {
-        for(size_t i = 0; i < measurement->size; i++) {
+        size_t i;
+        for(i = 0; i < measurement->size; i++) {
             val[i] = data[i];
+        }
+
+        for(; i < sizeof(int32_t); i++) {
+            val[i] = sign_byte;
         }
     }
 
     *dst = *((int32_t*)val);
 
-    if(sign_byte & (1 << 7)) {
-        *dst *= -1;
-    }
+    // if(sign_byte & (1 << 7)) {
+    //     *dst *= -1;
+    // }
 
     return SUCCESS;
 }
