@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 4,
-  "iteration": 1643413898826,
+  "iteration": 1645667392980,
   "links": [],
   "panels": [
     {
@@ -863,7 +863,7 @@
         "isAuth": false,
         "method": "POST",
         "orientation": "center",
-        "payload": "./ec_cmd 300 1; ./ec_cmd 301 0; ./ec_cmd 302 0;",
+        "payload": "./ec_cmd 300 0; ./ec_cmd 301 0; ./ec_cmd 302 1;",
         "text": "G",
         "type": "header",
         "url": "http://$GroundStationIP:$GroundStationPort",
@@ -936,7 +936,7 @@
         "isAuth": false,
         "method": "POST",
         "orientation": "center",
-        "payload": "./ec_cmd 300 0; ./ec_cmd 301 0; ./ec_cmd 302 1;",
+        "payload": "./ec_cmd 302 0; ./ec_cmd 301 0; ./ec_cmd 300 1;",
         "text": "R",
         "type": "header",
         "url": "http://$GroundStationIP:$GroundStationPort",
@@ -1533,33 +1533,7 @@
         },
         "datasource": "InfluxDB",
         "definition": "",
-        "error": {
-          "config": {
-            "data": "q=SELECT%20program%20from%20ec_programs",
-            "headers": {
-              "Content-type": "application/x-www-form-urlencoded",
-              "X-Grafana-Org-Id": 1
-            },
-            "hideFromInspector": false,
-            "inspect": {
-              "type": "influxdb"
-            },
-            "method": "POST",
-            "params": {
-              "db": "gsw",
-              "epoch": "ms"
-            },
-            "precision": "ms",
-            "retry": 0,
-            "url": "api/datasources/proxy/1/query"
-          },
-          "data": {
-            "error": "Bad Gateway",
-            "message": "Bad Gateway",
-            "response": ""
-          },
-          "message": "InfluxDB Error: Bad Gateway"
-        },
+        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": null,
@@ -1603,5 +1577,5 @@
   "timezone": "",
   "title": "Engine Controller - Mobile",
   "uid": "yg3pqk27k",
-  "version": 3
+  "version": 4
 }

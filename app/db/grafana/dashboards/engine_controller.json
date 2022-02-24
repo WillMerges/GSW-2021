@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 3,
-  "iteration": 1642022213060,
+  "iteration": 1645666013722,
   "links": [],
   "panels": [
     {
@@ -355,7 +355,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SOLENOID1 from $Vehicle",
+          "query": "SELECT SOLENOID2 from $Vehicle",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -380,7 +380,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Solenoid 1",
+      "title": "Solenoid 2",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -2213,7 +2213,7 @@
         "isAuth": false,
         "method": "POST",
         "orientation": "center",
-        "payload": "./ec_cmd 300 1; ./ec_cmd 301 0; ./ec_cmd 302 0;",
+        "payload": "./ec_cmd 300 0; ./ec_cmd 301 0; ./ec_cmd 302 1;",
         "text": "G",
         "type": "header",
         "url": "http://$GroundStationIP:$GroundStationPort",
@@ -2286,7 +2286,7 @@
         "isAuth": false,
         "method": "POST",
         "orientation": "center",
-        "payload": "./ec_cmd 300 0; ./ec_cmd 301 1; ./ec_cmd 302 0;",
+        "payload": "./ec_cmd 300 0; ./ec_cmd 302 0 ; ./ec_cmd 301 1;",
         "text": "Y",
         "type": "header",
         "url": "http://$GroundStationIP:$GroundStationPort",
@@ -2359,7 +2359,7 @@
         "isAuth": false,
         "method": "POST",
         "orientation": "center",
-        "payload": "./ec_cmd 300 0; ./ec_cmd 301 0; ./ec_cmd 302 1;",
+        "payload": "./ec_cmd 301 0; ./ec_cmd 302 0; ./ec_cmd 300 1;",
         "text": "R",
         "type": "header",
         "url": "http://$GroundStationIP:$GroundStationPort",
@@ -3206,7 +3206,7 @@
       {
         "allValue": null,
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "engine_controller_sim",
           "value": "engine_controller_sim"
         },
@@ -3230,9 +3230,9 @@
       },
       {
         "current": {
-          "selected": true,
-          "text": "gs.local",
-          "value": "gs.local"
+          "selected": false,
+          "text": "127.0.0.1",
+          "value": "127.0.0.1"
         },
         "error": null,
         "hide": 0,
@@ -3251,7 +3251,7 @@
       },
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "8080",
           "value": "8080"
         },
@@ -3273,9 +3273,10 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
-          "text": "simple1.ec",
-          "value": "simple1.ec"
+          "isNone": true,
+          "selected": false,
+          "text": "None",
+          "value": ""
         },
         "datasource": "InfluxDB",
         "definition": "",
@@ -3323,5 +3324,5 @@
   "timezone": "",
   "title": "Engine Controller",
   "uid": "yg3nqk27k",
-  "version": 50
+  "version": 52
 }

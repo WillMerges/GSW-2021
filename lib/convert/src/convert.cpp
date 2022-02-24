@@ -161,10 +161,6 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
 
     *dst = *((int32_t*)val);
 
-    // if(sign_byte & (1 << 7)) {
-    //     *dst *= -1;
-    // }
-
     return SUCCESS;
 }
 
