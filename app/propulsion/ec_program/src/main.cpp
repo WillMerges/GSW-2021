@@ -38,23 +38,38 @@ using namespace countdown_clock;
 #define SEQUENCE_ACK_MEASUREMENT "SEQ_NUM"
 
 // engine controller command
-typedef struct command_s{
-    int64_t time;
+struct command_s {
     uint16_t control;
     uint16_t state;
+};
 
-    // for sorting my time
-    bool operator < (const struct command_s& other) const
-    {
+// action
+typedef union {
+    struct command_s cmd;
+    std::string* msg;
+} action_t;
+
+typedef enum {
+    COMMAND,
+    MESSAGE
+} action_type_t;
+
+typedef struct event_s {
+    int64_t time;
+    action_type_t type;
+    action_t action;
+
+    // for sorting by time
+    bool operator < (struct event_s& other) const {
         return time < other.time;
     }
-} command_t;
+} event_t;
 
 // maps macros
 std::unordered_map<std::string, std::string> macros;
 
 // keys are time, values are commands
-std::vector<command_t> commands;
+std::vector<event_t> events;
 
 // Countdown Clock
 CountdownClock cl;
@@ -113,35 +128,18 @@ RetType parse() {
             tokens.push_back(s);
         }
 
+        if(tokens.size() == 0) {
+            continue;
+        }
+
         if(tokens.size() == 1) {
             if(tokens[0] == "end") {
                 break;
             }
         }
 
-        if(tokens.size() != 3) {
-            printf("unexpected number of tokens\n");
-
-            for(std::string token : tokens) {
-                std::cout << token << '\n';
-            }
-
-            logger.log_message("unexpected number of tokens");
-            return FAILURE;
-        }
-
-        if(tokens[1] == "=") {
-            // macro
-            macros[tokens[0]] = tokens[2];
-        } else {
-            // replace with macros if available
-            for(size_t i = 0; i < tokens.size(); i++) {
-                if(macros.find(tokens[i]) != macros.end()) {
-                    // we have a macro for this, replace the token
-                    tokens[i] = macros[tokens[i]];
-                }
-            }
-
+        if(tokens[1] == "MSG") {
+            // logging message
             long abs_time = strtol(tokens[0].c_str(), NULL, 10);
 
             if(abs_time == 0 && errno == EINVAL) {
@@ -160,35 +158,109 @@ RetType parse() {
                 curr_time = abs_time;
             }
 
-            long control = strtol(tokens[1].c_str(), NULL, 10);
+            event_t ev;
+            ev.time = (int64_t)abs_time;
+            ev.type = MESSAGE;
+            ev.action.msg = new std::string();
+            *(ev.action.msg) = "";
 
-            if(control == 0 && errno == EINVAL) {
-                printf("failed to convert control value\n");
-                logger.log_message("control value invalid");
-
-                return FAILURE;
-            }
-
-            long state = strtol(tokens[2].c_str(), NULL, 10);
-
-            if(state == 0 && errno == EINVAL) {
-                printf("failed to convert state value\n");
-                logger.log_message("state value invalid");
+            if(tokens[2][0] != '\"') {
+                printf("message commands must list a string surrounded by \"'s\n");
+                logger.log_message("message commands must list a string surrounded by \"'s");
 
                 return FAILURE;
             }
 
-            // assemble the command and add it
-            command_t cmd;
-            cmd.control = (uint16_t)control;
-            cmd.state = (uint16_t)state;
-            cmd.time = (int64_t)abs_time;
-            commands.push_back(cmd);
+            tokens[2].erase(0, 1);
+
+            size_t i = 2;
+            for(; i < tokens.size() - 1; i++) {
+                *(ev.action.msg) += tokens[i] + " ";
+            }
+
+            if(tokens[i].back() != '\"') {
+                printf("message commands must list a string surrounded by \"'s\n");
+                logger.log_message("message commands must list a string surrounded by \"'s");
+
+                return FAILURE;
+            }
+
+            tokens[i].pop_back();
+            *(ev.action.msg) += tokens[i];
+
+            events.push_back(ev);
+        }
+        else if(tokens.size() == 3) {
+            if(tokens[1] == "=") {
+                // macro
+                macros[tokens[0]] = tokens[2];
+            } else {
+                // replace with macros if available
+                for(size_t i = 0; i < tokens.size(); i++) {
+                    if(macros.find(tokens[i]) != macros.end()) {
+                        // we have a macro for this, replace the token
+                        tokens[i] = macros[tokens[i]];
+                    }
+                }
+
+                long abs_time = strtol(tokens[0].c_str(), NULL, 10);
+
+                if(abs_time == 0 && errno == EINVAL) {
+                    printf("failed to convert time value\n");
+                    logger.log_message("time value invalid");
+
+                    return FAILURE;
+                }
+
+                if(abs_time < curr_time) {
+                    printf("absolute time is less than current time, invalid command!\n");
+                    logger.log_message("absolute time is less than current time, invalid command!");
+
+                    return FAILURE;
+                } else {
+                    curr_time = abs_time;
+                }
+
+                long control = strtol(tokens[1].c_str(), NULL, 10);
+
+                if(control == 0 && errno == EINVAL) {
+                    printf("failed to convert control value\n");
+                    logger.log_message("control value invalid");
+
+                    return FAILURE;
+                }
+
+                long state = strtol(tokens[2].c_str(), NULL, 10);
+
+                if(state == 0 && errno == EINVAL) {
+                    printf("failed to convert state value\n");
+                    logger.log_message("state value invalid");
+
+                    return FAILURE;
+                }
+
+                // assemble the command and add it
+                event_t ev;
+                ev.time = (int64_t)abs_time;
+                ev.type = COMMAND;
+                ev.action.cmd.control = (uint16_t)control;
+                ev.action.cmd.state = (uint16_t)state;
+                events.push_back(ev);
+            }
+        } else {
+            printf("unexpected number of tokens\n");
+
+            for(std::string token : tokens) {
+                std::cout << token << '\n';
+            }
+
+            logger.log_message("unexpected number of tokens");
+            return FAILURE;
         }
     }
 
     // sort the commands by execution time
-    std::sort(commands.begin(), commands.end());
+    std::sort(events.begin(), events.end());
 
     return SUCCESS;
 }
@@ -196,8 +268,6 @@ RetType parse() {
 // main function
 int main(int argc, char* argv[]) {
     MsgLogger logger("EC_PROGRAM", "main");
-
-    logger.log_message("executing engine controller program");
 
     // interpret the next argument as a config_file location if available
     std::string config_file = "";
@@ -322,9 +392,12 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    logger.log_message("engine program loaded");
+
     // wait until the clock is started
     int64_t curr_time;
     bool stopped = true;
+    size_t first_event = 0;
     while(stopped) {
         if(FAILURE == cl.read_time(&curr_time, &stopped)) {
             logger.log_message("failed to read countdown clock");
@@ -334,27 +407,30 @@ int main(int argc, char* argv[]) {
             return -1;
         }
 
+        // get rid of all the commands that happened prior to the current time
+        // this stops us from starting the clock halfway through a program and executing all the beginning commands at once
+        // NOTE: it's valid for a user to start a program when the clock is part way through that program
+        // we do this in the loop so we don't have a delay after the clock starts to when we can start executing
+        for(; first_event < events.size(); first_event++) {
+            if(events[first_event].time < curr_time) {
+                // this command has already passed, don't execute it
+            } else {
+                // stop at the first command that occurs after the current time
+                // since commands are sorted, this is a valid assumption
+                break;
+            }
+        }
+
+
         fflush(stdout);
         usleep(1000); // sleep 1 ms
     }
 
-    // get rid of all the commands that happened prior to the current time
-    // this stops us from starting the clock halfway through a program and executing all the beginning commands at once
-    // NOTE: it's valid for a user to start a program when the clock is part way through that program
-    size_t first_cmd;
-    for(first_cmd = 0; first_cmd < commands.size(); first_cmd++) {
-        if(commands[first_cmd].time < curr_time) {
-            // this command has already passed, don't execute it
-        } else {
-            // stop at the first command that occurs after the current time
-            // since commands are sorted, this is a valid assumption
-            break;
-        }
-    }
+    logger.log_message("engine program started");
 
-    if(first_cmd > 0) {
-        logger.log_message("some commands have already passed, those commands will not be executed");
-        printf("some commands have already passed, those commands will not be executed\n");
+    if(first_event > 0) {
+        logger.log_message("some events have already passed, those commands will not be executed");
+        printf("some events have already passed, those commands will not be executed\n");
     }
 
     // get the current sequence number
@@ -368,13 +444,15 @@ int main(int argc, char* argv[]) {
     // execute all parsed commands
     ec_command_t cmd;
     long cmd_num;
-    command_t c;
-    for(size_t i = first_cmd; i < commands.size(); i++) {
-        c = commands[i];
+    event_t e;
+    for(size_t i = first_event; i < events.size(); i++) {
+        e = events[i];
 
         if(FAILURE == cl.read_time(&curr_time, &stopped)) {
             logger.log_message("failed to read countdown clock");
             printf("failed to read countdown clock");
+
+            release_resources();
 
             return -1;
         }
@@ -383,20 +461,29 @@ int main(int argc, char* argv[]) {
             logger.log_message("clock was stopped, exiting program");
             printf("clock was stopped, exiting program\n");
 
+            release_resources();
+
             return -1;
         }
 
-        if(curr_time < c.time) {
+        if(curr_time < e.time) {
             // we need to wait to execute this
             // NOTE: if the clock is reset during this time, we may miss the command
-            usleep((c.time - curr_time) * 1000);
+            usleep((e.time - curr_time) * 1000);
             i--;
             continue;
         }
 
+        if(e.type == MESSAGE) {
+            // message command
+            logger.log_message(*(e.action.msg));
+            delete e.action.msg;
+            continue;
+        } // otherwise it's a command
+
         // generate command
-        cmd.control = c.control;
-        cmd.state = c.state;
+        cmd.control = e.action.cmd.control;
+        cmd.state = e.action.cmd.state;
 
         // until our command has been ACK'd we don't want to exit on a signal
         // this way we can be sure to unlock things
@@ -442,6 +529,13 @@ int main(int argc, char* argv[]) {
                 logger.log_message("timed out waiting for acknowledgement");
                 printf("timed out waiting for acknowledgement\n");
 
+                release_resources();
+
+                if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER_COMMAND)) {
+                    logger.log_message("failed to unlock engine controller command resource");
+                    printf("failed to unlock engine controller command resource\n");
+                }
+
                 return -1;
             } else {
                 time_remaining = TIMEOUT - (now - start);
@@ -484,4 +578,6 @@ int main(int argc, char* argv[]) {
 
         return -1;
     }
+
+    logger.log_message("engine program complete");
 }
