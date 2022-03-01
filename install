@@ -4,7 +4,6 @@
 set +e
 
 # change script permissions
-chmod +x setenv
 chmod +x startup/*/*
 chmod +x data/select_config.sh
 chmod +x log/clean.sh

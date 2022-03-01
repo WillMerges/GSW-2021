@@ -43,6 +43,12 @@ ${GSW_HOME}/proc/decom/decom &
 echo $! | cat - pidlist > temp && mv temp pidlist
 sleep 1
 
+# start the vcalc process
+echo "starting virtual telemetry calculation process"
+${GSW_HOME}/proc/vcalc/vcalc &
+echo $! | cat - pidlist > temp && mv temp pidlist
+sleep 1
+
 # start the uplink process
 echo "starting uplink process"
 ${GSW_HOME}/proc/uplink/uplink &
