@@ -2,6 +2,9 @@
 wordcount.sh
 TODO*
 
+# default connfig file
+data/default
+
 # logging files
 log/*.log
 log/*/*.log

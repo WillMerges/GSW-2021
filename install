@@ -20,6 +20,9 @@ echo "alias gsw=\"cd ${GSW_HOME}; . setenv\"" >> ~/.bashrc
 # for now use a default config file
 (cd data; ./select_config.sh sample)
 
+# select the default startup scripts
+(cd startup; ./select_current.sh default)
+
 # If we have the build tools, build everything
 # If not, don't build
 if [[ `command -v g++` && `command -v make` ]];
