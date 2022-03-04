@@ -165,6 +165,8 @@ int main(int argc, char** argv) {
         if(used_packets[i]) {
             tlm.add(i);
             arg_packets.push_back(i);
+
+            // TODO allocate loggers here, not for every single packet type
         }
     }
 

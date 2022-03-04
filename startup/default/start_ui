@@ -34,3 +34,8 @@ ${GSW_HOME}/app/db/grafana/start.sh
 echo "starting database forwaring"
 ${GSW_HOME}/app/db/fwd_influx/fwd_influx &
 echo $! >> ui_pids
+
+# start log forwarding to InfluxDB
+echo "starting log forwaring"
+${GSW_HOME}/app/db/fwd_log/fwd_logs.sh &
+echo $! >> ui_pids

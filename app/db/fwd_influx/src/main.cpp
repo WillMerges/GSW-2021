@@ -251,6 +251,9 @@ int main(int argc, char* argv[]) {
         for(std::string meas : veh->measurements) {
             m_info = veh->get_info(meas);
 
+            // TODO skip the measurement if it wasn't updated in the last cycle
+            // need functionality in TelemetryViewer
+
             /**
             if(meas == "UPTIME") {
                 if(SUCCESS == convert_to(veh, m_info, buff, &timestamp)) {
