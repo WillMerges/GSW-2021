@@ -1,0 +1,3 @@
+these configs use the 'old' style VCM file
+    -all telemetry comes in a single packet
+    -measurements have left/right padding

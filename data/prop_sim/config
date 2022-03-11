@@ -7,26 +7,24 @@ name = engine_controller_sim
 
 endianness = little
 
-# [measurement name] [total measurement size in bytes (including padding)] [most sig padding (bits)] [least sig (bits)] [optional type of int, float, or string, default is int] [optional signed or unsigned, default is signed]
-# signed/unsigned cannot be specified without a type
 
 ## measurements ##
 
 # relays
-SOLENOID1 1 0 0 int unsigned
-SOLENOID2 1 0 0 int unsigned
-SOLENOID3 1 0 0 int unsigned
-SOLENOID4 1 0 0 int unsigned
-IGNITER1 1 0 0 int unsigned
+SOLENOID1 1 int unsigned
+SOLENOID2 1 int unsigned
+SOLENOID3 1 int unsigned
+SOLENOID4 1 int unsigned
+IGNITER1  1 int unsigned
 
 # dummy light tower
-LED_G 1 0 0 int unsigned
-LED_Y 1 0 0 int unsigned
-LED_R 1 0 0 int unsigned
-LED_BUZZ 1 0 0 int unsigned
+LED_G     1 int unsigned
+LED_Y     1 int unsigned
+LED_R     1 int unsigned
+LED_BUZZ  1 int unsigned
 
 # command sequence number
-SEQ_NUM 4 0 0 int unsigned
+SEQ_NUM 4 int unsigned
 
 
 ## telemetry packets ##

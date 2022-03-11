@@ -229,55 +229,57 @@ RetType VCM::init() {
                 logger.log_message("Reached end of file before end of packet");
                 return FAILURE;
             }
-        } else {
+        } else { // measurement definition
             std::string fourth;
             ss >> fourth;
-            std::string fifth;
-            ss >> fifth;
-            std::string sixth;
-            ss >> sixth;
+            // no more padding
+            // std::string fifth;
+            // ss >> fifth;
+            // std::string sixth;
+            // ss >> sixth;
 
-            if(fst == "" || snd == "" || third == "" || fourth == "") { // these are required
+            // if(fst == "" || snd == "" || third == "" || fourth == "") { // these are required
+            if(fst == "" || snd == "") {
                 logger.log_message("Missing information: " + line);
                 return FAILURE;
             }
 
             measurement_info_t* entry = new measurement_info_t;
             // entry->addr = (void*)packet_size;
-            try {
-                entry->size = (size_t)(std::stoi(snd, NULL, 10));
-                entry->l_padding = (size_t)(std::stoi(third, NULL, 10));
-                entry->r_padding = (size_t)(std::stoi(fourth, NULL, 10));
-            } catch(std::invalid_argument& ia) {
-                logger.log_message("Invalid measurement size: " + line);
-                return FAILURE;
-            }
+            // try {
+            //     entry->size = (size_t)(std::stoi(snd, NULL, 10));
+            //     entry->l_padding = (size_t)(std::stoi(third, NULL, 10));
+            //     entry->r_padding = (size_t)(std::stoi(fourth, NULL, 10));
+            // } catch(std::invalid_argument& ia) {
+            //     logger.log_message("Invalid measurement size: " + line);
+            //     return FAILURE;
+            // }
             // packet_size += entry->size;
             // compressed_size += (entry->size*sizeof(unsigned char)) - (entry->l_padding + entry->r_padding);
 
 
             // check for type (optional, default is undefined)
-            if(fifth == "int") {
+            if(third == "int") {
                 entry->type = INT_TYPE;
-            } else if(fifth == "float") {
+            } else if(third == "float") {
                 entry->type = FLOAT_TYPE;
-            } else if(fifth == "string") {
+            } else if(third == "string") {
                 entry->type = STRING_TYPE;
-            } else if(fifth == "") {
+            } else if(third == "") {
                 entry->type = UNDEFINED_TYPE;
             } else {
-                logger.log_message("Invalid type specified: " + fifth);
+                logger.log_message("Invalid type specified: " + third);
                 return FAILURE;
             }
 
-            if(sixth == "unsigned") {
+            if(fourth == "unsigned") {
                 entry->sign = UNSIGNED_TYPE;
-            } else if(sixth == "signed") {
+            } else if(fourth == "signed") {
                 entry->sign = SIGNED_TYPE;
-            } else if(sixth == "") {
+            } else if(fourth == "") {
                 entry->sign = SIGNED_TYPE; // default is signed
             } else {
-                logger.log_message("Invalid sign specified: " + sixth);
+                logger.log_message("Invalid sign specified: " + fourth);
                 return FAILURE;
             }
 
