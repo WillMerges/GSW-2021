@@ -286,6 +286,24 @@ RetType TelemetryViewer::latest_data(measurement_info_t* meas, const uint8_t** d
     return SUCCESS;
 }
 
+bool TelemetryViewer::updated(measurement_info_t* meas) {
+    // MsgLogger logger("TelemetryViewer", "updated");
+
+    // loop through every packet this measurement is in
+    // TODO this could be slow for a lot of lookups, better solution?
+    for(location_info_t loc : meas->locations) {
+        // no need to check for bounds
+        // all indices in VCM are guaranteed to be in bounds
+        if(shm->updated[loc.packet_index]) {
+            // we found an updated packet
+            return true;
+        }
+    }
+
+    // otherwise no packets this measurement is in was updated
+    return false;
+}
+
 RetType TelemetryViewer::get_str(measurement_info_t* meas, std::string* val) {
     MsgLogger logger("TelemetryViewer", "get");
 

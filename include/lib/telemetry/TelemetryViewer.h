@@ -93,6 +93,9 @@ public:
     // set 'data' to the most recently updated memory containing 'measurement'
     RetType latest_data(measurement_info_t* meas, const uint8_t** data);
 
+    // return true if the measurement was updated in the last call to 'update'
+    bool updated(measurement_info_t* meas);
+
 private:
     TelemetryShm* shm;
     bool rm_shm = false;

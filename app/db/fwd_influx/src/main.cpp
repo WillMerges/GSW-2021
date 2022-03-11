@@ -251,8 +251,10 @@ int main(int argc, char* argv[]) {
         for(std::string meas : veh->measurements) {
             m_info = veh->get_info(meas);
 
-            // TODO skip the measurement if it wasn't updated in the last cycle
-            // need functionality in TelemetryViewer
+            // skip if this measurement didn't update so we don't send redundant data
+            if(!tlm.updated(m_info)) {
+                continue;
+            }
 
             /**
             if(meas == "UPTIME") {
@@ -275,7 +277,7 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        // TODO this probably didn't work because there's an extra comman at the end of the measurements line
+        // TODO this probably didn't work because there's an extra comma at the end of the measurements line
         // ^^ actually it's because I think the NANOSEC_PER_MILLISEC #define was wrong, it used to be (10^6) which is xor not power, it's worth trying this again
         // we can add a timestamp in nano-seconds to the end of the line in Influx line protocol
         //if(use_timestamp) {

@@ -755,6 +755,7 @@ const uint8_t* TelemetryShm::get_buffer(uint32_t packet_id) {
     return packet_blocks[packet_id]->data;
 }
 
+// NOTE: faster to just check the 'updated' array
 RetType TelemetryShm::packet_updated(uint32_t packet_id, bool* updated) {
     MsgLogger logger("TelemetryShm", "packet_updated");
 
@@ -768,7 +769,11 @@ RetType TelemetryShm::packet_updated(uint32_t packet_id, bool* updated) {
         return FAILURE;
     }
 
+    // get the nonce from shared memory
     uint32_t* nonce = (uint32_t*)(info_blocks[packet_id]->data);
+
+    // compare it to our last stored nonce
+    // don't need to do any locking, we're only reading and any change to the nonce will cause them to differ
     *updated = (last_nonces[packet_id] == *nonce);
 
     return SUCCESS;
