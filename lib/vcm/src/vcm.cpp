@@ -232,31 +232,13 @@ RetType VCM::init() {
         } else { // measurement definition
             std::string fourth;
             ss >> fourth;
-            // no more padding
-            // std::string fifth;
-            // ss >> fifth;
-            // std::string sixth;
-            // ss >> sixth;
 
-            // if(fst == "" || snd == "" || third == "" || fourth == "") { // these are required
             if(fst == "" || snd == "") {
                 logger.log_message("Missing information: " + line);
                 return FAILURE;
             }
 
             measurement_info_t* entry = new measurement_info_t;
-            // entry->addr = (void*)packet_size;
-            // try {
-            //     entry->size = (size_t)(std::stoi(snd, NULL, 10));
-            //     entry->l_padding = (size_t)(std::stoi(third, NULL, 10));
-            //     entry->r_padding = (size_t)(std::stoi(fourth, NULL, 10));
-            // } catch(std::invalid_argument& ia) {
-            //     logger.log_message("Invalid measurement size: " + line);
-            //     return FAILURE;
-            // }
-            // packet_size += entry->size;
-            // compressed_size += (entry->size*sizeof(unsigned char)) - (entry->l_padding + entry->r_padding);
-
 
             // check for type (optional, default is undefined)
             if(third == "int") {
