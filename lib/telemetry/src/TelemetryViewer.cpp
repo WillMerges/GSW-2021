@@ -239,7 +239,9 @@ RetType TelemetryViewer::update(uint32_t timeout) {
     unsigned int id;
     for(size_t i = 0; i < num_packets; i++) {
         id = packet_ids[i];
-        memcpy(packet_buffers[id], shm->get_buffer(id), packet_sizes[id]);
+        if(shm->updated[id]) {
+            memcpy(packet_buffers[id], shm->get_buffer(id), packet_sizes[id]);
+        } // if the packet didn't update, save ourself the copy
     }
 
     // unlock shared memory
