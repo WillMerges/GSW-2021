@@ -240,6 +240,13 @@ RetType VCM::init() {
 
             measurement_info_t* entry = new measurement_info_t;
 
+            try {
+                entry->size = (size_t)(std::stoi(snd, NULL, 10));
+            } catch(std::invalid_argument& ia) {
+                logger.log_message("Invalid measurement size: " + line);
+                return FAILURE;
+            }
+
             // check for type (optional, default is undefined)
             if(third == "int") {
                 entry->type = INT_TYPE;
