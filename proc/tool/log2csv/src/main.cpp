@@ -17,6 +17,10 @@
 #include <vector>
 #include <unordered_map>
 
+// maximum number of rows for each output file
+// set to 10,000 so each file can be opened in LibreOffice
+#define MAX_OUTPUT_ROWS 10000
+
 using namespace vcm;
 using namespace dls;
 using namespace convert;
@@ -67,11 +71,12 @@ int main(int argc, char** argv) {
         temp.clear();
     }
 
-    // open the output file
+    // open the first output file
     std::ofstream of;
     std::string of_name = dir;
-    of_name += "/log.csv";
+    of_name += "/log0.csv";
     of.open(of_name.c_str(), std::ios::out | std::ios::trunc);
+    size_t num_ofile = 0;
 
     if(!of.is_open()) {
         printf("Failed to open output file: %s\n", of_name.c_str());
@@ -92,6 +97,8 @@ int main(int argc, char** argv) {
     int file_index = 0;
 
     std::string filename = base_filename;
+
+    size_t line_cnt = 1;
 
     while(1) {
         std::ifstream f(filename.c_str(), std::ifstream::binary);
@@ -146,7 +153,41 @@ int main(int argc, char** argv) {
 
             if(rec->size != veh->packets[packet_id]->size) {
                 printf("size mismatch in file: %s\n", filename.c_str());
-                break;
+
+                // look for the next record
+                continue;
+            }
+
+            // check if we need a new output file before we write a new line
+            if(line_cnt > MAX_OUTPUT_ROWS) {
+                // close the last output file
+                of.close();
+                printf("file written to: %s\n", of_name.c_str());
+
+                // open a new output file
+                num_ofile++;
+                of_name = dir;
+                of_name += "/log";
+                of_name += std::to_string(num_ofile);
+                of_name += ".csv";
+
+                of.open(of_name.c_str(), std::ios::out | std::ios::trunc);
+
+                if(!of.is_open()) {
+                    printf("Failed to open output file: %s\n", of_name.c_str());
+                    return -1;
+                }
+
+                // write out the first entry
+                of << "timestamp,packet id,";
+                for(std::string m : veh->measurements) {
+                    of << m << ",";
+                }
+                of << '\n';
+                of.flush();
+
+                // reset the line counter
+                line_cnt = 1;
             }
 
             // write out the record to the CSV file
@@ -176,11 +217,11 @@ int main(int argc, char** argv) {
 
                 // NOTE: we leave an extra comma on each line, but who cares
                 of << val << ',';
-                of.flush();
             }
 
             of << '\n';
             of.flush();
+            line_cnt++;
 
             free_record(rec);
 
@@ -200,7 +241,7 @@ int main(int argc, char** argv) {
     }
 
     of.close();
+    printf("file written to: %s\n", of_name.c_str());
 
     printf("completed parsing\n");
-    printf("file written to: %s\n", of_name.c_str());
 }

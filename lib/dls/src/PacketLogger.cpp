@@ -57,11 +57,11 @@ packet_record_t* dls::retrieve_record(std::istream& f) {
 
                 if(c == ']') {
                     // got the timestamp
+                    done = true;
                     break;
                 }
 
                 *timestamp += c;
-                done = true;
             }
         }
     }
