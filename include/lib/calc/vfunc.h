@@ -115,6 +115,35 @@ static RetType DAQ_ADC_SCALE(measurement_info_t* meas, uint8_t* dst, std::vector
     return SUCCESS;
 }
 
+// converts a load cell voltage to a percent of full-scale
+// assumes load cell is using current excitation of 10mA
+// also assumes has a nominal arm resistance of 350 ohms and a range of 350 (+/-)10 ohms
+// outputs to a double in the range [0, 1.0]
+static RetType LOAD_CELL_PERCENT_CURRENT_EXCITATION(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
+    double vm; // measured voltage
+    if(unlikely(convert_to(veh, args[0].meas, args[0].addr, &vm) != SUCCESS)) {
+        return FAILURE;
+    }
+
+    // calculate ratio of measured resistance to nominal arm resistance
+    // https://www.dataloggerinc.com/resource-article/strain-gauge-measurements-current/
+    static double nominal_arm_resitance = 350; // ohms
+    static double delta_resistance = 10; // ohms
+    static double current = 0.01; // amps (current excitation of 10 mA)
+
+    double ratio = (vm / current) / nominal_arm_resitance;
+
+    // map to a range between nominal and max range
+    double percent = ((vm / current) - 350) / delta_resistance;
+
+    // write out percent
+    if(unlikely(convert_from(veh, meas, dst, percent) != SUCCESS)) {
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
 // K inverse polynomial approximations from NIST
 // https://srdata.nist.gov/its90/type_k/kcoefficients_inverse.html
 // given in 3 temperature ranges
@@ -261,6 +290,7 @@ const vfunc_t vfunc_list[] =
     {"SUM_UINT", &SUM_UINT},
     {"DAQ_ADC_SCALE", &DAQ_ADC_SCALE},
     {"KTYPE_THERMOCOUPLE_TEMP", &KTYPE_THERMOCOUPLE_TEMP},
+    {"LOAD_CELL_PERCENT_CURRENT_EXCITATION", LOAD_CELL_PERCENT_CURRENT_EXCITATION}
     {NULL, NULL}
 };
 
