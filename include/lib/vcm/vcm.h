@@ -19,6 +19,8 @@
 
 #define DEFAULT_CONFIG_DIR "data/default"
 
+// TODO make endianess per measurement rather than per file
+
 // responsible for translating config file into addresses in shared mem
 // address 0x00 is the first byte in shared mem
 // currently gives addr and size of data in shared mem (after attaching itself in constructor)

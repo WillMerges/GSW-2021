@@ -239,6 +239,7 @@ int main(int argc, char** argv) {
                             for(size_t i = 1; i < output_locations[calculation.out].size(); i++) {
                                 loc = (*locations)[i];
                                 memcpy(packet_buffers[loc.packet_index], packet_buffers[first_loc.packet_index], loc.offset);
+
                                 // we changed a measurement in our buffer, mark it to be written to shared memory
                                 output_packets.insert(loc.packet_index);
                             }
