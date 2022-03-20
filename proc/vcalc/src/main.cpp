@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
     logger.log_message("successfully parsed vcalc file");
 
     // indexes are packet id's, each index contains a list of triggers
-    // lists contain measurements that need to be calculated when the packet is
+    // lists contain measurements that need to be calculated when the packet is updated
     std::vector<vcalc_t>* triggers = new std::vector<vcalc_t>[veh->num_packets];
 
     // tracks id's for each packet to make sure each trigger is only included once
@@ -111,15 +111,21 @@ int main(int argc, char** argv) {
     // sizes of each packet
     std::vector<size_t> packet_sizes;
 
+    // valid output locations for each virtual measurement that has a calculation
+    // keys are measurements, values are a list of locations to output to when that measurement is updated
+    std::unordered_map<measurement_info_t*, std::vector<location_info_t>> output_locations;
+
+
     // set defaults
     for(uint32_t i = 0; i < veh->num_packets; i++) {
         used_packets[i] = false;
         packet_buffers[i] = NULL;
 
+        packet_sizes.push_back(veh->packets[i]->size);
+
+        // TODO we allocate a packet logger for packets we don't use, maybe don't do that
         PacketLogger* logger = new PacketLogger(veh->device + "(" + std::to_string(i) + ")");
         loggers.push_back(logger);
-
-        packet_sizes.push_back(veh->packets[i]->size);
     }
 
     // add events for each packet
@@ -129,11 +135,20 @@ int main(int argc, char** argv) {
             // the measurement may exists in a virtual packet and in regular telemetry
             // we only want to allocate buffers for virtual packets
             if(veh->packets[loc.packet_index]->is_virtual) {
+                // record this as an output location
+                output_locations[v.out].push_back(loc);
+
+                // allocate a buffer if we haven't
                 if(packet_buffers[loc.packet_index] == NULL) {
                     packet_buffers[loc.packet_index] = new uint8_t[packet_sizes[loc.packet_index]];
                     memset(packet_buffers[loc.packet_index], 0, packet_sizes[loc.packet_index]);
                 } // otherwise we've already allocated this buffer
             }
+        }
+
+        // if there's no output locations for this measurement, don't bother calculating it
+        if(!output_locations[v.out].size()) {
+            continue;
         }
 
         // iterate through each argument
@@ -147,7 +162,7 @@ int main(int argc, char** argv) {
                     used_packets[loc.packet_index] = true;
 
                     // make sure we don't add this trigger for the same packet again
-                    // e.g. if both arguments are from the same packet, only need one trigger
+                    // e.g. if two virtual measurements in the same packet depend on the same real packet
                     ids[loc.packet_index].insert(v.unique_id);
                 }
             }
@@ -160,13 +175,11 @@ int main(int argc, char** argv) {
     std::vector<uint32_t> arg_packets;
 
     // add packets we need to telemetry viewer
-    // also allocate buffers for output packet(s)
+    // also allocate loggers for output packet(s)
     for(uint32_t i = 0; i < veh->num_packets; i++) {
         if(used_packets[i]) {
             tlm.add(i);
             arg_packets.push_back(i);
-
-            // TODO allocate loggers here, not for every single packet type
         }
     }
 
@@ -181,6 +194,9 @@ int main(int argc, char** argv) {
     RetType ret;
     std::unordered_set<uint32_t> triggers_processed;
     std::unordered_set<uint32_t> output_packets;
+    location_info_t loc;
+    location_info_t first_loc;
+    std::vector<location_info_t>* locations;
     while(1) {
         if(tlm.update() != SUCCESS) {
             logger.log_message("failed to update telemetry");
@@ -209,23 +225,43 @@ int main(int argc, char** argv) {
                             arg_list.push_back(arg);
                         }
 
-                        // run the calculation for each virtual output location
-                        for(location_info_t loc : calculation.out->locations) {
-                            if(!veh->packets[loc.packet_index]->is_virtual) {
-                                // regular telemetry, don't write anything
-                                continue;
-                            }
+                        // run the calculation
+                        // copies result to first output location in our list (we're guaranteed to have at least 1 output location)
+                        locations = &(output_locations[calculation.out]);
+                        first_loc = (*locations)[0];
+                        ret = (*(calculation.convert_function))(calculation.out, packet_buffers[first_loc.packet_index] + first_loc.offset, arg_list);
 
-                            // TODO make this better? e.g. calculate once then write multiple times?
-                            ret = (*(calculation.convert_function))(calculation.out, packet_buffers[loc.packet_index] + loc.offset, arg_list);
-                            if(ret != SUCCESS) {
-                                logger.log_message("calculation failed");
-                                // do nothing
-                            } else if(ret != NOCHANGE) {
+                        if(ret != SUCCESS) {
+                            logger.log_message("calculation failed");
+                            // do nothing
+                        }  else if(ret != NOCHANGE) {
+                            // copy it to the rest of our output locations
+                            for(size_t i = 1; i < output_locations[calculation.out].size(); i++) {
+                                loc = (*locations)[i];
+                                memcpy(packet_buffers[loc.packet_index], packet_buffers[first_loc.packet_index], loc.offset);
                                 // we changed a measurement in our buffer, mark it to be written to shared memory
                                 output_packets.insert(loc.packet_index);
-                            } // else convert function said not to write anything but didn't fail
-                        }
+                            }
+                        } // else convert function said not to write anything but didn't fail
+
+
+                        // run the calculation for each virtual output location
+                        // for(location_info_t loc : calculation.out->locations) {
+                        //     if(!veh->packets[loc.packet_index]->is_virtual) {
+                        //         // regular telemetry, don't write anything
+                        //         continue;
+                        //     }
+                        //
+                        //     // TODO make this better? e.g. calculate once then write multiple times?
+                        //     ret = (*(calculation.convert_function))(calculation.out, packet_buffers[loc.packet_index] + loc.offset, arg_list);
+                        //     if(ret != SUCCESS) {
+                        //         logger.log_message("calculation failed");
+                        //         // do nothing
+                        //     } else if(ret != NOCHANGE) {
+                        //         // we changed a measurement in our buffer, mark it to be written to shared memory
+                        //         output_packets.insert(loc.packet_index);
+                        //     } // else convert function said not to write anything but didn't fail
+                        // }
                     }
                 }
             }
