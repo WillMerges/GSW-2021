@@ -131,10 +131,10 @@ static RetType LOAD_CELL_PERCENT_CURRENT_EXCITATION(measurement_info_t* meas, ui
     static double delta_resistance = 10; // ohms
     static double current = 0.01; // amps (current excitation of 10 mA)
 
-    double ratio = (vm / current) / nominal_arm_resitance;
+    // double ratio = (vm / current) / nominal_arm_resitance;
 
     // map to a range between nominal and max range
-    double percent = ((vm / current) - 350) / delta_resistance;
+    double percent = ((vm / current) - nominal_arm_resitance) / delta_resistance;
 
     // write out percent
     if(unlikely(convert_from(veh, meas, dst, percent) != SUCCESS)) {
@@ -290,7 +290,7 @@ const vfunc_t vfunc_list[] =
     {"SUM_UINT", &SUM_UINT},
     {"DAQ_ADC_SCALE", &DAQ_ADC_SCALE},
     {"KTYPE_THERMOCOUPLE_TEMP", &KTYPE_THERMOCOUPLE_TEMP},
-    {"LOAD_CELL_PERCENT_CURRENT_EXCITATION", LOAD_CELL_PERCENT_CURRENT_EXCITATION}
+    {"LOAD_CELL_PERCENT_CURRENT_EXCITATION", LOAD_CELL_PERCENT_CURRENT_EXCITATION},
     {NULL, NULL}
 };
 

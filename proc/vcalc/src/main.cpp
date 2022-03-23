@@ -230,6 +230,7 @@ int main(int argc, char** argv) {
                         locations = &(output_locations[calculation.out]);
                         first_loc = (*locations)[0];
                         ret = (*(calculation.convert_function))(calculation.out, packet_buffers[first_loc.packet_index] + first_loc.offset, arg_list);
+                        output_packets.insert(first_loc.packet_index);
 
                         if(ret != SUCCESS) {
                             logger.log_message("calculation failed");
