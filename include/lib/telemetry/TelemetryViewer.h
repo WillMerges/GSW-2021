@@ -110,9 +110,6 @@ private:
 
     uint8_t** packet_buffers;
     size_t* packet_sizes;
-
-    // command to execute to start the reaper process
-    std::string reaper_cmd;
 };
 
 #endif
