@@ -38,7 +38,10 @@ FB0_VOLTS   8 float
 FB1_VOLTS   8 float
 CL0_VOLTS   8 float
 CL1_VOLTS   8 float
-
+TC0_TEMP    8 float
+TC1_TEMP    8 float
+TC2_TEMP    8 float
+TC3_TEMP    8 float
 
 
 ## telemetry packets ##
@@ -92,4 +95,12 @@ FB0_VOLTS
 FB1_VOLTS
 CL0_VOLTS
 CL1_VOLTS
+}
+
+# calculated thermocouple temperatures
+virtual {
+TC0_TEMP
+TC1_TEMP
+TC2_TEMP
+TC3_TEMP
 }
