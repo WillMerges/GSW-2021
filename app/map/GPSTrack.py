@@ -41,7 +41,7 @@ class GPSTrack(object):
 
             #self.size = self.size + 1
             #self.times.append(coords[3])
-            self.coords = [(float(coords[0]), float(coords[1]), float(coords[2]))]
+            self.coords = [(float(coords[1]), float(coords[0]), float(coords[2]))]
             self.write_track()
 
     def write_track(self):
