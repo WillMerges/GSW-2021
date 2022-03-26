@@ -24,6 +24,14 @@ LED_BUZZ  2 int unsigned
 # command sequence number
 SEQ_NUM 4 int unsigned
 
+# heartbeat number
+HEARTBEAT 2 int unsigned
+
+# mode number
+MODE 2 int unsigned
+
+# safing number
+SAFING 2 int unsigned
 
 ## telemetry packets ##
 
@@ -66,4 +74,11 @@ LED_Y
 LED_R
 LED_BUZZ
 SEQ_NUM
+HEARTBEAT
+}
+
+8085 {
+SEQ_NUM
+MODE
+SAFING
 }
