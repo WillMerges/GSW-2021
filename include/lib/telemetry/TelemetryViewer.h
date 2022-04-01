@@ -90,9 +90,10 @@ public:
     RetType get_int(std::string& meas, int* val);
     RetType get_uint(std::string& meas, unsigned int* val);
     RetType get_raw(std::string& meas, uint8_t* buffer);
+    RetType get_raw(measurement_info_t* meas, uint8_t** buffer); // no copy
 
     // set 'data' to the most recently updated memory containing 'measurement'
-    RetType latest_data(measurement_info_t* meas, const uint8_t** data);
+    RetType latest_data(measurement_info_t* meas, uint8_t** data);
 
     // return true if the measurement was updated in the last call to 'update'
     bool updated(measurement_info_t* meas);

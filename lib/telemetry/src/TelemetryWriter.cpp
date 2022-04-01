@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Name: TelemetryViewer.cpp
+* Name: TelemetryWriter.cpp
 *
 * Purpose: Top level write access to telemetry measurements
 *
@@ -114,6 +114,21 @@ RetType TelemetryWriter::init(VCM* vcm, TelemetryShm* shm) {
     return SUCCESS;
 }
 
+// helper function to copy data into telemetry
+// basically memcpy with endianness checking
+void TelemetryWriter::telemetry_copy(uint8_t* dst, const uint8_t* src, size_t len) {
+    if(vcm->sys_endianness != vcm->recv_endianness) {
+        // copy backwards
+        for(size_t i = 0; i < len; i++) {
+            dst[len - i - 1] = src[i];
+        }
+    } else {
+        for(size_t i = 0; i < len; i++) {
+            dst[i] = src[i];
+        }
+    }
+}
+
 RetType TelemetryWriter::write(measurement_info_t* meas, uint8_t* data, size_t len) {
     if(len != meas->size) {
         MsgLogger logger("TelemetryWriter", "write");
@@ -126,7 +141,7 @@ RetType TelemetryWriter::write(measurement_info_t* meas, uint8_t* data, size_t l
     // this isn't so bad for now though
     for(location_info_t loc : meas->locations) {
         if(vcm->packets[loc.packet_index]->is_virtual) {
-            memcpy(packet_buffers[loc.packet_index], data, len);
+            telemetry_copy(packet_buffers[loc.packet_index] + loc.offset, data, len);
             updated[loc.packet_index] = true;
         }
     }

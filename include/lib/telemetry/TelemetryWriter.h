@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Name: TelemetryViewer.h
+* Name: TelemetryWriter.h
 *
 * Purpose: Top level write access to telemetry measurements
 *
@@ -51,6 +51,9 @@ public:
     // NOTE: only allowed to write to virtual measurements, returns FAILURE otherwise
     RetType write(std::string& meas, uint8_t* data, size_t len);
 
+    // write but does not switch endianness
+    RetType write_raw(measurement_info_t* meas, uint8_t* data, size_t len);
+
     // flush all written measurement to shared memory
     // NOTE: writes are also logged
     RetType flush();
@@ -69,6 +72,8 @@ private:
     bool rm_shm = false;
 
     PacketLogger** loggers;
+
+    void telemetry_copy(uint8_t* dst, const uint8_t* src, size_t len);
 };
 
 #endif

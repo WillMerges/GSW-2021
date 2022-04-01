@@ -23,7 +23,7 @@ VCM::VCM() {
     // packet_size = 0;
     num_packets = 0;
     device = "";
-    vcalc_file = "";
+    trigger_file = "";
     recv_endianness = GSW_LITTLE_ENDIAN; // default is little endian
 
     if(__BYTE_ORDER == __BIG_ENDIAN) {

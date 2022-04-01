@@ -26,9 +26,11 @@ VCM* veh;
 TelemetryViewer tlm;
 TelemetryShm tshm;
 
-void sighandler(int signum) {
+bool killed = false;
+
+void sighandler(int) {
     tshm.sighandler();
-    exit(signum);
+    killed = true;
 }
 
 int main(int argc, char** argv) {
@@ -197,7 +199,7 @@ int main(int argc, char** argv) {
     location_info_t loc;
     location_info_t first_loc;
     std::vector<location_info_t>* locations;
-    while(1) {
+    while(!killed) {
         if(tlm.update() != SUCCESS) {
             logger.log_message("failed to update telemetry");
             continue;

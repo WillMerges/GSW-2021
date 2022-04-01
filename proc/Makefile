@@ -6,7 +6,7 @@ all:
 	-$(MAKE) -C tool all
 	-$(MAKE) -C shmctl all
 	-$(MAKE) -C uplink all
-	-$(MAKE) -C vcalc all
+	-$(MAKE) -C mmon all
 	-$(MAKE) -C test all
 
 clean:
@@ -15,5 +15,5 @@ clean:
 	-$(MAKE) -C tool clean
 	-$(MAKE) -C shmctl clean
 	-$(MAKE) -C uplink clean
-	-$(MAKE) -C vcalc clean
+	-$(MAKE) -C mmon clean
 	-$(MAKE) -C test clean 

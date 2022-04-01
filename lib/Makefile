@@ -11,7 +11,7 @@ build:
 	-$(MAKE) -C telemetry all
 	-$(MAKE) -C clock all
 	-$(MAKE) -C vlock all
-	-$(MAKE) -C calc all
+	-$(MAKE) -C trigger all
 
 copy:
 	rm -rf bin || true > /dev/null
@@ -29,11 +29,11 @@ clean:
 	-$(MAKE) -C python clean
 	-$(MAKE) -C clock clean
 	-$(MAKE) -C vlock clean 
-	-$(MAKE) -C calc clean 
+	-$(MAKE) -C trigger clean 
 	rm -r bin
 
 # build special library used by Python ctypes
 # library is every lib object module in a single lib with additional c bindings
 python: build copy
 	-$(MAKE) -C python
-	g++ -shared python/bindings.o vcm/src/*.o dls/src/*.o nm/src/*.o shm/src/*.o convert/src/*.o telemetry/src/*.o -o bin/libpython.so -lrt
+	g++ -shared python/bindings.o vcm/src/*.o dls/src/*.o nm/src/*.o shm/src/*.o convert/src/*.o telemetry/src/*.o clock/src/*.o vlock/src/*.o trigger/src/*.o -o bin/libpython.so -lrt
