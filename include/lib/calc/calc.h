@@ -20,7 +20,6 @@
 using namespace vcm;
 
 namespace calc {
-
     typedef struct {
         measurement_info_t* meas;
         const uint8_t* addr;

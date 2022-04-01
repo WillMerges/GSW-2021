@@ -1,7 +1,7 @@
 /*******************************************************************************
 * Name: TelemetryViewer.h
 *
-* Purpose: Top level access to telemetry measurements
+* Purpose: Top level read access to telemetry measurements
 *
 * Author: Will Merges
 *
@@ -17,6 +17,12 @@
 
 using namespace vcm;
 
+// NOTE: signals should be caught when using this class in blocking mode
+//       shared memory could be locked up if a read lock is held when the process is killed
+//       to avoid this, catch the signal and wait until 'update' returns before exiting
+//       since 'update' is a blocking call it will still block after a signal is caught so
+//       the process cannot be released, to exit from 'update' call 'sighandler' in the signal
+//       handler and 'update' will immediately return with
 class TelemetryViewer {
 public:
     // construct a telemetry viewer
@@ -27,7 +33,7 @@ public:
 
     // initialize the telemetry viewer for vehicle specified by VCM
     // if 'shm' is not specified, creates a new TelemetryShm object
-    // NOTE: if shm is not NULL, it should already be opened
+    // NOTE: if shm is not NULL, it should already be opened and initialized
     RetType init(VCM* vcm, TelemetryShm* shm = NULL);
 
     // init using use the default VCM
@@ -56,11 +62,6 @@ public:
     } update_mode_t;
 
     // set which update mode to use
-    // NOTE: if update mode is set to BLOCKING_UPDATE, signal handlers should NOT be changed after calling this function
-    // the currently set signal handlers will still be called
-    // if signal handlers are changed after this mode is set, receiving a signal could lock shared memory
-    // NOTE: there could be some weird behavior in threads if this function is called with the BLOCKING_OPTION concurrently
-    // this function will call 'init_signals' which modifies static memory without locking it
     void set_update_mode(update_mode_t mode);
 
     // update the telemetry viewer with the most recent telemetry data
@@ -101,6 +102,7 @@ private:
     bool rm_shm = false;
 
     VCM* vcm;
+    bool rm_vcm = false;
 
     update_mode_t update_mode;
     bool check_all; // if we're tracking all measurements

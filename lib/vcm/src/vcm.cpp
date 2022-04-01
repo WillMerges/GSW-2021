@@ -161,8 +161,8 @@ RetType VCM::init() {
                     logger.log_message("Unrecogonized endianness on line: " + line);
                     return FAILURE;
                 }
-            } else if(fst == "vcalc") {
-                vcalc_file = config_dir + "/" + third;
+            } else if(fst == "triggers") {
+                trigger_file = config_dir + "/" + third;
             } else {
                 logger.log_message("Invalid line: " + line);
                 return FAILURE;

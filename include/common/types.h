@@ -8,7 +8,8 @@ typedef enum {
     INTERRUPTED = 2,
     TIMEOUT = 3,
     LOCKED = 4,
-    NOCHANGE = 5
+    NOCHANGE = 5,
+    FILENOTFOUND = 6
 } RetType;
 
 #endif

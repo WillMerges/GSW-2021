@@ -20,8 +20,8 @@ name = sample_device
 # endianness (coming FROM the receiver, not of the ground station platform) [big or little], if not set defaults to little endian
 endianness = big
 
-# Virtual telemetry conversion file
-vcalc = virtual
+# trigger file
+triggers = triggers
 
 # [measurement name] [total measurement size in bytes] [optional type of int, float, or string, default is int] [optional signed or unsigned, default is signed]
 # signed/unsigned cannot be specified without a type

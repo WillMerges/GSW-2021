@@ -1,7 +1,7 @@
 /*******************************************************************************
 * Name: TelemetryViewer.cpp
 *
-* Purpose: Top level access to telemetry measurements
+* Purpose: Top level read access to telemetry measurements
 *
 * Author: Will Merges
 *
@@ -9,6 +9,7 @@
 *******************************************************************************/
 #include <string.h>
 #include <limits.h>
+
 #include "lib/telemetry/TelemetryViewer.h"
 #include "lib/dls/dls.h"
 #include "lib/convert/convert.h"
@@ -29,9 +30,10 @@ TelemetryViewer::TelemetryViewer() {
 TelemetryViewer::~TelemetryViewer() {
     if(shm != NULL) {
         if(shm->read_locked) {
-            // if we're sure we locked shared memory, read unlock
-            // this is unlikely to happen as most processes should use a signal handler
-            // and unlock it themselves before exiting
+            // if we currently hold a lock we need to release it before exiting so we don't block everyone
+            // most processes will catch signals so this should not happen
+            // most processes ignore immediate kills and unlock before exiting
+            // if they are stuck blocking in read_lock they call 'sighandler' to release them and then they exit, so the lock is not held
             shm->read_unlock();
         }
 
@@ -57,16 +59,19 @@ TelemetryViewer::~TelemetryViewer() {
     if(packet_sizes != NULL) {
         delete packet_sizes;
     }
+
+    if(vcm && rm_vcm) {
+        delete vcm;
+    }
 }
 
 RetType TelemetryViewer::init(TelemetryShm* shm) {
     MsgLogger logger("TelemetryViewer", "init");
 
-    // TODO this is never deleted, memory leak
     VCM* vcm = new VCM();
+    rm_vcm = true;
 
-    if(FAILURE == vcm->init() )
-    {
+    if(FAILURE == vcm->init()) {
         logger.log_message("Failed to init default VCM");
         return FAILURE;
     }
@@ -80,18 +85,18 @@ RetType TelemetryViewer::init(VCM* vcm, TelemetryShm* shm) {
     if(shm == NULL) {
         this->shm = new TelemetryShm();
         rm_shm = true;
+
+        if(this->shm->init(vcm) == FAILURE) {
+            logger.log_message("failed to initialize telemetry shared memory");
+            return FAILURE;
+        }
+
+        if(this->shm->open() == FAILURE) {
+            logger.log_message("failed to attach to telemetry shared memory");
+            return FAILURE;
+        }
     } else {
         this->shm = shm;
-    }
-
-    if(this->shm->init(vcm) == FAILURE) {
-        logger.log_message("failed to initialize telemetry shared memory");
-        return FAILURE;
-    }
-
-    if(this->shm->open() == FAILURE) {
-        logger.log_message("failed to attach to telemetry shared memory");
-        return FAILURE;
     }
 
     this->vcm = vcm;

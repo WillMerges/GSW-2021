@@ -1,0 +1,8 @@
+# defines triggers to be run when a measurement is updated
+
+# lines of the form
+# [measurement causing trigger] [trigger function] [optional arguments]
+
+TEST COPY TEST VIRTUAL_VALUE
+TEST SUM_UINT VIRTUAL_VALUE2 TEST TEST2
+TEST2 SUM_UINT VIRTUAL_VALUE2 TEST TEST2

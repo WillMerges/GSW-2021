@@ -62,8 +62,6 @@ namespace vcm {
         // void* addr; // offset into shmem
         std::vector<location_info_t> locations; // locations of this measurement
         size_t size; // bytes
-        size_t l_padding; // bits of left padding (most significant bits)
-        size_t r_padding; // bits of right padding (least significant bits)
         measurement_type_t type;
         measurement_sign_t sign;
     } measurement_info_t;
@@ -94,7 +92,7 @@ namespace vcm {
         protocol_t protocol;
         std::string config_dir;
         std::string config_file;
-        std::string vcalc_file;
+        std::string trigger_file;
         std::string device;
 
         endianness_t recv_endianness; // endianness of the receiver

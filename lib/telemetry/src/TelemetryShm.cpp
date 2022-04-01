@@ -20,38 +20,29 @@
 
 using namespace dls;
 
-// how locking works right now (for individual packet):
-//  lock master block
-//  check each packet nonce against last saved nonces
-//      during this check save all the new nonces if any changed
-//
-//  if a nonce changed, return
-//  if a nonce didn't change and need to block
-//      unlock master block
-//      futex wait bitset on master nonce
-//      when wake up, check all the nonces again and repeat
-//
-//  why is this bad? one lock for all readers/writers even if working on different packet
-//      also, overflow isn't detected when looking for packet updates
+// how read locking works in blocking mode for an individual packets:
+// obtain lock to all nonces (one lock shared by everyone)
+// cache the latest master nonce
+// check our cached nonces with the nonces from shared memory (which are locked)
+// if any changed, return immediately and keep the lock
+// if none changed, we need to wait until they do
+// release the locks
+// call futex wait, blocks us until someone updates one of our packets
+//      futex wait checks if someone updated since we unblocked and returns immediately so we can check nonces again
+// when we wake up, lock and check nonces again from the top
 
-// potential other way:
-//  store the master nonce locally
-//      if it changes after the individual packet nonces are checked, we should recheck them
-//      only want to do this if we need to sleep the process
-//  check each packet nonce against last saved nonces
-//      don't need to lock here since if they change while we check, that's actually good
-//
-//  if a nonce changed
-//      lock individual locks for each packet
-//      return
-//
-//  if a nonce didn't change
-//      futex bitset on the master nonce we stored before and the master nonce
-//          writers should just change this every write so it knows to wake people up
-//
-//  why is this bad? still no way to tell who was updated more recently, I think each nonce should just get incremented and check for overflow, resetting the others if it happens
-//      locking all packets may be a bit harder actually, need to lock a lot of individual blocks
-//      could keep a master lock? i have absolutely no idea how that would work
+// locking on all packets works similarly but we only check our cached master nonce
+// against the shared master nonce rather than checking nonces for each packet
+
+// biggest efficiency problem is all readers and writers contend for one lock
+// since they all need to call futex to block, they need one word to block on and wait for changes to
+// to do this for multiple packets, we would need to call futex on all the nonces and wake up at the first one that changes
+// which means we need threads and to wait for the return of one of those threads, which is slow as hell
+// so we share a lock instead
+
+// when we do call futex_wait, we use a bitset so we don't get woken up for packets that aren't us
+// the packet id is used in the bitset so when a packet with the same id mod 32 is written, it calls
+// wake on that bitset
 
 
 // locking is done with writers preference
@@ -215,23 +206,6 @@ RetType TelemetryShm::create() {
             logger.log_message("failed to detach from shared memory block");
             return FAILURE;
         }
-
-        // info blocks are just nonces now, only one lock stored in the master block
-        // shm_info_t* info = (shm_info_t*)info_blocks[i]->data;
-        //
-        // // initialize info block
-        // // init semaphores
-        // INIT(info->rmutex, 1);
-        // INIT(info->wmutex, 1);
-        // INIT(info->readTry, 1);
-        // INIT(info->resource, 1);
-        //
-        // // init reader/writer counts to 0
-        // info->readers = 0;
-        // info->writers = 0;
-        //
-        // // start the nonce at 0
-        // info->nonce = 0;
     }
 
     if(SUCCESS != master_block->create()) {
@@ -472,12 +446,6 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
 
         // update the stored master nonce
         last_nonce = info->nonce;
-
-        // if reading in standard mode we never block so don't check
-        // actually we want to update our last nonces so keep going for now
-        // if(read_mode == STANDARD_READ) {
-        //     return SUCCESS;
-        // }
 
         // check to see if any nonce has changed for the packets we're locking
         // if any nonce has changed we don't need to block
