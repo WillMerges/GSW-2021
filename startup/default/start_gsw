@@ -43,9 +43,9 @@ ${GSW_HOME}/proc/decom/decom &
 echo $! | cat - pidlist > temp && mv temp pidlist
 sleep 1
 
-# start the vcalc process
-echo "starting virtual telemetry calculation process"
-${GSW_HOME}/proc/vcalc/vcalc &
+# start the mmon process
+echo "starting measurement monitor process"
+${GSW_HOME}/proc/mmon/mmon &
 echo $! | cat - pidlist > temp && mv temp pidlist
 sleep 1
 

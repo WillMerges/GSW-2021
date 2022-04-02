@@ -130,23 +130,27 @@ RetType TelemetryViewer::add_all() {
     return SUCCESS;
 }
 
-RetType TelemetryViewer::add(std::string& measurement) {
+RetType TelemetryViewer::add(measurement_info_t* info) {
     MsgLogger logger("TelemetryViewer", "add");
 
-    measurement_info_t* info = vcm->get_info(measurement);
     if(info == NULL) {
-        logger.log_message("Invalid measurement " + measurement + ", cannot add");
+        logger.log_message("Invalid measurement, cannot add");
         return FAILURE;
     }
 
     for(location_info_t loc : info->locations) {
         if(FAILURE == add(loc.packet_index)) {
-            logger.log_message("failed to add measurement: " + measurement);
+            logger.log_message("failed to add measurement");
             return FAILURE;
         }
     }
 
     return SUCCESS;
+}
+
+RetType TelemetryViewer::add(std::string& measurement) {
+    measurement_info_t* info = vcm->get_info(measurement);
+    return add(info);
 }
 
 RetType TelemetryViewer::add(uint32_t packet_id) {

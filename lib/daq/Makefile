@@ -1,6 +1,6 @@
-# builds calculation library
+# builds DAQ library
 
-TARGET = libcalc.so
+TARGET = libdaq.so
 
 CXX = g++
 CC = g++

@@ -37,6 +37,15 @@ void sighandler(int) {
     killed = true;
 }
 
+namespace std {
+    template<>
+    struct hash<trigger_t> {
+        inline size_t operator()(const trigger_t& t) const {
+            return t.unique_id;
+        }
+    };
+}
+
 int main(int argc, char** argv) {
     MsgLogger logger("MMON", "main");
     logger.log_message("starting mmon process");
@@ -87,6 +96,8 @@ int main(int argc, char** argv) {
         return -1;
     }
 
+    tv.set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
+
     // parse the trigger file
     std::vector<trigger_t> triggers;
     if(SUCCESS != parse_trigger_file(veh, &triggers)) {
@@ -107,20 +118,18 @@ int main(int argc, char** argv) {
     std::unordered_set<uint32_t> trigger_packets;
 
     // maps packet id to list of triggers to execute
-    std::vector<std::unordered_set<trigger_t*>> packet_map;
+    std::vector<std::unordered_set<trigger_t>> packet_map;
 
     for(size_t i = 0; i < veh->num_packets; i++) {
-        std::unordered_set<trigger_t*> l;
+        std::unordered_set<trigger_t> l;
         packet_map.push_back(l);
     }
 
     for(trigger_t t : triggers) {
+        tv.add(t.meas);
         for(location_info_t loc : t.meas->locations) {
-            if(veh->packets[loc.packet_index]->is_virtual) {
-                // we found a virtual packet with a trigger!
-                trigger_packets.insert(loc.packet_index);
-                packet_map[loc.packet_index].insert(&t);
-            }
+            trigger_packets.insert(loc.packet_index);
+            packet_map[loc.packet_index].insert(t);
         }
     }
 
@@ -140,8 +149,8 @@ int main(int argc, char** argv) {
             if(tshm.updated[packet_id]) {
                 // this packet updated, process it's triggers
 
-                for(trigger_t* t : packet_map[packet_id]) {
-                    if(SUCCESS == t->func(&tv, &tw, &(t->args))) {
+                for(trigger_t t : packet_map[packet_id]) {
+                    if(SUCCESS == t.func(&tv, &tw, &(t.args))) {
                         flush = 1;
                     }
                 }

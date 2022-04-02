@@ -51,6 +51,10 @@ public:
     // NOTE: this will also add other measurements in the same packet
     RetType add(std::string& measurement);
 
+    // add a single measurement to be viewable
+    // NOTE: this will also add other measurements in the same packet
+    RetType add(measurement_info_t* measurement);
+
     // add all the measurements in a single telemetry packet to be viewable
     RetType add(uint32_t packet_id);
 

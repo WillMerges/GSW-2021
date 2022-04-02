@@ -11,7 +11,7 @@ CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
 CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -ggdb
 LDFLAGS = -L$(GSW_HOME)/lib/bin/ -Wl,-rpath=$(GSW_HOME)/lib/bin/
 
-LIBS = -ldls -lvcm -ltelemetry -lcalc -lconvert -lshm -ltrigger
+LIBS = -ldls -lvcm -ltelemetry -ltrigger -ldaq -lconvert -lshm
 
 
 CPP_FILES := $(wildcard src/*.cpp)

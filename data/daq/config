@@ -4,7 +4,7 @@ protocol = udp
 port = 8080
 name = daq
 endianness = big 
-vcalc = virtual
+triggers = triggers
 multicast = 224.0.0.1
 
 

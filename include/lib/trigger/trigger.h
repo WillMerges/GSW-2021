@@ -30,12 +30,16 @@ namespace trigger {
     // returns SUCCESS if new value was written, anything else otherwise
     typedef RetType (*trigger_handle)(TelemetryViewer*, TelemetryWriter*, arg_t*);
 
-    typedef struct {
-        measurement_info_t* meas; // measurement that causes the trigger
+    struct trigger_t {
         size_t unique_id;         // some unique id
+        measurement_info_t* meas; // measurement that causes the trigger
         trigger_handle func;      // function to call when measurement is updated
         arg_t args;               // arguments to call function with
-    } trigger_t;
+
+        inline bool operator==(const trigger_t& other) const {
+            return unique_id == other.unique_id;
+        }
+    };
 
     // parse the trigger file listed in the vcm config file into a vector of triggers
     // returns FILENOTFOUND if there is no trigger file exists

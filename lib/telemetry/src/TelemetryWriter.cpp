@@ -53,6 +53,10 @@ TelemetryWriter::~TelemetryWriter() {
 
         delete loggers;
     }
+
+    if(packet_sizes) {
+        delete packet_sizes;
+    }
 }
 
 RetType TelemetryWriter::init(TelemetryShm* shm) {
@@ -94,6 +98,7 @@ RetType TelemetryWriter::init(VCM* vcm, TelemetryShm* shm) {
     // create buffers for each virtual packet
     num_packets = vcm->num_packets;
     packet_buffers = new uint8_t*[num_packets];
+    packet_sizes = new size_t[num_packets];
     updated = new bool[num_packets];
     loggers = new PacketLogger*[num_packets];
 
@@ -133,6 +138,7 @@ RetType TelemetryWriter::write(measurement_info_t* meas, uint8_t* data, size_t l
     if(len != meas->size) {
         MsgLogger logger("TelemetryWriter", "write");
         logger.log_message("must write size of measurement");
+
         return FAILURE;
     }
 
@@ -160,6 +166,22 @@ RetType TelemetryWriter::write(std::string& meas, uint8_t* data, size_t len) {
     }
 
     return write(m, data, len);
+}
+
+RetType TelemetryWriter::write_raw(measurement_info_t* meas, uint8_t* data, size_t len) {
+    if(len != meas->size) {
+        MsgLogger logger("TelemetryWriter", "write_raw");
+        logger.log_message("must write size of measurement");
+
+        return FAILURE;
+    }
+
+    for(location_info_t loc : meas->locations) {
+        if(vcm->packets[loc.packet_index]->is_virtual) {
+            memcpy(packet_buffers[loc.packet_index] + loc.offset, data, len);
+            updated[loc.packet_index] = true;
+        }
+    }
 }
 
 RetType TelemetryWriter::flush() {

@@ -14,7 +14,7 @@
 
 // *** includes for trigger functions *** //
 #include "lib/trigger/basic.h"
-// #include "lib/daq/sensors.h"
+#include "lib/daq/sensors.h"
 // ************************************** //
 
 
@@ -28,6 +28,7 @@ const trigger_map_t trigger_func_list[] =
 {
     {"COPY", &COPY},
     {"SUM_UINT", &SUM_UINT},
+    {"DAQ_ADC_SCALE", &DAQ_ADC_SCALE},
     {NULL, NULL}
 };
 // ******************************************* //

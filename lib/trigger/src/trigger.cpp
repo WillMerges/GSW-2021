@@ -14,10 +14,18 @@
 #include <fstream>
 #include <sstream>
 
-using namespace trigger;
 using namespace dls;
 
-RetType parse_trigger_file(VCM* veh, std::vector<trigger_t>* triggers) {
+namespace std {
+    template<>
+    struct hash<trigger_t> {
+        inline size_t operator()(const trigger_t& t) const {
+            return t.unique_id;
+        }
+    };
+}
+
+RetType trigger::parse_trigger_file(VCM* veh, std::vector<trigger_t>* triggers) {
     MsgLogger logger("TRIGGER", "parse_trigger_file");
 
     // open the file
@@ -71,6 +79,8 @@ RetType parse_trigger_file(VCM* veh, std::vector<trigger_t>* triggers) {
                 trigger.func = t.func;
                 break;
             }
+
+            i++;
         }
 
         if(trigger.func == NULL) {
@@ -79,11 +89,14 @@ RetType parse_trigger_file(VCM* veh, std::vector<trigger_t>* triggers) {
 
         // build argument list
         arg_t args;
+        args.args = NULL;
         args.num_args = 0;
         std::string tok;
-        ss >> tok;
 
-        while(tok != "") {
+
+        while(!ss.eof()) {
+            ss >> tok;
+
             measurement_info_t* m = veh->get_info(tok);
 
             if(m == NULL) {
