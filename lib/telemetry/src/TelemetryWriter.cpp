@@ -145,6 +145,8 @@ RetType TelemetryWriter::write(measurement_info_t* meas, uint8_t* data, size_t l
     // TODO is there a more efficient way than checking each packet every write?
     // could store which measurements go where at init
     // this isn't so bad for now though
+    // tradeoff between using something like a hashmap and this
+    // if we assume a virtual measurement is only in virtual packets, this is faster since we avoid a lookup
     for(location_info_t loc : meas->locations) {
         if(vcm->packets[loc.packet_index]->is_virtual) {
             telemetry_copy(packet_buffers[loc.packet_index] + loc.offset, data, len);
@@ -204,4 +206,38 @@ RetType TelemetryWriter::flush() {
     }
 
     return (RetType)ret;
+}
+
+RetType TelemetryWriter::lock(bool check_for_updates) {
+    // TODO it may be better to have a list of all the virtual packets
+    // see same complaint in 'flush'
+    for(size_t i = 0; i < num_packets; i++) {
+        if(packet_sizes[i]) { // if we have a packet size, it's a virtual packet
+            if(SUCCESS != shm->write_lock(i)) {
+                return FAILURE;
+            }
+
+            // copy the current contents of the packet to our cache
+            // we want to not overwrite someone else's write with what's in our cache
+            if(check_for_updates || shm->updated[i]) {
+                memcpy(packet_buffers[i], (void*)(shm->get_buffer(i)), packet_sizes[i]);
+            }
+        }
+    }
+
+    return SUCCESS;
+}
+
+RetType TelemetryWriter::unlock() {
+    // TODO it may be better to have a list of all the virtual packets
+    // see same complaint in 'flush' and 'lock_all'
+    for(size_t i = 0; i < num_packets; i++) {
+        if(packet_sizes[i]) { // if we have a packet size, it's a virtual packet
+            if(SUCCESS != shm->write_unlock(i)) {
+                return FAILURE;
+            }
+        }
+    }
+
+    return SUCCESS;
 }

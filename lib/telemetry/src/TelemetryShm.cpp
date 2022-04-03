@@ -367,6 +367,13 @@ RetType TelemetryShm::write(uint32_t packet_id, uint8_t* data) {
 
     (*packet_nonce) = info->nonce; // update the packet nonce to equal the new master nonce
 
+    // update our last nonces
+    // we do this so if we read after a write we know we updated our packet
+    // TODO is this bad? if we write and then do a read it will block
+    // for now, this seems like the way to go since only mmon reads and writes and keeps it's own cache so this is preferable
+    last_nonce = info->nonce;
+    last_nonces[packet_id] = last_nonce;
+
     // wakeup anyone blocked on this packet (or any packet with an equivalen id mod 32)
     syscall(SYS_futex, &(info->nonce), FUTEX_WAKE_BITSET, INT_MAX, NULL, NULL, 1 << (packet_id % 32)); // TODO check return
     // syscall(SYS_futex, &(info->nonce), FUTEX_WAKE, INT_MAX, NULL, NULL, NULL); // TODO check return
@@ -424,6 +431,13 @@ RetType TelemetryShm::clear(uint32_t packet_id, uint8_t val) {
     info->nonce++; // update the master nonce
 
     (*packet_nonce) = info->nonce; // update the packet nonce to equal the new master nonce
+
+    // update our last nonces
+    // we do this so if we read after a write we know we updated our packet
+    // TODO is this bad? if we write and then do a read it will block
+    // for now, this seems like the way to go since only mmon reads and writes and keeps it's own cache so this is preferable
+    last_nonce = info->nonce;
+    last_nonces[packet_id] = last_nonce;
 
     // wakeup anyone blocked on this packet
     // technically we can only block on up to 32 packets, but we mod the packet id so that
@@ -817,16 +831,18 @@ RetType TelemetryShm::write_unlock(uint32_t packet_id) {
     return SUCCESS;
 }
 
-const uint8_t* TelemetryShm::get_buffer(uint32_t packet_id) {
-    MsgLogger logger("TelemtryShm", "get_buffer");
-
+uint8_t* TelemetryShm::get_buffer(uint32_t packet_id) {
     if(packet_id >= num_packets) {
+        MsgLogger logger("TelemtryShm", "get_buffer");
         logger.log_message("invalid packet id");
+
         return NULL;
     }
 
     if(packet_blocks == NULL) {
+        MsgLogger logger("TelemtryShm", "get_buffer");
         logger.log_message("shared memory block is null");
+
         return NULL;
     }
 

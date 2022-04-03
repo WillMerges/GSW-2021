@@ -58,6 +58,15 @@ public:
     // NOTE: writes are also logged
     RetType flush();
 
+    // lock all virtual packets
+    // if check_for_updates is true, all packets are copied to the local cache
+    // if it's false, it uses the packets updated the last time 'read_lock' was called to update to the cache
+    // NOTE: blocking
+    RetType lock(bool check_for_updates=true);
+
+    // unlock all virtual packets
+    RetType unlock();
+
 private:
     VCM* vcm;
     bool rm_vcm = false;

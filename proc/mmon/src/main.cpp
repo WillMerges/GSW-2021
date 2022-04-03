@@ -143,6 +143,12 @@ int main(int argc, char** argv) {
             continue;
         }
 
+        // lock packets for writing
+        // don't want anyone writing to our virtual packets at the same time
+        if(SUCCESS != tw.lock(false)) {
+            continue;
+        }
+
         // TODO can we parallelize some of this?
         // is the overhead worth it?
         for(uint32_t packet_id : trigger_packets) {
@@ -162,6 +168,11 @@ int main(int argc, char** argv) {
             tw.flush();
             flush = 0;
         }
+
+        // unlock packets so others waiting can write to virtual packets
+        // don't check return, continues anyways
+        // TODO something bad probably happens if this returns, since we increment semaphore again
+        tw.unlock();
     }
 
     return 1;

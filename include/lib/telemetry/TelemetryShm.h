@@ -111,9 +111,10 @@ public:
     // returns FAILURE if not locked currently, unless 'force' is set to true
     RetType read_unlock(bool force = false);
 
-    // get the buffer to read from for a packet
+    // get the buffer for a packet
+    // address is in shared memory
     // returns NULL on error
-    const uint8_t* get_buffer(uint32_t packet_id);
+    uint8_t* get_buffer(uint32_t packet_id);
 
     // set 'updated' to true if packet corresponding to 'packet_id' was updated before the last call to 'read_lock'
     // after calling read_lock this will not change since no writers may update the packets when shm is read locked
@@ -162,6 +163,17 @@ public:
     // array of booleans, true if packet was updated in last call to 'read_lock'
     // index is packet ID
     bool* updated;
+
+    // TODO to use the following function need an overall write_lock/unlock that locks the master nonce
+    // ideal use is to avoid using the 'write' function and copying directly to buffer from 'get_buffer' then calling 'commit_write'
+    // this could speedup decom by passing the shared memory buffer write to recv syscall
+    // also could speedup mmon
+    // commit a write to a packet
+    // updates nonces and wakes up any waiting readers
+    // NOTE: best not to call if write lock is not held
+    //       you could wake up a reader that's waiting on data being written
+    // RetType commit_write(uint32_t packet_id)
+
 private:
     // info block for locking main shared memory
     typedef struct {
