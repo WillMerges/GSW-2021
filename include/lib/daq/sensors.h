@@ -18,8 +18,16 @@
 using namespace trigger;
 
 // scales an ADC voltage to actual voltage
-// argument one is raw input
-// argument two is voltage output
+// @arg1 is raw input
+// @arg2 is voltage output
 RetType DAQ_ADC_SCALE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args);
+
+// calculates thermocouple values for a MAX31855K thermocouple board
+// @arg1 raw input (32 bit int)
+// @arg2 connected status
+// @arg3 remote temperature in Celsius (double)
+// @arg4 ambient temperature in Celsius (double)
+RetType KTYPE_THERMOCOUPLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* arg);
+
 
 #endif

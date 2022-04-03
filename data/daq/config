@@ -38,10 +38,18 @@ FB0_VOLTS   8 float
 FB1_VOLTS   8 float
 CL0_VOLTS   8 float
 CL1_VOLTS   8 float
-TC0_TEMP    8 float
-TC1_TEMP    8 float
-TC2_TEMP    8 float
-TC3_TEMP    8 float
+TC0_REMOTE  8 float
+TC1_REMOTE  8 float
+TC2_REMOTE  8 float
+TC3_REMOTE  8 float
+TC0_AMBIENT 8 float
+TC1_AMBIENT 8 float
+TC2_AMBIENT 8 float
+TC3_AMBIENT 8 float
+TC0_STATUS  1 int unsigned
+TC1_STATUS  1 int unsigned
+TC2_STATUS  1 int unsigned
+TC3_STATUS  1 int unsigned
 
 
 ## telemetry packets ##
@@ -99,8 +107,16 @@ CL1_VOLTS
 
 # calculated thermocouple temperatures
 virtual {
-TC0_TEMP
-TC1_TEMP
-TC2_TEMP
-TC3_TEMP
+TC0_REMOTE
+TC1_REMOTE
+TC2_REMOTE
+TC3_REMOTE
+TC0_AMBIENT
+TC1_AMBIENT
+TC2_AMBIENT
+TC3_AMBIENT
+TC0_STATUS
+TC1_STATUS
+TC2_STATUS
+TC3_STATUS
 }

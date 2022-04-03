@@ -182,6 +182,8 @@ RetType TelemetryWriter::write_raw(measurement_info_t* meas, uint8_t* data, size
             updated[loc.packet_index] = true;
         }
     }
+
+    return SUCCESS;
 }
 
 RetType TelemetryWriter::flush() {

@@ -29,6 +29,7 @@ const trigger_map_t trigger_func_list[] =
     {"COPY", &COPY},
     {"SUM_UINT", &SUM_UINT},
     {"DAQ_ADC_SCALE", &DAQ_ADC_SCALE},
+    {"KTYPE_THERMOCOUPLE", &KTYPE_THERMOCOUPLE},
     {NULL, NULL}
 };
 // ******************************************* //
