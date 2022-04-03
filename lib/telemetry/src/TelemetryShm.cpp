@@ -20,6 +20,8 @@
 
 using namespace dls;
 
+// TODO add more logging messages
+
 // how read locking works in blocking mode for an individual packets:
 // obtain lock to all nonces (one lock shared by everyone)
 // cache the latest master nonce
@@ -78,16 +80,42 @@ TelemetryShm::TelemetryShm() {
 }
 
 TelemetryShm::~TelemetryShm() {
+    // unlock all the packets we have write locks on
+    for(size_t i = 0; i < num_packets; i++) {
+        if(locked_packets[i]) {
+            // unlock this packet
+            write_unlock(i);
+        }
+    }
+
+    // if we're read locked, unlock now
+    if(read_locked) {
+        read_unlock();
+    }
+
     if(packet_blocks) {
         for(size_t i = 0; i < num_packets; i++) {
             delete packet_blocks[i];
         }
+        delete[] packet_blocks;
     }
 
     if(info_blocks) {
         for(size_t i = 0; i < num_packets; i++) {
             delete info_blocks[i];
         }
+        delete[] info_blocks;
+    }
+
+    if(write_locks) {
+        for(size_t i = 0; i < num_packets; i++) {
+            delete write_locks[i];
+        }
+        delete[] write_locks;
+    }
+
+    if(locked_packets) {
+        delete[] locked_packets;
     }
 
     if(master_block) {
@@ -124,15 +152,24 @@ RetType TelemetryShm::init(VCM* vcm) {
     // create Shm objects for each telemetry packet
     packet_blocks = new Shm*[num_packets];
     info_blocks = new Shm*[num_packets];
+    write_locks = new Shm*[num_packets];
+
+    // store which packets we currently have locked
+    locked_packets = new bool[num_packets];
 
     packet_info_t* packet;
     size_t i;
     for(i = 0; i < num_packets; i++) {
         packet = vcm->packets[i];
         // for shmem id use (i+1)*2 for packets (always even) and (2*i)+1 for info blocks (always odd)
+        // virtual locks use a shmid of -(i+1)*2 (always even and negative)
         // guarantees all blocks can use the same file but different ids to make a key
         packet_blocks[i] = new Shm(vcm->config_file.c_str(), 2*(i+1), packet->size);
         info_blocks[i] = new Shm(vcm->config_file.c_str(), (2*i)+1, sizeof(uint32_t)); // holds one nonce
+        write_locks[i] = new Shm(vcm->config_file.c_str(), -2*(i+1), sizeof(sem_t)); // holds a single semaphore
+
+        // we currently hold no locks
+        locked_packets[i] = false;
     }
 
     return SUCCESS;
@@ -150,6 +187,8 @@ RetType TelemetryShm::open() {
         }
         else if(SUCCESS != info_blocks[i]->attach()) {
             return FAILURE;
+        } else if(SUCCESS != write_locks[i]->attach()) {
+            return FAILURE;
         }
     }
 
@@ -166,6 +205,8 @@ RetType TelemetryShm::close() {
             return FAILURE;
         }
         else if(SUCCESS != info_blocks[i]->detach()) {
+            return FAILURE;
+        } else if(SUCCESS != write_locks[i]->detach()) {
             return FAILURE;
         }
     }
@@ -189,10 +230,13 @@ RetType TelemetryShm::create() {
         else if(SUCCESS != info_blocks[i]->create()) {
             logger.log_message("failed to create info block");
             return FAILURE;
+        } else if(SUCCESS != write_locks[i]->create()) {
+            logger.log_message("failed to create write lock");
+            return FAILURE;
         }
 
         // attach first
-        if(info_blocks[i]->attach() == FAILURE) {
+        if(SUCCESS != info_blocks[i]->attach()) {
             logger.log_message("failed to attach to shared memory block");
             return FAILURE;
         }
@@ -202,8 +246,21 @@ RetType TelemetryShm::create() {
 
         // we should unatach after setting the default
         // although we technically still could stay attached and be okay
-        if(info_blocks[i]->detach() == FAILURE) {
+        if(SUCCESS != info_blocks[i]->detach()) {
             logger.log_message("failed to detach from shared memory block");
+            return FAILURE;
+        }
+
+        // now set the write lock for this packet
+        if(SUCCESS != write_locks[i]->attach()) {
+            logger.log_message("failed to attach to write lock shared memory block");
+            return FAILURE;
+        }
+
+        INIT(*((sem_t*)(write_locks[i]->data)), 1);
+
+        if(SUCCESS != write_locks[i]->detach()) {
+            logger.log_message("failed to detach from write lock shared memory block");
             return FAILURE;
         }
     }
@@ -255,6 +312,9 @@ RetType TelemetryShm::destroy() {
         }
         else if(SUCCESS != info_blocks[i]->destroy()) {
             logger.log_message("failed to destroy info block");
+            return FAILURE;
+        } else if(SUCCESS != write_locks[i]->destroy()) {
+            logger.log_message("failed to destroy write lock block");
             return FAILURE;
         }
     }
@@ -383,7 +443,6 @@ RetType TelemetryShm::clear(uint32_t packet_id, uint8_t val) {
     return SUCCESS;
 }
 
-// TODO add a pointer argument to track which packets changed!
 RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t timeout) {
     MsgLogger logger("TelemetryShm", "read_lock(2 args)");
 
@@ -446,6 +505,14 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
 
         // update the stored master nonce
         last_nonce = info->nonce;
+        if(last_nonce == 0) {
+            // we got a signal sometime before now which set the master nonce to 0
+            // exit immediately
+            logger.log_message("caught signal, exiting");
+            return INTERRUPTED;
+        }
+        // if a signal happens after this point, the master nonce memory will be set to 0
+        // which will not match our 'last_nonce' and futex will return immediately
 
         // check to see if any nonce has changed for the packets we're locking
         // if any nonce has changed we don't need to block
@@ -704,6 +771,49 @@ RetType TelemetryShm::read_unlock(bool force) {
     V(info->rmutex);
 
     read_locked = false;
+    return SUCCESS;
+}
+
+RetType TelemetryShm::write_lock(uint32_t packet_id) {
+    MsgLogger logger("TelemetryShm", "write_lock");
+
+    if(packet_id >= num_packets) {
+        logger.log_message("invalid packet id");
+        return FAILURE;
+    }
+
+    if(locked_packets[packet_id]) {
+        logger.log_message("packet already locked");
+        return FAILURE;
+    }
+
+    // NOTE: we assume that we can obtain this lock fast
+    // we don't check if we caught a signal before blocking
+
+    Shm* lock = write_locks[packet_id];
+    P(*((sem_t*)(lock->data)));
+    locked_packets[packet_id] = true;
+
+    return SUCCESS;
+}
+
+RetType TelemetryShm::write_unlock(uint32_t packet_id) {
+    MsgLogger logger("TelemetryShm", "write_unlock");
+
+    if(packet_id >= num_packets) {
+        logger.log_message("invalid packet id");
+        return FAILURE;
+    }
+
+    if(!locked_packets[packet_id]) {
+        logger.log_message("packet already unlocked");
+        return FAILURE;
+    }
+
+    Shm* lock = write_locks[packet_id];
+    V(*((sem_t*)(lock->data)));
+    locked_packets[packet_id] = false;
+
     return SUCCESS;
 }
 

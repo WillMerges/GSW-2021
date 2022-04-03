@@ -46,6 +46,9 @@ public:
     TelemetryShm();
 
     // destructor
+    // NOTE: if any packets currently have a read/write lock, the packet is unlocked
+    // if a signal was caught in the middle of a read lock it needs to be delt with by catching the signal
+    // call 'sighandler' within a signal handler to make sure no current read locks block and instead return immediately
     virtual ~TelemetryShm();
 
     // initialize the object using 'vcm'
@@ -74,11 +77,15 @@ public:
     // does not do any size check, data must be at least as large as the packet size
     // if any bytes fail to write FAILURE is returned
     // NOTE: this is a blocking operation
+    // NOTE: assumed packet is locked (e.g. does not verify lock is held)
+    //       if the lock is not held, there will be data races
+    //       in cases where it's guaranteed there's only every 1 writer (e.g. decom) it's okay to write without a lock
     RetType write(uint32_t packet_id, uint8_t* data);
 
     // clear telemetry block corresponding to 'packet_id' with value 'val'
     // returns FAULURE if any bytes fail to clear
     // NOTE: this is a blocking operation
+    // NOTE: makes same locking assumptions as 'write'
     RetType clear(uint32_t packet_id, uint8_t val = 0x0);
 
     // lock the shared memory for packets as a reader (e.g. dont allow any writers)
@@ -128,6 +135,14 @@ public:
     // and the smallest value is more recently updated
     RetType update_value(uint32_t packet_id, uint32_t* value);
 
+    // lock a packet for writing
+    // this will block other writers from writing to this packet while the lock is held
+    // NOTE: blocking operation
+    RetType write_lock(uint32_t packet_id);
+
+    // unlock a packet for writing
+    RetType write_unlock(uint32_t packet_id);
+
     // reading modes
     typedef enum {
         STANDARD_READ,   // read no matter what, regardless if the data updated since the last read
@@ -161,9 +176,11 @@ private:
 
     read_mode_t read_mode;
 
-    size_t num_packets;
+    size_t num_packets; // number of packets
     uint32_t last_nonce; // last master nonce
     uint32_t* last_nonces; // list of previous nonces for all packets
+    Shm** write_locks; // locks used for locking individual writes to packets
+    bool* locked_packets; // which packets do we currently have locked
     Shm** packet_blocks; // list of blocks holding raw telemetry data
     Shm** info_blocks; // list of blocks holding uint32_t nonces TODO rename this to something better lol
     Shm* master_block; // holds a single shm_info_t for locking
