@@ -171,7 +171,7 @@ int main(int argc, char** argv) {
 
         // unlock packets so others waiting can write to virtual packets
         // don't check return, continues anyways
-        // TODO something bad probably happens if this returns, since we increment semaphore again
+        // TODO something bad probably happens if this errors, since we increment semaphore again
         tw.unlock();
     }
 
