@@ -60,6 +60,9 @@ LC0_FORCE     8 float
 PT0_PSI_MEAN  8 float
 PT1_PSI_MEAN  8 float
 LC0_FORCE_MEAN  8 float
+PT0_PSI_MAX     8 float
+PT1_PSI_MAX     8 float
+LC0_FORCE_MAX   8 float
 
 
 ## telemetry packets ##
@@ -160,6 +163,7 @@ TC3_CORRECTED
 virtual {
 LC0_FORCE
 LC0_FORCE_MEAN
+LC0_FORCE_MAX
 }
 
 # calculated pressure transducer values
@@ -168,4 +172,6 @@ PT0_PSI
 PT1_PSI
 PT0_PSI_MEAN
 PT1_PSI_MEAN
+PT0_PSI_MAX
+PT1_PSI_MAX
 }
