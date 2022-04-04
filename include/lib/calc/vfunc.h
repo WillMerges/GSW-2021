@@ -194,7 +194,7 @@ static double dr2[K_INVERSE_R2_NUM] =
 
 // converts a 32-bit thermocouple reading from a MAX31855K to a relative temperature in degrees Celsius
 // outputs to double format
-static RetType KTYPE_THERMOCOUPLE_TEMP(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
+static RetType MAX31855K_THERMOCOUPLE_TEMP(measurement_info_t* meas, uint8_t* dst, std::vector<arg_t>& args) {
     uint32_t data;
     // convert functions shouldn't fail if the config is correct, hint that to the branch predictor
     if(unlikely(convert_to(veh, args[0].meas, args[0].addr, &data) != SUCCESS)) {
@@ -289,7 +289,7 @@ const vfunc_t vfunc_list[] =
     {"COPY", &COPY},
     {"SUM_UINT", &SUM_UINT},
     {"DAQ_ADC_SCALE", &DAQ_ADC_SCALE},
-    {"KTYPE_THERMOCOUPLE_TEMP", &KTYPE_THERMOCOUPLE_TEMP},
+    {"MAX31855K_THERMOCOUPLE_TEMP", &MAX31855K_THERMOCOUPLE_TEMP},
     {"LOAD_CELL_PERCENT_CURRENT_EXCITATION", LOAD_CELL_PERCENT_CURRENT_EXCITATION},
     {NULL, NULL}
 };

@@ -29,7 +29,9 @@ const trigger_map_t trigger_func_list[] =
     {"COPY", &COPY},
     {"SUM_UINT", &SUM_UINT},
     {"DAQ_ADC_SCALE", &DAQ_ADC_SCALE},
-    {"KTYPE_THERMOCOUPLE", &KTYPE_THERMOCOUPLE},
+    {"MAX31855K_THERMOCOUPLE", &MAX31855K_THERMOCOUPLE},
+    {"PCB1403_CURRENT_EXCITE", &PCB1403_CURRENT_EXCITE},
+    {"PRESSURE_TRANSDUCER_8252", &PRESSURE_TRANSDUCER_8252},
     {NULL, NULL}
 };
 // ******************************************* //

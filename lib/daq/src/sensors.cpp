@@ -93,8 +93,8 @@ static double dr2[K_INVERSE_R2_NUM] =
 // @arg2 connected status
 // @arg3 remote temperature in Celsius (double)
 // @arg4 ambient temperature in Celsius (double)
-// @arg5 corrected temperature difference (double)
-RetType KTYPE_THERMOCOUPLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
+// @arg5 corrected absolute temperature (Celsius) (double)
+RetType MAX31855K_THERMOCOUPLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
     // NOTE: we don't do an arg check
     // if it segfaults, that's the fault of whoever made the triggers file wrong
 
@@ -106,7 +106,7 @@ RetType KTYPE_THERMOCOUPLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args
 
     uint8_t connected = 1;
 
-    if(data & (1 << 15)) {
+    if(data & (1 << 16)) {
         connected = 0;
     }
 
@@ -115,7 +115,7 @@ RetType KTYPE_THERMOCOUPLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args
     }
 
     if(!connected) {
-        return FAILURE;
+        return SUCCESS;
     }
 
     // remote temp, 14 highest bits
@@ -182,8 +182,55 @@ RetType KTYPE_THERMOCOUPLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args
         return FAILURE;
     }
 
-    // t is corrected temperature difference from ambient to remote
+    t += ambient;
+
+    // t is corrected absolute temperature
     if(unlikely(SUCCESS != tw->write(args->args[4], (uint8_t*)&t, sizeof(double)))) {
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
+
+// @arg1 input measured voltage (double)
+// @arg2 measured force in lbF (double)
+RetType PCB1403_CURRENT_EXCITE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
+    double vmeas;
+
+    if(unlikely(tv->get_double(args->args[0], &vmeas))) {
+        return FAILURE;
+    }
+
+    // vmeas / 10 mA = Rmeas
+    // Rnominal = 350 ohm
+    // Ratio of Rmeas:Rnominal is proportional to force measured
+    // full scale force is 2500 lbF
+    // we negate so that pushing is positive
+    double f = -((vmeas / 0.01) / 350) * 2500;
+
+    if(unlikely(tw->write(args->args[1], (uint8_t*)&f, sizeof(double)))) {
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
+// @arg1 input measured voltage (double)
+// @arg2 measured pressure (PSI)
+RetType PRESSURE_TRANSDUCER_8252(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
+    double vmeas;
+
+    if(unlikely(tv->get_double(args->args[0], &vmeas))) {
+        return FAILURE;
+    }
+
+    // measured current is vmeas / resistance of current sense resistor (121 ohms)
+    // measured current is in the linear scale from 4-20mA
+    // 1500 psi is max pressure
+    double p = (((vmeas / 121) - 0.004) / 0.016) * 1500;
+
+    if(unlikely(tw->write(args->args[1], (uint8_t*)&p, sizeof(double)))) {
         return FAILURE;
     }
 

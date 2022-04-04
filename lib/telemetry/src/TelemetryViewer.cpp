@@ -209,39 +209,6 @@ RetType TelemetryViewer::update(uint32_t timeout) {
         if(status != SUCCESS) {
             return status; // could be BLOCKED or FAILURE or TIMEOUT
         }
-        // while(1) {
-        //     status = shm->read_lock(packet_ids, num_packets, timeout);
-        //     if(status != SUCCESS) {
-        //         return status; // could be BLOCKED or FAILURE
-        //     }
-        //
-        //     // need to check that one of our packets did actually update if we're in blocking mode
-        //     // with less than 32 packets we can skip this since we can guarantee we were awoken for our packet
-        //     // this is because our packet index isn't equivalent to another packet modulo 32 and the lock only allows 32 bits
-        //     // TODO I think this is actually checked in TelemetryShm so this is redundant... investigate this
-        //     if((update_mode == BLOCKING_UPDATE) && (vcm->num_packets > 32)) {
-        //         bool updated = false;
-        //         for(size_t i = 0; i < num_packets && !updated; i++) {
-        //             if(FAILURE == shm->packet_updated(packet_ids[i], &updated)) {
-        //                 // unlock shared mem
-        //                 if(FAILURE == shm->read_unlock()) {
-        //                     logger.log_message("failed to unlock shared memory");
-        //                     return FAILURE;
-        //                 }
-        //
-        //                 logger.log_message("failed to determine if packet was updated");
-        //                 return FAILURE;
-        //             }
-        //
-        //             if(updated) {
-        //                 // we found a packet that did indeed update
-        //                 break;
-        //             }
-        //         }
-        //     } else {
-        //         break;
-        //     }
-        // } // end while
     }
 
     // copy in packets we're tracking from shared memory

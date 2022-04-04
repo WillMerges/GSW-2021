@@ -105,6 +105,8 @@ RetType TelemetryWriter::init(VCM* vcm, TelemetryShm* shm) {
     for(size_t i = 0; i < num_packets; i++) {
         if(vcm->packets[i]->is_virtual) {
             packet_buffers[i] = new uint8_t[vcm->packets[i]->size];
+            // zero out the buffer
+            memset(packet_buffers[i], 0x0, vcm->packets[i]->size);
             packet_sizes[i] = vcm->packets[i]->size;
             loggers[i] = new PacketLogger(vcm->device + "(" + std::to_string(i) + ")");
         } else {

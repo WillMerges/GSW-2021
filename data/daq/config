@@ -3,7 +3,7 @@
 protocol = udp
 port = 8080
 name = daq
-endianness = big 
+endianness = big
 triggers = triggers
 multicast = 224.0.0.1
 
@@ -54,6 +54,9 @@ TC0_CORRECTED 8 float
 TC1_CORRECTED 8 float
 TC2_CORRECTED 8 float
 TC3_CORRECTED 8 float
+PT0_PSI       8 float
+PT1_PSI       8 float
+LC0_FORCE     8 float
 
 
 ## telemetry packets ##
@@ -111,20 +114,52 @@ CL1_VOLTS
 
 # calculated thermocouple temperatures
 virtual {
-TC0_REMOTE
-TC1_REMOTE
-TC2_REMOTE
-TC3_REMOTE
-TC0_AMBIENT
-TC1_AMBIENT
-TC2_AMBIENT
-TC3_AMBIENT
 TC0_STATUS
-TC1_STATUS
-TC2_STATUS
-TC3_STATUS
+}
+
+virtual {
+TC0_REMOTE
+TC0_AMBIENT
 TC0_CORRECTED
+}
+
+virtual {
+TC1_STATUS
+}
+
+virtual {
+TC1_REMOTE
+TC1_AMBIENT
 TC1_CORRECTED
+}
+
+virtual {
+TC2_STATUS
+}
+
+virtual {
+TC2_REMOTE
+TC2_AMBIENT
 TC2_CORRECTED
+}
+
+virtual {
+TC3_STATUS
+}
+
+virtual {
+TC3_REMOTE
+TC3_AMBIENT
 TC3_CORRECTED
+}
+
+# calculated load cell values
+virtual {
+LC0_FORCE
+}
+
+# calculated pressure transducer values
+virtual {
+PT0_PSI
+PT1_PSI
 }

@@ -85,6 +85,7 @@ RetType trigger::parse_trigger_file(VCM* veh, std::vector<trigger_t>* triggers) 
 
         if(trigger.func == NULL) {
             logger.log_message("No such trigger function: " + snd);
+            return FAILURE;
         }
 
         // build argument list
