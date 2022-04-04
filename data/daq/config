@@ -57,6 +57,9 @@ TC3_CORRECTED 8 float
 PT0_PSI       8 float
 PT1_PSI       8 float
 LC0_FORCE     8 float
+PT0_PSI_MEAN  8 float
+PT1_PSI_MEAN  8 float
+LC0_FORCE_MEAN  8 float
 
 
 ## telemetry packets ##
@@ -156,10 +159,13 @@ TC3_CORRECTED
 # calculated load cell values
 virtual {
 LC0_FORCE
+LC0_FORCE_MEAN
 }
 
 # calculated pressure transducer values
 virtual {
 PT0_PSI
 PT1_PSI
+PT0_PSI_MEAN
+PT1_PSI_MEAN
 }

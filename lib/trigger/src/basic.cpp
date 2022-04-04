@@ -8,6 +8,7 @@
 *  RIT Launch Initiative
 *********************************************************************/
 #include <string.h>
+#include "lib/trigger/basic.h"
 #include "lib/trigger/trigger.h"
 #include "lib/convert/convert.h"
 #include "lib/telemetry/TelemetryViewer.h"
@@ -16,6 +17,10 @@
 
 using namespace dls;
 using namespace trigger;
+
+// macros
+#define likely(x)       __builtin_expect((x),1)
+#define unlikely(x)     __builtin_expect((x),0)
 
 RetType COPY(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
     MsgLogger logger("trigger_basic", "COPY");
@@ -60,4 +65,29 @@ RetType SUM_UINT(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
     }
 
     return tw->write(args->args[0], (uint8_t*)&sum, sizeof(sum));
+}
+
+// @ar1 newest sample (double)
+// @arg2 last mean (double)
+RetType ROLLING_AVG_DOUBLE_430(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
+    // NOTE: no arg checking (has to be fast)
+
+    double m;
+    if(unlikely(SUCCESS != tv->get_double(args->args[1], &m))) {
+        return FAILURE;
+    }
+
+    double x;
+    if(unlikely(SUCCESS != tv->get_double(args->args[0], &x))) {
+        return FAILURE;
+    }
+
+
+    m = m + ((x - m) / 430);
+
+    if(unlikely(tw->write(args->args[1], (uint8_t*)&m, sizeof(double)))) {
+        return FAILURE;
+    }
+
+    return SUCCESS;
 }

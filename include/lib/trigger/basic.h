@@ -21,3 +21,9 @@ RetType COPY(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args);
 // first arg is output measurement
 // sums all other arguments and writes out to first arg
 RetType SUM_UINT(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args);
+
+// use Welford's method to take a rolling average of doubles
+// averages the last 430 samples (nice for sampling 43kHz data at 10Hz)
+// @arg1 newest sample (double)
+// @arg2 mean (double)
+RetType ROLLING_AVG_DOUBLE_430(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args);
