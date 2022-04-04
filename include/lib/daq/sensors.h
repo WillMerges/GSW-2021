@@ -27,7 +27,10 @@ RetType DAQ_ADC_SCALE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args);
 // @arg2 connected status
 // @arg3 remote temperature in Celsius (double)
 // @arg4 ambient temperature in Celsius (double)
+// @arg5 corrected temperature difference (double)
 RetType KTYPE_THERMOCOUPLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* arg);
 
+// TODO load cell force
+// TODO pressure transducer pressure
 
 #endif

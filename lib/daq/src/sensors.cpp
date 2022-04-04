@@ -93,6 +93,7 @@ static double dr2[K_INVERSE_R2_NUM] =
 // @arg2 connected status
 // @arg3 remote temperature in Celsius (double)
 // @arg4 ambient temperature in Celsius (double)
+// @arg5 corrected temperature difference (double)
 RetType KTYPE_THERMOCOUPLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
     // NOTE: we don't do an arg check
     // if it segfaults, that's the fault of whoever made the triggers file wrong
@@ -118,48 +119,35 @@ RetType KTYPE_THERMOCOUPLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args
     }
 
     // remote temp, 14 highest bits
-    uint16_t tr = data >> 18;
-    int16_t TR = tr;
-    if(tr & 0b0010000000000000) { // sign bit is set
-        TR *= -1;
-    }
+    int16_t tr = (data >> 18);
+    // if(tr & 0b0010000000000000) { // sign bit is set
+    //     TR *= -1;
+    // }
 
-    double remote = TR * 0.25;
+    // ratio from manual
+    double remote = tr * 0.25;
 
     if(unlikely(SUCCESS != tw->write(args->args[2], (uint8_t*)&remote, sizeof(double)))) {
         return FAILURE;
     }
 
-    // ambient temp
-    uint16_t tamb = (data >> 4) & 0xF0;
-    int16_t TAMB = tamb;
-    if(tamb & 0b0000100000000000) { // sign bit is set
-        TAMB *= -1;
-    }
+    // ambient temp, 12 bits starting at bit 4
+    int16_t tamb = ((data >> 4) & 0x0FFF);
+    // int16_t TAMB = *(&tamb(int16_t*)&tamb);
+    // if(tamb & 0b0000100000000000) { // sign bit is set
+    //     TAMB *= -1;
+    // }
 
-    double ambient = TAMB * 0.0625;
+    // ratio from manual
+    double ambient = tamb * 0.0625;
 
     if(unlikely(SUCCESS != tw->write(args->args[3], (uint8_t*)&ambient, sizeof(double)))) {
         return FAILURE;
     }
 
-    return SUCCESS;
-
-    // Vout = (41.276 uV / C) * (TR - TAMB)
-    // Vout = (41.276 uV / C) * (degree_ratio)(TR_reading - TAMB_reading)
-
-    // degree ratio is how many degrees C per magnitude of reading (assuming linear scale)
-    // comes from manual page 10, 0b01100100000000 equates to 1600 C
-    // this yields a ratio of 4 C per magnitude
-
-    // Vout = (4 * 41.276 uV / C) * (degree_ratio)(TR_reading - TAMB_reading)
-
-    // vout is the voltage output of the thermocouple in mV
-    // derived from the termperatures reported by the MAX31855K which assumed a linear scale
-    // we can use the temperature readings to calculate vout and find the termperature using a non-linear method
-
-    // the multiplication of constants should get optimized out
-    double vout = (4 * 0.041276) * (TR - TAMB);
+    // MAX31855 manual page 8
+    // Vout = (41.276 uV / C) * (Tremote - Tambient)
+    double vout = (41.276 / 1000) * (remote - ambient); // millivolts
 
     // find which range vout is in
     if(vout < -5.891) {
@@ -194,7 +182,10 @@ RetType KTYPE_THERMOCOUPLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args
         return FAILURE;
     }
 
-    // t is relative temp (calculated)
+    // t is corrected temperature difference from ambient to remote
+    if(unlikely(SUCCESS != tw->write(args->args[4], (uint8_t*)&t, sizeof(double)))) {
+        return FAILURE;
+    }
 
     return SUCCESS;
 }
