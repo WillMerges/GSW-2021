@@ -82,7 +82,7 @@ RetType ROLLING_AVG_DOUBLE_430(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* 
         return FAILURE;
     }
 
-
+    // Welford's method
     m = m + ((x - m) / 430);
 
     if(unlikely(tw->write(args->args[1], (uint8_t*)&m, sizeof(double)))) {
