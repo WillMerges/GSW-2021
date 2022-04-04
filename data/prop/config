@@ -2,20 +2,21 @@
 
 protocol = udp
 port = 8080
-name = engine_controller_sim
+name = engine_controller
 endianness = little
 multicast = 224.0.0.1
 
 
 ## measurements ##
 
-# relays
-SOLENOID1 2 int unsigned
-SOLENOID2 2 int unsigned
-SOLENOID3 2 int unsigned
-IGNITER1  2 int unsigned
+# valve relays
+SOLENOID_OX          2 int unsigned
+SOLENOID_FUEL        2 int unsigned
+SOLENOID_OX_PURGE    2 int unsigned
+SOLENOID_FUEL_PURGE  2 int unsigned
+IGNITER_MAIN         2 int unsigned
 
-# dummy light tower
+# dummy light tower relays
 LED_G     2 int unsigned
 LED_Y     2 int unsigned
 LED_R     2 int unsigned
@@ -42,15 +43,16 @@ SEQ_NUM
 
 # solenoids
 8081 {
-SOLENOID1
-SOLENOID2
-SOLENOID3
+SOLENOID_OX
+SOLENOID_FUEL
+SOLENOID_OX_PURGE
+SOLENOID_FUEL_PURGE
 SEQ_NUM
 }
 
 # igniters
 8082 {
-IGNITER1
+IGNITER_MAIN
 SEQ_NUM
 }
 
@@ -65,10 +67,11 @@ SEQ_NUM
 
 # everything
 8084 {
-SOLENOID1
-SOLENOID2
-SOLENOID3
-IGNITER1
+SOLENOID_OX
+SOLENOID_FUEL
+SOLENOID_OX_PURGE
+SOLENOID_FUEL_PURGE
+IGNITER_MAIN
 LED_G
 LED_Y
 LED_R

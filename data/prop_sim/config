@@ -2,22 +2,20 @@
 
 protocol = udp
 port = 8080
-
-name = engine_controller_sim
-
+name = engine_controller
 endianness = little
 
 
 ## measurements ##
 
-# relays
-SOLENOID1 1 int unsigned
-SOLENOID2 1 int unsigned
-SOLENOID3 1 int unsigned
-SOLENOID4 1 int unsigned
-IGNITER1  1 int unsigned
+# valve relays
+SOLENOID_OX          1 int unsigned
+SOLENOID_FUEL        1 int unsigned
+SOLENOID_OX_PURGE    1 int unsigned
+SOLENOID_FUEL_PURGE  1 int unsigned
+IGNITER_MAIN         1 int unsigned
 
-# dummy light tower
+# dummy light tower relays
 LED_G     1 int unsigned
 LED_Y     1 int unsigned
 LED_R     1 int unsigned
@@ -26,20 +24,24 @@ LED_BUZZ  1 int unsigned
 # command sequence number
 SEQ_NUM 4 int unsigned
 
-
 ## telemetry packets ##
+
+# sequence number only
+8084 {
+SEQ_NUM
+}
 
 # solenoids
 8081 {
-SOLENOID1
-SOLENOID2
-SOLENOID3
-SOLENOID4
+SOLENOID_OX
+SOLENOID_FUEL
+SOLENOID_OX_PURGE
+SOLENOID_FUEL_PURGE
 }
 
-# igniter(s)
+# igniters
 8082 {
-IGNITER1
+IGNITER_MAIN
 }
 
 # light tower
@@ -49,9 +51,3 @@ LED_Y
 LED_R
 LED_BUZZ
 }
-
-# sequence number only
-8084 {
-SEQ_NUM
-}
-

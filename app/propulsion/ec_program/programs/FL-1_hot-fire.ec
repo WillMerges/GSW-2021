@@ -1,15 +1,17 @@
 # Test Procedure
+# FL-1 hot fire
 
 # define some macros
 # matches a single word
-OX = 100 
+OX = 100
 FUEL = 101
-PURGE_OX = 102     # solenoid 3
-PURGE_FUEL = 303     # solenoid 3
-IGNITER = 200   # igniter 1
+PURGE_OX = 102
+PURGE_FUEL = 103
+IGNITER = 200
 RED = 300
 YELLOW = 301
 GREEN = 302
+BUZZER = 303
 
 ON = 1          # on state
 OFF = 0         # off state
@@ -17,10 +19,19 @@ OFF = 0         # off state
 # Run through a basic program
 # Format is [absolute time in ms (time referenced from countdown clock)] [control] [state]
 
-# TODO make this the buzzer
-0 YELLOW ON
-500 YELLOW OFF
-500 RED ON
+# beep the buzzer 5 times
+# starts beeping 4.5s before turning fuel on
+# end of last buzz is when fuel valve opens
+-4000 BUZZER ON
+-2500 BUZZER OFF
+-3000 BUZZER ON
+-2500 BUZZER OFF
+-2000 BUZZER ON
+-1500 BUZZER OFF
+-1000 BUZZER ON
+-500 BUZZER OFF
+0 BUZZER ON
+500 BUZZER OFF
 
 500 FUEL ON
 500 MSG "fuel on"

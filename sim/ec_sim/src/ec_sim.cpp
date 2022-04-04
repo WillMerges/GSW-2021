@@ -6,6 +6,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+// TODO add modes and safing
+
 // solenoid states
 #define NUM_SOLENOIDS 4
 // solenoids start at control number 100, e.g. solenoid 0 is 100, 1 is 101 ...
