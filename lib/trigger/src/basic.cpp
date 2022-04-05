@@ -85,9 +85,63 @@ RetType ROLLING_AVG_DOUBLE_430(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* 
     // Welford's method
     m = m + ((x - m) / 430);
 
-    if(unlikely(tw->write(args->args[1], (uint8_t*)&m, sizeof(double)))) {
+    if(unlikely(SUCCESS != tw->write(args->args[1], (uint8_t*)&m, sizeof(double)))) {
         return FAILURE;
     }
 
     return SUCCESS;
+}
+
+// track maximum of a double value
+// @arg1 newest sample (double)
+// @arg2 maximum value (double)
+RetType MAX_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
+    // NOTE: no arg checking, fast!
+
+    double x;
+    if(unlikely(SUCCESS != tv->get_double(args->args[0], &x))) {
+        return FAILURE;
+    }
+
+    double max;
+    if(unlikely(SUCCESS != tv->get_double(args->args[1], &max))) {
+        return FAILURE;
+    }
+
+    if(x > max) {
+        if(unlikely(SUCCESS != tw->write(args->args[1], (uint8_t*)&x, sizeof(double)))) {
+            return FAILURE;
+        }
+
+        return SUCCESS;
+    }
+
+    return NOCHANGE;
+}
+
+// track minimum of a double value
+// @arg1 newest sample (double)
+// @arg2 minimum value (double)
+RetType MIN_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
+    // NOTE: no arg checking, fast!
+
+    double x;
+    if(unlikely(SUCCESS != tv->get_double(args->args[0], &x))) {
+        return FAILURE;
+    }
+
+    double max;
+    if(unlikely(SUCCESS != tv->get_double(args->args[1], &max))) {
+        return FAILURE;
+    }
+
+    if(x < max) {
+        if(unlikely(SUCCESS != tw->write(args->args[1], (uint8_t*)&x, sizeof(double)))) {
+            return FAILURE;
+        }
+
+        return SUCCESS;
+    }
+
+    return NOCHANGE;
 }

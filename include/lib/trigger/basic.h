@@ -27,3 +27,13 @@ RetType SUM_UINT(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args);
 // @arg1 newest sample (double)
 // @arg2 mean (double)
 RetType ROLLING_AVG_DOUBLE_430(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args);
+
+// track maximum of a double value
+// @arg1 newest sample (double)
+// @arg2 maximum value (double)
+RetType MAX_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args);
+
+// track minimum of a double value
+// @arg1 newest sample (double)
+// @arg2 minimum value (double)
+RetType MIN_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args);

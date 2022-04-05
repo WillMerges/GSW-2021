@@ -13,6 +13,8 @@
 #include "lib/trigger/trigger.h"
 #include "common/types.h"
 
+#include <math.h>
+
 using namespace trigger;
 
 // macros
@@ -205,11 +207,19 @@ RetType PCB1403_CURRENT_EXCITE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* 
     // vmeas / 10 mA = Rmeas
     // Rnominal = 350 ohm
     // Ratio of Rmeas:Rnominal is proportional to force measured
-    // full scale force is 2500 lbF
-    // we negate so that pushing is positive
-    double f = -((vmeas / 0.01) / 350) * 2500;
+    double f = (((vmeas / 0.01)) / 352.00);
 
-    if(unlikely(tw->write(args->args[1], (uint8_t*)&f, sizeof(double)))) {
+    // we multiply by full load mv/V from the testing document
+    f *= 2.06579;
+
+    // plug this in to the inverse of the equation given in the testing document
+    static const double a = -9.417589e-11;
+    static const double b = -8.261031e-4;
+    double c = 1.294404e-4 - f;
+
+    double x = (-b - sqrt((b*b) - (4 * a * c))) / (2 * a);
+
+    if(unlikely(tw->write(args->args[1], (uint8_t*)&x, sizeof(double)))) {
         return FAILURE;
     }
 
