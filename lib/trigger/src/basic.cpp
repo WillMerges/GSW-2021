@@ -59,7 +59,7 @@ RetType SUM_UINT(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
 
 // @ar1 newest sample (double)
 // @arg2 last mean (double)
-RetType ROLLING_AVG_DOUBLE_430(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
+RetType ROLLING_AVG_DOUBLE_20(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
     double m;
     if(unlikely(SUCCESS != tv->get_double(args->args[1], &m))) {
         return FAILURE;
@@ -71,7 +71,7 @@ RetType ROLLING_AVG_DOUBLE_430(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* 
     }
 
     // Welford's method
-    m = m + ((x - m) / 430);
+    m = m + ((x - m) / 20);
 
     if(unlikely(SUCCESS != tw->write(args->args[1], (uint8_t*)&m, sizeof(double)))) {
         return FAILURE;

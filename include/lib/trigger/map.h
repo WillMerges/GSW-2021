@@ -32,7 +32,7 @@ const trigger_map_t trigger_func_list[] =
 {
     {"COPY", &COPY, 2, 2},
     {"SUM_UINT", &SUM_UINT, 3, UINT_MAX},
-    {"ROLLING_AVG_DOUBLE_430", &ROLLING_AVG_DOUBLE_430, 2, 2},
+    {"ROLLING_AVG_DOUBLE_20", &ROLLING_AVG_DOUBLE_20, 2, 2},
     {"MAX_DOUBLE", &MAX_DOUBLE, 2, 2},
     {"MIN_DOUBLE", &MIN_DOUBLE, 2, 2},
     {"DAQ_ADC_SCALE", &DAQ_ADC_SCALE, 2, 2},
