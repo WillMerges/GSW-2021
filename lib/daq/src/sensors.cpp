@@ -23,9 +23,6 @@ using namespace trigger;
 
 
 RetType DAQ_ADC_SCALE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
-    // NOTE: we don't do an arg check!
-    // if it segfaults, that's the fault of whoever made the triggers file wrong
-
     int32_t data;
 
     if(unlikely(SUCCESS != tv->get_int(args->args[0], &data))) {
@@ -97,9 +94,6 @@ static double dr2[K_INVERSE_R2_NUM] =
 // @arg4 ambient temperature in Celsius (double)
 // @arg5 corrected absolute temperature (Celsius) (double)
 RetType MAX31855K_THERMOCOUPLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
-    // NOTE: we don't do an arg check
-    // if it segfaults, that's the fault of whoever made the triggers file wrong
-
     uint32_t data;
 
     if(unlikely(SUCCESS != tv->get_uint(args->args[0], &data))) {

@@ -13,6 +13,7 @@
 #include "common/types.h"
 #include <fstream>
 #include <sstream>
+#include <string>
 
 using namespace dls;
 
@@ -108,6 +109,16 @@ RetType trigger::parse_trigger_file(VCM* veh, std::vector<trigger_t>* triggers) 
             args.num_args++;
             args.args = (measurement_info_t**)realloc((void*)args.args, sizeof(measurement_info_t*) * args.num_args);
             args.args[args.num_args - 1] = m;
+        }
+
+        if(args.num_args < t.min_args) {
+            logger.log_message("too few arguments for trigger: " + std::string(t.name));
+            return FAILURE;
+        }
+
+        if(args.num_args > t.min_args) {
+            logger.log_message("too many arguments for trigger: " + std::string(t.name));
+            return FAILURE;
         }
 
         trigger.args = args;

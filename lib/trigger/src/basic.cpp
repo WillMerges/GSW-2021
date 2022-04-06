@@ -25,11 +25,6 @@ using namespace trigger;
 RetType COPY(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
     MsgLogger logger("trigger_basic", "COPY");
 
-    if(args->num_args != 2) {
-        logger.log_message("invalid number of arguments");
-        return FAILURE;
-    }
-
     if(args->args[0]->size != args->args[1]->size) {
         logger.log_message("size mismatch");
         return FAILURE;
@@ -46,11 +41,6 @@ RetType COPY(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
 
 RetType SUM_UINT(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
     MsgLogger logger("trigger_basic", "SUM_UINT");
-
-    if(args->num_args < 1) {
-        logger.log_message("requires at least one argument");
-        return FAILURE;
-    }
 
     uint32_t temp;
     uint32_t sum = 0;
@@ -70,8 +60,6 @@ RetType SUM_UINT(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
 // @ar1 newest sample (double)
 // @arg2 last mean (double)
 RetType ROLLING_AVG_DOUBLE_430(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
-    // NOTE: no arg checking (has to be fast)
-
     double m;
     if(unlikely(SUCCESS != tv->get_double(args->args[1], &m))) {
         return FAILURE;
@@ -96,8 +84,6 @@ RetType ROLLING_AVG_DOUBLE_430(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* 
 // @arg1 newest sample (double)
 // @arg2 maximum value (double)
 RetType MAX_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
-    // NOTE: no arg checking, fast!
-
     double x;
     if(unlikely(SUCCESS != tv->get_double(args->args[0], &x))) {
         return FAILURE;
@@ -123,8 +109,6 @@ RetType MAX_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
 // @arg1 newest sample (double)
 // @arg2 minimum value (double)
 RetType MIN_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
-    // NOTE: no arg checking, fast!
-
     double x;
     if(unlikely(SUCCESS != tv->get_double(args->args[0], &x))) {
         return FAILURE;
