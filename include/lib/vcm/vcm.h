@@ -59,9 +59,9 @@ namespace vcm {
     } location_info_t;
 
     typedef struct {
-        // void* addr; // offset into shmem
         std::vector<location_info_t> locations; // locations of this measurement
-        size_t size; // bytes
+        size_t size;                            // size in bytes
+        endianness_t endianness;
         measurement_type_t type;
         measurement_sign_t sign;
     } measurement_info_t;
@@ -95,7 +95,6 @@ namespace vcm {
         std::string trigger_file;
         std::string device;
 
-        endianness_t recv_endianness; // endianness of the receiver
         endianness_t sys_endianness; // endianness of the system GSW is running on
 
         uint32_t num_packets; // number of telemetry packets

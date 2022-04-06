@@ -1,18 +1,17 @@
-# DAQ (Data Acquisition System)
+# FL-1 Engine Configuration
+# Includes engine controller and DAQ
 
+name = FL-1
 protocol = udp
-port = 8080
-name = daq
+port = 8080     # port of the controller, since that's where outgoing messages should go
 triggers = triggers
 multicast = 224.0.0.1
 
 
-## measurements ##
-
-# physical telemetry (off the network)
+# DAQ measurements
 MILLISEC    4 int unsigned big
 MICROSEC    4 int unsigned big
-SEQ_NUM     4 int unsigned big
+SEQ_NUM_DAQ 4 int unsigned big
 ADC0_STATUS 3 int unsigned big
 IEPE0_DATA  3 int signed big
 IEPE1_DATA  3 int signed big
@@ -28,7 +27,8 @@ TC1_DATA    4 int unsigned big
 TC2_DATA    4 int unsigned big
 TC3_DATA    4 int unsigned big
 
-# virtual measurements (calculated from physical telemetry)
+
+# DAQ virtual measurements
 # don't specify endianness, use same as the system
 IEPE0_VOLTS 8 float
 IEPE1_VOLTS 8 float
@@ -65,13 +65,100 @@ PT1_PSI_MAX     8 float
 LC0_FORCE_MAX   8 float
 
 
-## telemetry packets ##
+# Engine Controller measurements
+SOLENOID_OX          2 int unsigned little
+SOLENOID_FUEL        2 int unsigned little
+SOLENOID_OX_PURGE    2 int unsigned little
+SOLENOID_FUEL_PURGE  2 int unsigned little
+IGNITER_MAIN         2 int unsigned little
+LED_G                2 int unsigned little
+LED_Y                2 int unsigned little
+LED_R                2 int unsigned little
+LED_BUZZ             2 int unsigned little
+SEQ_NUM_EC           4 int unsigned little
+HEARTBEAT            2 int unsigned little
+MODE                 2 int unsigned little
+SAFING               2 int unsigned little
+
+
+# Engine Controller virtual measurements
+OX_STR          10 string
+FUEL_STR        10 string
+OX_PURGE_STR    10 string
+# FUEL_PURGE_STR 10 string
+IGNITER_STR     10 string
+MODE_STR        10 string
+SAFING_STR      10 string
+
+
+# Engine Controller Telemetry
+
+8080 {
+SEQ_NUM_EC
+}
+
+8081 {
+SOLENOID_OX
+SOLENOID_FUEL
+SOLENOID_OX_PURGE
+SEQ_NUM_EC
+}
+
+8082 {
+IGNITER_MAIN
+SEQ_NUM_EC
+}
+
+8083 {
+LED_G
+LED_Y
+LED_R
+LED_BUZZ
+SEQ_NUM_EC
+}
+
+8084 {
+SOLENOID_OX
+SOLENOID_FUEL
+SOLENOID_OX_PURGE
+IGNITER_MAIN
+LED_G
+LED_Y
+LED_R
+LED_BUZZ
+SEQ_NUM_EC
+HEARTBEAT
+}
+
+8085 {
+SEQ_NUM_EC
+MODE
+SAFING
+}
+
+virtual {
+OX_STR
+FUEL_STR
+OX_PURGE_STR
+}
+
+virtual {
+IGNITER_STR
+}
+
+virtual {
+MODE_STR
+SAFING_STR
+}
+
+
+# DAQ Telemetry
 
 # ADC0
-8080 {
+9080 {
 MILLISEC
 MICROSEC
-SEQ_NUM
+SEQ_NUM_DAQ
 ADC0_STATUS
 IEPE0_DATA
 IEPE1_DATA
@@ -80,10 +167,10 @@ IEPE3_DATA
 }
 
 # ADC1
-8081 {
+9081 {
 MILLISEC
 MICROSEC
-SEQ_NUM
+SEQ_NUM_DAQ
 ADC1_STATUS
 FB0_DATA
 FB1_DATA
@@ -92,17 +179,16 @@ CL1_DATA
 }
 
 # thermocouples
-8082 {
+9082 {
 MILLISEC
 MICROSEC
-SEQ_NUM
+SEQ_NUM_DAQ
 TC0_DATA
 TC1_DATA
 TC2_DATA
 TC3_DATA
 }
 
-# calcualted ADC0 voltages
 virtual {
 IEPE0_VOLTS
 IEPE1_VOLTS
@@ -110,7 +196,6 @@ IEPE2_VOLTS
 IEPE3_VOLTS
 }
 
-# calculated ADC1 voltages
 virtual {
 FB0_VOLTS
 FB1_VOLTS
@@ -118,7 +203,6 @@ CL0_VOLTS
 CL1_VOLTS
 }
 
-# calculated thermocouple temperatures
 virtual {
 TC0_STATUS
 }

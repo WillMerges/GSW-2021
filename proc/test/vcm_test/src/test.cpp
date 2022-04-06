@@ -17,13 +17,6 @@ int main() {
 
     std::cout << "device id: " << vcm.device << '\n';
 
-    std::cout << "receiver endianness: ";
-    if(vcm.recv_endianness == GSW_LITTLE_ENDIAN) {
-        std::cout << "little endian\n";
-    } else if(vcm.recv_endianness == GSW_BIG_ENDIAN) {
-        std::cout << "big endian\n";
-    }
-
     std::cout << "system endianness: ";
     if(vcm.sys_endianness == GSW_LITTLE_ENDIAN) {
         std::cout << "little endian\n";
@@ -40,15 +33,21 @@ int main() {
         std::cout << "multicast address: " << inet_ntoa(addr) << "\n";
     }
 
+    size_t packet_count = 0;
+
     std::cout << "\npackets: \n";
     int i = 0;
     for(packet_info_t* packet : vcm.packets) {
         std::cout << i++ << ": ";
         std::cout << "size: " << packet->size << " ";
         std::cout << "port: " << packet->port << "\n";
+
+        packet_count++;
     }
 
     std::cout << '\n';
+
+    size_t meas_count = 0;
 
     for (auto& it : vcm.measurements) {
         std::cout << it << " ";
@@ -70,6 +69,19 @@ int main() {
                     std::cout << "string";
                     break;
             }
+
+            if(SIGNED_TYPE == info->sign) {
+                std::cout << " signed";
+            } else if(UNSIGNED_TYPE == info->sign) {
+                std::cout << " unsigned";
+            }
+
+            if(GSW_LITTLE_ENDIAN == info->endianness) {
+                std::cout << " little_endian";
+            } else if(GSW_BIG_ENDIAN == info->endianness) {
+                std::cout << " big_endian";
+            }
+
             std::cout << "  [ ";
             for(location_info_t loc : info->locations) {
                 std::cout << loc.packet_index << ":" << loc.offset << " ";
@@ -77,7 +89,8 @@ int main() {
             std::cout << "]";
 
             std::cout << '\n';
+            meas_count++;
         }
-
     }
+    std::cout << "\n" << meas_count << " measurements over " << packet_count << " packets\n";
 }

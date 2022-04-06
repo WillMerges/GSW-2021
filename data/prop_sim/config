@@ -3,10 +3,11 @@
 protocol = udp
 port = 8080
 name = engine_controller
-endianness = little
 
 
 ## measurements ##
+
+# all endiannesses assumed to be same as system
 
 # valve relays
 SOLENOID_OX          1 int unsigned

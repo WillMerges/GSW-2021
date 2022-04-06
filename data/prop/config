@@ -3,7 +3,6 @@
 protocol = udp
 port = 8080
 name = engine_controller
-endianness = little
 multicast = 224.0.0.1
 triggers = triggers
 
@@ -11,36 +10,36 @@ triggers = triggers
 ## measurements ##
 
 # valve relays
-SOLENOID_OX          2 int unsigned
-SOLENOID_FUEL        2 int unsigned
-SOLENOID_OX_PURGE    2 int unsigned
-SOLENOID_FUEL_PURGE  2 int unsigned
-IGNITER_MAIN         2 int unsigned
+SOLENOID_OX          2 int unsigned little
+SOLENOID_FUEL        2 int unsigned little
+SOLENOID_OX_PURGE    2 int unsigned little
+SOLENOID_FUEL_PURGE  2 int unsigned little
+IGNITER_MAIN         2 int unsigned little
 
 # dummy light tower relays
-LED_G     2 int unsigned
-LED_Y     2 int unsigned
-LED_R     2 int unsigned
-LED_BUZZ  2 int unsigned
+LED_G     2 int unsigned little
+LED_Y     2 int unsigned little
+LED_R     2 int unsigned little
+LED_BUZZ  2 int unsigned little
 
 # command sequence number
-SEQ_NUM 4 int unsigned
+SEQ_NUM 4 int unsigned little
 
 # heartbeat number
-HEARTBEAT 2 int unsigned
+HEARTBEAT 2 int unsigned little
 
 # mode number
-MODE 2 int unsigned
+MODE 2 int unsigned little
 
 # safing number
-SAFING 2 int unsigned
+SAFING 2 int unsigned little
 
 
 # calculated strings
 OX_STR          10 string
 FUEL_STR        10 string
 OX_PURGE_STR    10 string
-# FUEL_PURGE_STR  10 string
+# FUEL_PURGE_STR 10 string
 IGNITER_STR     10 string
 MODE_STR        10 string
 SAFING_STR      10 string

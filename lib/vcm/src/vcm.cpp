@@ -24,7 +24,6 @@ VCM::VCM() {
     num_packets = 0;
     device = "";
     trigger_file = "";
-    recv_endianness = GSW_LITTLE_ENDIAN; // default is little endian
 
     if(__BYTE_ORDER == __BIG_ENDIAN) {
         sys_endianness = GSW_BIG_ENDIAN;
@@ -152,15 +151,6 @@ RetType VCM::init() {
                 }
             } else if(fst == "name") {
                 device = third;
-            } else if(fst == "endianness") {
-                if(third == "little") {
-                    recv_endianness = GSW_LITTLE_ENDIAN;
-                } else if(third == "big") {
-                    recv_endianness = GSW_BIG_ENDIAN;
-                } else {
-                    logger.log_message("Unrecogonized endianness on line: " + line);
-                    return FAILURE;
-                }
             } else if(fst == "triggers") {
                 trigger_file = config_dir + "/" + third;
             } else {
@@ -232,6 +222,8 @@ RetType VCM::init() {
         } else { // measurement definition
             std::string fourth;
             ss >> fourth;
+            std::string fifth;
+            ss >> fifth;
 
             if(fst == "" || snd == "") {
                 logger.log_message("Missing information: " + line);
@@ -261,14 +253,47 @@ RetType VCM::init() {
                 return FAILURE;
             }
 
-            if(fourth == "unsigned") {
+            std::string tok = fourth;
+
+            uint8_t endianness_set = 0;
+
+            if(tok == "big") {
+                entry->endianness = GSW_BIG_ENDIAN;
+                endianness_set = 1;
+            } else if(tok == "little") {
+                entry->endianness = GSW_LITTLE_ENDIAN;
+                endianness_set = 1;
+            }
+
+            tok = fifth;
+            if(!endianness_set) {
+                // repeated code, this is bad lol
+                if(tok == "big") {
+                    entry->endianness = GSW_BIG_ENDIAN;
+                    endianness_set = 1;
+                } else if(tok == "little") {
+                    entry->endianness = GSW_LITTLE_ENDIAN;
+                    endianness_set = 1;
+                } else if(tok == "") {
+                    // default is the system endianness
+                    entry->endianness = sys_endianness;
+                } else {
+                    logger.log_message("invalid token: " + tok);
+                    return FAILURE;
+                }
+
+                tok = fourth;
+            }
+
+            if(tok == "unsigned") {
                 entry->sign = UNSIGNED_TYPE;
-            } else if(fourth == "signed") {
+            } else if(tok == "signed") {
                 entry->sign = SIGNED_TYPE;
-            } else if(fourth == "") {
-                entry->sign = SIGNED_TYPE; // default is signed
+            } else if(tok == "") {
+                // default is signed
+                entry->sign = SIGNED_TYPE;
             } else {
-                logger.log_message("Invalid sign specified: " + fourth);
+                logger.log_message("Invalid token: " + tok);
                 return FAILURE;
             }
 

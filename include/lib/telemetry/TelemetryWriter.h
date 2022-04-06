@@ -82,7 +82,7 @@ private:
 
     PacketLogger** loggers;
 
-    void telemetry_copy(uint8_t* dst, const uint8_t* src, size_t len);
+    void telemetry_copy(measurement_info_t* meas, uint8_t* dst, const uint8_t* src, size_t len);
 };
 
 #endif

@@ -17,18 +17,17 @@ multicast = 224.0.0.1
 # device name
 name = sample_device
 
-# endianness (coming FROM the receiver, not of the ground station platform) [big or little], if not set defaults to little endian
-endianness = big
-
 # trigger file
 triggers = triggers
 
-# [measurement name] [total measurement size in bytes] [optional type of int, float, or string, default is int] [optional signed or unsigned, default is signed]
-# signed/unsigned cannot be specified without a type
-TEST            4 int unsigned
-TEST2           2 int unsigned
-TEST3           4 float
-TEST4           10 string
+# [measurement name] [total measurement size in bytes] [optional type of int, float, or string, default is int] [optional endianness, big or little (default)] [optional signed or unsigned, default is signed]
+# endianness and signed/unsigned cannot be specified without a type
+# the order of signedness and type do not matter
+# endianness is effectively ignored for strings (doesn't make sense)
+TEST            4 int unsigned little
+TEST2           2 int little unsigned
+TEST3           4 float little
+TEST4           10 string big
 VIRTUAL_VALUE   4 int unsigned
 VIRTUAL_VALUE2  4 int unsigned
 

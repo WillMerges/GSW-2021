@@ -28,7 +28,7 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
     // size_t addr = (size_t)measurement->addr;
     // const uint8_t* buff = (const uint8_t*)data;
 
-    if(vcm->recv_endianness != vcm->sys_endianness) {
+    if(measurement->endianness != vcm->sys_endianness) {
         for(size_t i = 0; i < measurement->size; i++) {
             val[measurement->size - i - 1] = data[i];
         }
@@ -59,7 +59,7 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
     // size_t addr = (size_t)measurement->addr;
     // const uint8_t* buff = (const uint8_t*)data;
 
-    if(vcm->recv_endianness != vcm->sys_endianness) {
+    if(measurement->endianness != vcm->sys_endianness) {
         for(size_t i = 0; i < measurement->size; i++) {
             val[measurement->size - i - 1] = data[i];
         }
@@ -91,7 +91,7 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
     // size_t addr = (size_t)measurement->addr;
     // const uint8_t* buff = (const uint8_t*)data;
 
-    if(vcm->recv_endianness != vcm->sys_endianness) {
+    if(measurement->endianness != vcm->sys_endianness) {
         for(size_t i = 0; i < measurement->size; i++) {
             val[measurement->size - i - 1] = data[i];
         }
@@ -124,7 +124,7 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
     // const uint8_t* buff = (const uint8_t*)data;
 
     uint8_t sign_byte;
-    if(vcm->recv_endianness == GSW_BIG_ENDIAN) {
+    if(measurement->endianness == GSW_BIG_ENDIAN) {
         // sign byte is first
         sign_byte = data[0];
     } else {
@@ -139,7 +139,7 @@ RetType convert::convert_to(vcm::VCM* vcm, vcm::measurement_info_t* measurement,
         sign_byte = 0x00;
     }
 
-    if(vcm->recv_endianness != vcm->sys_endianness) {
+    if(measurement->endianness != vcm->sys_endianness) {
         size_t i;
         for(i = 0; i < measurement->size; i++) {
             val[measurement->size - i - 1] = data[i];
@@ -284,7 +284,7 @@ RetType convert::convert_from(vcm::VCM* vcm, vcm::measurement_info_t* measuremen
 
     uint8_t* valb = (uint8_t*)&val;
 
-    if(vcm->sys_endianness != vcm->recv_endianness) {
+    if(vcm->sys_endianness != measurement->endianness) {
         // pad the beginning with zeros
         memset(output, 0, measurement->size - sizeof(uint32_t));
 
@@ -316,7 +316,7 @@ RetType convert::convert_from(vcm::VCM* vcm, vcm::measurement_info_t* measuremen
 
     uint8_t* valb = (uint8_t*)&val;
 
-    if(vcm->sys_endianness != vcm->recv_endianness) {
+    if(vcm->sys_endianness != measurement->endianness) {
         // pad the beginning with zeros
         memset(output, 0, measurement->size - sizeof(int32_t));
 
@@ -348,7 +348,7 @@ RetType convert::convert_from(vcm::VCM* vcm, vcm::measurement_info_t* measuremen
 
     uint8_t* valb = (uint8_t*)&val;
 
-    if(vcm->sys_endianness != vcm->recv_endianness) {
+    if(vcm->sys_endianness != measurement->endianness) {
         size_t i = 0;
         for(; i < sizeof(float); i++) {
             output[i] = valb[sizeof(float) - i - 1];
@@ -374,7 +374,7 @@ RetType convert::convert_from(vcm::VCM* vcm, vcm::measurement_info_t* measuremen
 
     uint8_t* valb = (uint8_t*)&val;
 
-    if(vcm->sys_endianness != vcm->recv_endianness) {
+    if(vcm->sys_endianness != measurement->endianness) {
         size_t i = 0;
         for(; i < sizeof(double); i++) {
             output[i] = valb[sizeof(double) - i - 1];

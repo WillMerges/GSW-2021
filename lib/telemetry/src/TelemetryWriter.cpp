@@ -128,8 +128,8 @@ RetType TelemetryWriter::init(VCM* vcm, TelemetryShm* shm) {
 
 // helper function to copy data into telemetry
 // basically memcpy with endianness checking
-void TelemetryWriter::telemetry_copy(uint8_t* dst, const uint8_t* src, size_t len) {
-    if(vcm->sys_endianness != vcm->recv_endianness) {
+void TelemetryWriter::telemetry_copy(measurement_info_t* meas, uint8_t* dst, const uint8_t* src, size_t len) {
+    if(vcm->sys_endianness != meas->endianness) {
         // copy backwards
         for(size_t i = 0; i < len; i++) {
             dst[len - i - 1] = src[i];
@@ -156,7 +156,7 @@ RetType TelemetryWriter::write(measurement_info_t* meas, uint8_t* data, size_t l
     // if we assume a virtual measurement is only in virtual packets, this is faster since we avoid a lookup
     for(location_info_t loc : meas->locations) {
         if(vcm->packets[loc.packet_index]->is_virtual) {
-            telemetry_copy(packet_buffers[loc.packet_index] + loc.offset, data, len);
+            telemetry_copy(meas, packet_buffers[loc.packet_index] + loc.offset, data, len);
             updated[loc.packet_index] = true;
         }
     }
