@@ -272,8 +272,14 @@ int main(int argc, char* argv[]) {
 
             if(SUCCESS == tlm.get_str(m_info, &val)) {
                 msg += meas;
-                msg += "=";
-                msg += val;
+                if(STRING_TYPE == m_info->type) {
+                    msg += "=\"";
+                    msg += val;
+                    msg += "\"";
+                } else {
+                    msg += "=";
+                    msg += val;
+                } 
             }
         }
 

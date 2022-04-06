@@ -5,6 +5,7 @@ port = 8080
 name = engine_controller
 endianness = little
 multicast = 224.0.0.1
+triggers = triggers
 
 
 ## measurements ##
@@ -34,6 +35,17 @@ MODE 2 int unsigned
 # safing number
 SAFING 2 int unsigned
 
+
+# calculated strings
+OX_STR          10 string
+FUEL_STR        10 string
+OX_PURGE_STR    10 string
+# FUEL_PURGE_STR  10 string
+IGNITER_STR     10 string
+MODE_STR        10 string
+SAFING_STR      10 string
+
+
 ## telemetry packets ##
 
 # sequence number only
@@ -46,7 +58,6 @@ SEQ_NUM
 SOLENOID_OX
 SOLENOID_FUEL
 SOLENOID_OX_PURGE
-SOLENOID_FUEL_PURGE
 SEQ_NUM
 }
 
@@ -70,7 +81,6 @@ SEQ_NUM
 SOLENOID_OX
 SOLENOID_FUEL
 SOLENOID_OX_PURGE
-SOLENOID_FUEL_PURGE
 IGNITER_MAIN
 LED_G
 LED_Y
@@ -84,4 +94,22 @@ HEARTBEAT
 SEQ_NUM
 MODE
 SAFING
+}
+
+# calculated solenoid strings
+virtual {
+OX_STR
+FUEL_STR
+OX_PURGE_STR
+}
+
+# calculated igniter strings
+virtual {
+IGNITER_STR
+}
+
+# calcualted mode and safing strings
+virtual {
+MODE_STR
+SAFING_STR
 }

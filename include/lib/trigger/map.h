@@ -15,6 +15,7 @@
 // *** includes for trigger functions *** //
 #include "lib/trigger/basic.h"
 #include "lib/daq/sensors.h"
+#include "lib/ec/ec.h"
 // ************************************** //
 
 
@@ -37,6 +38,10 @@ const trigger_map_t trigger_func_list[] =
     {"MAX31855K_THERMOCOUPLE", &MAX31855K_THERMOCOUPLE},
     {"PCB1403_CURRENT_EXCITE", &PCB1403_CURRENT_EXCITE},
     {"PRESSURE_TRANSDUCER_8252", &PRESSURE_TRANSDUCER_8252},
+    {"SOLENOID_STATE_TO_STR", &SOLENOID_STATE_TO_STR},
+    {"IGNITER_STATE_TO_STR", &IGNITER_STATE_TO_STR},
+    {"MODE_STATE_TO_STR", &MODE_STATE_TO_STR},
+    {"SAFE_STATE_TO_STR", &SAFE_STATE_TO_STR},
     {NULL, NULL}
 };
 // ******************************************* //

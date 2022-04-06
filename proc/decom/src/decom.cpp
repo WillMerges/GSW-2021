@@ -74,6 +74,8 @@ void sighandler(int signum) {
         exit(signum);
     } else { // if we're a child we need to clean up our mess
         // mark us as killed, don't want to kill immediately in case we have shared memory locked
+        logger.log_message("child process received kill signal");
+
         killed = true;
         received_sig = signum;
     }
@@ -84,7 +86,7 @@ void child_cleanup() {
     MsgLogger logger(decom_id.c_str(), "child_cleanup");
 
     logger.log_message("killed, cleaning up resources");
-    if(net) { // it's possible we get killed before we can create out network manager
+    if(net) { // it's possible we get killed before we can create our network manager
         delete net; // this also calls close
     }
 }
@@ -105,7 +107,7 @@ void execute(size_t packet_id, packet_info_t* packet) {
 
     // open the network manager (use default timeout)
     net = new NetworkManager(packet->port, packet_name.c_str(), buffer,
-                                        packet->size, veh->port, veh->multicast_addr);
+                                        packet->size, veh->port, veh->multicast_addr, 500);
     if(FAILURE == net->Open()) {
         logger.log_message("failed to open network manager");
         return;
@@ -139,7 +141,7 @@ void execute(size_t packet_id, packet_info_t* packet) {
 
     // main loop
     size_t n = 0;
-    while(1) {
+    while(!killed) {
         // TODO this should go somewhere else, in a single network process? (uplink?)
         // it should basically only call net->Send repeatedly/block on the mqueue read
         // maybe add a block bool to Send
@@ -161,12 +163,12 @@ void execute(size_t packet_id, packet_info_t* packet) {
             }
 
             plogger.log_packet((unsigned char*)buffer, n); // log the packet either way
-        } else if(killed) {
-            // we got killed and got a signal, making net->Receive fail
-            child_cleanup();
-            exit(received_sig);
         }
     }
+
+    // we got killed and got a signal, making net->Receive fail
+    child_cleanup();
+    exit(received_sig);
 }
 
 int main(int argc, char** argv) {

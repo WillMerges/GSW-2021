@@ -16,6 +16,11 @@
 using namespace vcm;
 using namespace dls;
 
+// TODO add writing to individual packets
+//      currently all virtual packets are added when 'init' is called
+//      so anytime 'lock' is called, all packets are locked, even though the user
+//      may not write to all of them
+
 // constructor
 TelemetryWriter::TelemetryWriter() {
     vcm = NULL;
@@ -173,9 +178,9 @@ RetType TelemetryWriter::write(std::string& meas, uint8_t* data, size_t len) {
 }
 
 RetType TelemetryWriter::write_raw(measurement_info_t* meas, uint8_t* data, size_t len) {
-    if(len != meas->size) {
+    if(len > meas->size) {
         MsgLogger logger("TelemetryWriter", "write_raw");
-        logger.log_message("must write size of measurement");
+        logger.log_message("must write less than size of measurement");
 
         return FAILURE;
     }

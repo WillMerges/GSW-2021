@@ -658,6 +658,7 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
             // update the master nonce
             last_nonce = info->nonce;
 
+            // TODO this is bad, should not set updated on all packets
             // update all the stored packet nonces
             for(size_t i = 0; i < num_packets; i++) {
                 last_nonces[i] = *((uint32_t*)(info_blocks[i]->data));

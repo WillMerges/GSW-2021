@@ -19,19 +19,19 @@ if mode == "disabled":
     exec_cmd("302", "1")
     exec_cmd("900", "0")
 elif mode == "test":
+    exec_cmd("900", "69")
     exec_cmd("300", "1")
     exec_cmd("301", "1")
     exec_cmd("302", "1")
-    exec_cmd("900", "69")
 elif mode == "cold":
+    exec_cmd("900", "1")
     exec_cmd("300", "0")
     exec_cmd("301", "1")
     exec_cmd("302", "0")
-    exec_cmd("900", "1")
 elif mode == "hot":
+    exec_cmd("900", "99")
     exec_cmd("300", "1")
     exec_cmd("301", "0")
     exec_cmd("302", "0")
-    exec_cmd("900", "99")
 else:
     print("invalid command")

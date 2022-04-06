@@ -13,6 +13,7 @@ build:
 	-$(MAKE) -C vlock all
 	-$(MAKE) -C trigger all
 	-$(MAKE) -C daq all
+	-$(MAKE) -C ec all
 
 copy:
 	rm -rf bin || true > /dev/null
@@ -32,6 +33,7 @@ clean:
 	-$(MAKE) -C vlock clean
 	-$(MAKE) -C trigger clean
 	-$(MAKE) -C daq clean
+	-$(MAKE) -C ec clean
 	rm -r bin
 
 # build special library used by Python ctypes
