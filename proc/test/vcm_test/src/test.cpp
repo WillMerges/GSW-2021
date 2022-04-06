@@ -40,8 +40,13 @@ int main() {
     for(packet_info_t* packet : vcm.packets) {
         std::cout << i++ << ": ";
         std::cout << "size: " << packet->size << " ";
-        std::cout << "port: " << packet->port << "\n";
+        std::cout << "port: " << packet->port;
 
+        if(packet->is_virtual) {
+            std::cout << " (virtual)";
+        }
+
+        std::cout << "\n";
         packet_count++;
     }
 
