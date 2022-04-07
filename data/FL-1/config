@@ -30,10 +30,6 @@ TC3_DATA    4 int unsigned big
 
 # DAQ virtual measurements
 # don't specify endianness, use same as the system
-IEPE0_VOLTS 8 float
-IEPE1_VOLTS 8 float
-IEPE2_VOLTS 8 float
-IEPE3_VOLTS 8 float
 FB0_VOLTS   8 float
 FB1_VOLTS   8 float
 CL0_VOLTS   8 float
@@ -187,13 +183,6 @@ TC0_DATA
 TC1_DATA
 TC2_DATA
 TC3_DATA
-}
-
-virtual {
-IEPE0_VOLTS
-IEPE1_VOLTS
-IEPE2_VOLTS
-IEPE3_VOLTS
 }
 
 virtual {
