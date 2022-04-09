@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 3,
-  "iteration": 1649033712781,
+  "iteration": 1649532248393,
   "links": [],
   "panels": [
     {
@@ -4267,14 +4267,39 @@
       {
         "allValue": null,
         "current": {
-          "isNone": true,
-          "selected": true,
-          "text": "None",
-          "value": ""
+          "selected": false,
+          "text": "FL-1_hot-fire.ec",
+          "value": "FL-1_hot-fire.ec"
         },
         "datasource": "InfluxDB",
         "definition": "",
-        "error": null,
+        "error": {
+          "config": {
+            "data": "q=SELECT%20program%20from%20ec_programs",
+            "headers": {
+              "Content-type": "application/x-www-form-urlencoded",
+              "X-Grafana-Org-Id": 1
+            },
+            "hideFromInspector": false,
+            "inspect": {
+              "type": "influxdb"
+            },
+            "method": "POST",
+            "params": {
+              "db": "gsw",
+              "epoch": "ms"
+            },
+            "precision": "ms",
+            "retry": 0,
+            "url": "api/datasources/proxy/1/query"
+          },
+          "data": {
+            "error": "Bad Gateway",
+            "message": "Bad Gateway",
+            "response": ""
+          },
+          "message": "InfluxDB Error: Bad Gateway"
+        },
         "hide": 0,
         "includeAll": false,
         "label": null,
