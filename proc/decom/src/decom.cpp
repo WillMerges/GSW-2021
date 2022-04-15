@@ -106,7 +106,7 @@ void execute(size_t packet_id, packet_info_t* packet) {
     if(veh->get_auto_net(packet->port)) {
         AutoNetworkReceiver* n = new AutoNetworkReceiver();
 
-        if(SUCCESS != n->init(veh, packet->port, veh->multicast_addr, 0, packet->size)) {
+        if(SUCCESS != n->init(veh, packet->port, veh->multicast_addr, 1000, packet->size)) {
             logger.log_message("failed to initialize auto network receiver");
             delete n;
             return;
@@ -116,7 +116,7 @@ void execute(size_t packet_id, packet_info_t* packet) {
     } else {
         net = new NetworkReceiver();
 
-        if(SUCCESS != net->init(packet->port, veh->multicast_addr, 0, packet->size)) {
+        if(SUCCESS != net->init(packet->port, veh->multicast_addr, 1000, packet->size)) {
             logger.log_message("failed to initialized network receiver");
             delete net;
             return;
@@ -142,11 +142,11 @@ void execute(size_t packet_id, packet_info_t* packet) {
     PacketLogger plogger(packet_name);
 
     // main loop
-    size_t n = 0;
+    ssize_t n = 0;
     while(!killed) {
         // read any incoming message and write it to shared memory
         if((n = net->rx()) > 0) {
-            if(n != packet->size) {
+            if(n != (ssize_t)packet->size) {
                 logger.log_message("Packet size mismatch, " + std::to_string(packet->size) +
                                    " != " + std::to_string(n) + " (received)");
             } else { // only write the packet to shared mem if it's the correct size
@@ -206,6 +206,7 @@ int main(int argc, char** argv) {
     for(packet_info_t* packet : veh->packets) {
         if(packet->is_virtual) {
             // this is a virtual telemetry packet, so it has no network input
+            i++;
             continue;
         }
 

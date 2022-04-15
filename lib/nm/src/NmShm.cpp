@@ -8,6 +8,7 @@ using namespace shm;
 
 NmShm::NmShm(unsigned int block_count) {
     shm = NULL;
+    last_nonces = NULL;
     this->block_count = block_count;
 }
 

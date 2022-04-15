@@ -76,10 +76,12 @@ int main(int argc, char* argv[]) {
     }
 
     NmShm nm_shm;
-    if(nm_shm.init() == FAILURE) {
-        printf("failed to initialize network manager shm controller\n");
-        logger.log_message("failed to initialize network manager shm controller");
-        return FAILURE;
+    if(vcm->num_net_devices > 0) {
+        if(nm_shm.init(vcm->num_net_devices) == FAILURE) {
+            printf("failed to initialize network manager shm controller\n");
+            logger.log_message("failed to initialize network manager shm controller");
+            return FAILURE;
+        }
     }
 
     TelemetryShm tlm_shm;
@@ -103,13 +105,15 @@ int main(int argc, char* argv[]) {
             logger.log_message("created telemetry shared memory");
         }
 
-        if(FAILURE == nm_shm.create()) {
-            printf("failed to create network manager shared memory\n");
-            logger.log_message("failed to create network manager shared memory");
-            ret = FAILURE;
-        } else {
-            printf("created network manager shared memory\n");
-            logger.log_message("created network manager shared memory");
+        if(vcm->num_net_devices > 0) {
+            if(FAILURE == nm_shm.create()) {
+                printf("failed to create network manager shared memory\n");
+                logger.log_message("failed to create network manager shared memory");
+                ret = FAILURE;
+            } else {
+                printf("created network manager shared memory\n");
+                logger.log_message("created network manager shared memory");
+            }
         }
 
         if(FAILURE == cl.create()) {
@@ -143,19 +147,21 @@ int main(int argc, char* argv[]) {
             if(FAILURE == tlm_shm.destroy()) {
                 printf("failed to destroy telemetry shared memory\n");
                 logger.log_message("failed to destroy telemetry shared memory");
-                ret = FAILURE;;
+                ret = FAILURE;
             }
         }
 
-        if(FAILURE == nm_shm.attach()) {
-            printf("network manager shared memory not created, nothing to destroy\n");
-            logger.log_message("network manager shared memory not created, nothing to destroy");
-            ret = FAILURE;
-        } else {
-            if(FAILURE == nm_shm.destroy()) {
-                printf("failed to destroy network manager shared memory\n");
-                logger.log_message("failed to destroy network manager shared memory");
-                ret = FAILURE;;
+        if(vcm->num_net_devices > 0) {
+            if(FAILURE == nm_shm.attach()) {
+                printf("network manager shared memory not created, nothing to destroy\n");
+                logger.log_message("network manager shared memory not created, nothing to destroy");
+                ret = FAILURE;
+            } else {
+                if(FAILURE == nm_shm.destroy()) {
+                    printf("failed to destroy network manager shared memory\n");
+                    logger.log_message("failed to destroy network manager shared memory");
+                    ret = FAILURE;
+                }
             }
         }
 
@@ -167,7 +173,7 @@ int main(int argc, char* argv[]) {
             if(FAILURE == cl.destroy()) {
                 printf("failed to destroy countdown clock shared memory\n");
                 logger.log_message("failed to destroy countdown clock shared memory");
-                ret = FAILURE;;
+                ret = FAILURE;
             }
         }
 

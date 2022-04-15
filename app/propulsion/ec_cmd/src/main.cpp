@@ -23,8 +23,10 @@ using namespace nm;
 // amount of time to wait for telemetry to indicate command was accepted
 #define TIMEOUT 500 // ms
 
-// measurement to look for sequence number of command in
-#define SEQUENCE_ACK_MEASUREMENT "SEQ_NUM"
+// value of this constant is the sequence number used
+#define CONST_SEQUENCE "SEQUENCE"
+// value of this constant is the network device commands are sent to
+#define CONST_DEVICE "CONTROLLER_DEVICE"
 
 
 void sighandler(int) {
@@ -76,8 +78,14 @@ int main(int argc, char* argv[]) {
     }
 
     // init VCM
-    if(veh->init() == FAILURE) {
+    if(SUCCESS != veh->init()) {
         logger.log_message("failed to initialize VCM");
+        return -1;
+    }
+
+    // parse constants file
+    if(SUCCESS != veh->parse_consts()) {
+        logger.log_message("failed to parse VCM constants");
         return -1;
     }
 
@@ -91,8 +99,15 @@ int main(int argc, char* argv[]) {
     }
 
     // initialize network interface
-    NetworkInterface net((veh->device).c_str());
-    if(FAILURE == net.Open()) {
+    std::string CONST_DEVICE_STR = CONST_DEVICE;
+    std::string* net_dev = veh->get_const(CONST_DEVICE_STR);
+    if(NULL == net_dev) {
+        logger.log_message("missing constant: " + CONST_DEVICE_STR);
+        return -1;
+    }
+
+    NetworkInterface net;
+    if(SUCCESS != net.init(*net_dev, veh)) {
         logger.log_message("failed to open network interface");
         printf("failed to open network interface\n");
 
@@ -108,14 +123,21 @@ int main(int argc, char* argv[]) {
     }
 
     // add sequence number measurement
-    std::string meas = SEQUENCE_ACK_MEASUREMENT;
+    std::string CONST_SEQUENCE_STR = CONST_SEQUENCE;
+    std::string* m = veh->get_const(CONST_SEQUENCE_STR);
+    if(NULL == m) {
+        logger.log_message("missing constant: " + CONST_SEQUENCE_STR);
+        return -1;
+    }
+
+    std::string meas = *m;
     if(FAILURE == tlm.add(meas)) {
-        printf("failed to add measurement: %s\n", SEQUENCE_ACK_MEASUREMENT);
+        printf("failed to add measurement: %s\n", meas.c_str());
         logger.log_message("failed to add sequence number measurement");
 
         return -1;
     }
-    // tlm.add_all();
+
     tlm.set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
 
     // shouldn't block on first update
@@ -145,7 +167,7 @@ int main(int argc, char* argv[]) {
     unsigned int seq_num;
     if(SUCCESS != tlm.get_uint(meas, &seq_num)) {
         // this shouldn't happen
-        printf("failed to get measurement: %s\n", SEQUENCE_ACK_MEASUREMENT);
+        printf("failed to get measurement: %s\n", meas.c_str());
         logger.log_message("failed to get sequence number measurement");
 
         // release the engine controller command resouce
@@ -167,7 +189,7 @@ int main(int argc, char* argv[]) {
     cmd.state = (uint16_t)state;
 
     // send the command over the network
-    if(FAILURE == net.QueueUDPMessage((char*)&cmd, sizeof(cmd))) {
+    if(FAILURE == net.QueueUDPMessage((const uint8_t*)&cmd, sizeof(cmd))) {
         printf("failed to queue message to network interface\n");
         logger.log_message("failed to queue message to network interface");
 
@@ -211,7 +233,7 @@ int main(int argc, char* argv[]) {
 
         if(FAILURE == tlm.get_uint(meas, &seq_num)) {
             // this shouldn't happen
-            printf("failed to get measurement: %s\n", SEQUENCE_ACK_MEASUREMENT);
+            printf("failed to get measurement: %s\n", meas.c_str());
             logger.log_message("failed to get sequence number measurement");
 
             continue;

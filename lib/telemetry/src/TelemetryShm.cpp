@@ -680,7 +680,7 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
             if(read_mode == BLOCKING_READ) {
                 // wait for any packet to be updated
                 // we don't need to check if the nonce is 0 (indicating a signal) since if it is it will never match 'last_nonce' (which can never be 0)
-                if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, 0xFF)) {
+                if(-1 == syscall(SYS_futex, &info->nonce, FUTEX_WAIT_BITSET, last_nonce, timespec, NULL, 0xFFFFFFFF)) {
                     if(errno == ETIMEDOUT) {
                         logger.log_message("shared memory wait timed out");
 

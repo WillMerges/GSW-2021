@@ -24,6 +24,7 @@ VCM::VCM() {
     device = "";
     trigger_file = "";
     const_file = "";
+    num_net_devices = 0;
 
     if(__BYTE_ORDER == __BIG_ENDIAN) {
         sys_endianness = GSW_BIG_ENDIAN;
@@ -211,6 +212,7 @@ RetType VCM::init() {
                 auto_port_map[*port] = info;
                 net_map[snd] = info;
                 net_devices.push_back(snd);
+                num_net_devices++;
             } else if(third == "static") {
                 logger.log_message("static configuration not yet supported");
 
@@ -433,12 +435,13 @@ RetType VCM::init() {
     if(protocol == PROTOCOL_NOT_SET) {
         logger.log_message("Config file missing protocol: " + config_file);
         return FAILURE;
-    // } else if(protocol == UDP && (addr == -1 || port == -1)) {
-    } else if(protocol == UDP && port == 0) {
-        // logger.log_message("Config file missing port or addr for UDP protocol: " + config_file);
-        logger.log_message("Config file missing port for UDP protocol: " + config_file);
-        return FAILURE;
     }
+    // } else if(protocol == UDP && (addr == -1 || port == -1)) {
+    // } else if(protocol == UDP && port == 0) {
+    //     // logger.log_message("Config file missing port or addr for UDP protocol: " + config_file);
+    //     logger.log_message("Config file missing port for UDP protocol: " + config_file);
+    //     return FAILURE;
+    // }
 
     return SUCCESS;
 }

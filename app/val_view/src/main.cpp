@@ -122,9 +122,9 @@ int main(int argc, char* argv[]) {
                 printf(" ");
             }
 
-            if(tlm.updated(m_info)) {
-                std::cout << "updated: ";
-            }
+            // if(tlm.updated(m_info)) {
+            //     std::cout << "updated: ";
+            // }
 
             if(FAILURE == tlm.get_str(m_info, &val)) {
                 logger.log_message("failed to convert telemetry value");

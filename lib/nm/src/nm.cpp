@@ -44,6 +44,8 @@ RetType NetworkReceiver::init(uint16_t port, uint32_t multicast_addr, size_t rx_
         return FAILURE;
     }
 
+    this->buffer_size = buffer_size;
+
     // set up the socket
     if(rx_timeout <= 0) { // blocking mode
         if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { // ipv4, UDP
@@ -118,7 +120,7 @@ ssize_t NetworkReceiver::rx() {
     socklen_t addr_len = sizeof(struct sockaddr_in);
 
     return recvfrom(sockfd, (char*)rx_buffer, buffer_size, MSG_TRUNC,
-                        (struct sockaddr*)&remote_addr, &addr_len);
+                    (struct sockaddr*)&remote_addr, &addr_len);
 }
 
 
@@ -146,6 +148,8 @@ RetType AutoNetworkReceiver::init(VCM* vcm, uint16_t port, uint32_t multicast_ad
         logger.log_message("already initialized");
         return FAILURE;
     }
+
+    this->buffer_size = buffer_size;
 
     net_info_t* net = vcm->get_auto_net(port);
     if(NULL == net) {
@@ -180,8 +184,8 @@ ssize_t AutoNetworkReceiver::rx() {
                         (struct sockaddr*)&remote_addr, &addr_len);
 
     if(-1 == read) {
-        MsgLogger logger("AutoNetworkReceiver", "rx");
-        logger.log_message("recvfrom failed");
+        // MsgLogger logger("AutoNetworkReceiver", "rx");
+        // logger.log_message("recvfrom failed");
 
         return -1;
     }

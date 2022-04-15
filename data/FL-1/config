@@ -3,14 +3,14 @@
 
 name = FL-1
 protocol = udp
-port = 8080     # port of the controller, since that's where outgoing messages should go
+#port = 8080     # port we send from 
 multicast = 224.0.0.1
 triggers = triggers
 constants = consts
 
 # network devices
 net engine_controller auto 8084
-net daq auto 9082
+#net daq auto 9082
 
 # DAQ measurements
 MILLISEC    4 int unsigned big
@@ -69,7 +69,7 @@ LC0_FORCE_MAX   8 float
 SOLENOID_OX          2 int unsigned little
 SOLENOID_FUEL        2 int unsigned little
 SOLENOID_OX_PURGE    2 int unsigned little
-SOLENOID_FUEL_PURGE  2 int unsigned little
+#SOLENOID_FUEL_PURGE  2 int unsigned little
 IGNITER_MAIN         2 int unsigned little
 LED_G                2 int unsigned little
 LED_Y                2 int unsigned little
