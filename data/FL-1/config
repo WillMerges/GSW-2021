@@ -3,14 +3,13 @@
 
 name = FL-1
 protocol = udp
-#port = 8080     # port we send from 
 multicast = 224.0.0.1
 triggers = triggers
 constants = consts
 
 # network devices
 net engine_controller auto 8084
-#net daq auto 9082
+net daq auto 9082
 
 # DAQ measurements
 MILLISEC    4 int unsigned big

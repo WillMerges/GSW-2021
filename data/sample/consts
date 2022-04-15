@@ -1,0 +1,7 @@
+# constants file
+# species configuration constants that can be used by processes at runtime
+
+# names are strings
+# values are string
+# use vcm.get_const(CONSTANT_NAME) to retrieve CONSTANT_VALUE
+CONSTANT_NAME CONSTANT_VALUE

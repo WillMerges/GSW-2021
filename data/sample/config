@@ -4,10 +4,8 @@
 # specify the protocol for packets to use (must be set at some point)
 protocol = udp
 
-# the port the device should send packets FROM (e.g. src port from device is 'port')
-# packets from this port will have their address copied and any outgoing packets will
-# be sent to that port
-# if their are multiple devices, whichever device(s) receive should send packets from this port
+# the port we send packets from
+# if not specified (or set to 0), the OS will decide
 port = 8080
 
 # set a multicast address that the receiver will send packets to (ground software should listen on this address)
@@ -19,6 +17,17 @@ name = sample_device
 
 # trigger file
 triggers = triggers
+
+# constants file
+constants = consts
+
+# network devices
+# specified by lines starting with 'net'
+
+# creates a network device in automatic configuration
+# automatic configuration stores the source IP of packets sent to the listed port
+# when someone tries to send over this device, it will be sent to that IP
+net DEVICE_NAME auto 8080
 
 # [measurement name] [total measurement size in bytes] [optional type of int, float, or string, default is int] [optional endianness, big or little (default)] [optional signed or unsigned, default is signed]
 # endianness and signed/unsigned cannot be specified without a type
