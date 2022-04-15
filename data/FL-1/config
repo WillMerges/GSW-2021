@@ -4,8 +4,9 @@
 name = FL-1
 protocol = udp
 port = 8080     # port of the controller, since that's where outgoing messages should go
-triggers = triggers
 multicast = 224.0.0.1
+triggers = triggers
+constants = consts
 
 # network devices
 net engine_controller auto 8084

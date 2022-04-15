@@ -58,6 +58,17 @@ int main() {
         }
     }
 
+    if(SUCCESS == vcm.parse_consts()) {
+        std::cout << "\nconstants: \n";
+        for(std::string c : vcm.constants) {
+            std::string* s;
+            s = vcm.get_const(c);
+
+            std::cout << c << " = " << *s << "\n";
+        }
+    }
+
+
     size_t packet_count = 0;
 
     std::cout << "\npackets: \n";

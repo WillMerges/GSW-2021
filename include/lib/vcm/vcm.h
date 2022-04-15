@@ -88,6 +88,15 @@ namespace vcm {
         // initialize
         RetType init();
 
+        // parse constants file
+        // constants can be accessed with 'get_const'
+        RetType parse_consts();
+
+        // retrieve the value of a constant with name 'name'
+        // returns NULL on error
+        std::string* get_const(std::string& name);
+        std::vector<std::string> constants; // names of all constants
+
         // returns NULL if no measurement with that name exists
         measurement_info_t* get_info(std::string& measurement); // get the info of a measurement
         std::vector<std::string> measurements; // list of measurement names
@@ -98,6 +107,7 @@ namespace vcm {
         // returns NULL on error
         net_info_t* get_net(std::string& device_name);
         std::vector<std::string> net_devices; // list of network device names
+        size_t num_net_devices;
 
         // TODO maybe put addr and port in another subclass
         // TODO maybe get rid of addr altogether, it isn't currently used anywhere
@@ -108,6 +118,7 @@ namespace vcm {
         std::string config_dir;
         std::string config_file;
         std::string trigger_file;
+        std::string const_file;
         std::string device;
 
         endianness_t sys_endianness; // endianness of the system GSW is running on
@@ -118,6 +129,7 @@ namespace vcm {
         std::ifstream* f;
         std::unordered_map<std::string, measurement_info_t*> addr_map;
         std::unordered_map<std::string, net_info_t*> net_map;
+        std::unordered_map<std::string, std::string*> const_map;
     };
 }
 

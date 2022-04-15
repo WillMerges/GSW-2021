@@ -23,6 +23,7 @@ VCM::VCM() {
     num_packets = 0;
     device = "";
     trigger_file = "";
+    const_file = "";
 
     if(__BYTE_ORDER == __BIG_ENDIAN) {
         sys_endianness = GSW_BIG_ENDIAN;
@@ -57,6 +58,7 @@ VCM::VCM(std::string config_file) {
     num_packets = 0;
     device = "";
     trigger_file = "";
+    const_file = "";
 
     if(__BYTE_ORDER == __BIG_ENDIAN) {
         sys_endianness = GSW_BIG_ENDIAN;
@@ -97,6 +99,10 @@ VCM::~VCM() {
         delete info;
     }
 
+    for(auto i : const_map) {
+        delete i.second;
+    }
+
     if(f) {
         if(f->is_open()) {
             f->close();
@@ -127,7 +133,12 @@ RetType VCM::init() {
 
     f = new std::ifstream(config_file.c_str());
     if(!f) {
-        logger.log_message("Failed to open config file: "+config_file);
+        logger.log_message("Failed to open config file: " + config_file);
+        return FAILURE;
+    }
+
+    if(!f->is_open()) {
+        logger.log_message("Failed to open config file: " + config_file);
         return FAILURE;
     }
 
@@ -138,10 +149,11 @@ RetType VCM::init() {
     uint32_t net_id = 0;
 
     // read the config file
-    for(std::string line; std::getline(*f,line); ) {
-        if(line == "" || !line.rfind("#",0)) { // blank or comment '#'
+    for(std::string line; std::getline(*f, line); ) {
+        if(line == "" || !line.rfind("#", 0)) { // blank or comment '#'
             continue;
         }
+
 
         // get 1st + 2nd tokens
         // this is really ugly ¯\_(ツ)_/¯
@@ -236,6 +248,8 @@ RetType VCM::init() {
                 device = third;
             } else if(fst == "triggers") {
                 trigger_file = config_dir + "/" + third;
+            } else if(fst == "constants") {
+                const_file = config_dir + "/" + third;
             } else {
                 logger.log_message("Invalid line: " + line);
                 return FAILURE;
@@ -403,4 +417,55 @@ RetType VCM::init() {
     }
 
     return SUCCESS;
+}
+
+// parse the constants file
+RetType VCM::parse_consts() {
+    MsgLogger logger("VCM", "parse_consts");
+
+    if(const_file == "") {
+        logger.log_message("No constants file specified");
+        return FAILURE;
+    }
+
+    std::ifstream ff(const_file.c_str());
+    if(!ff.is_open()) {
+        logger.log_message("Failed to open constants file: " + const_file);
+        return FAILURE;
+    }
+
+    RetType ret = SUCCESS;
+
+    for(std::string line; std::getline(ff, line); ) {
+        logger.log_message(line);
+
+        std::istringstream ss(line);
+        std::string fst;
+        ss >> fst;
+        std::string snd;
+        ss >> snd;
+
+        if(fst == "" || snd == "") {
+            logger.log_message("Invalid constant name or value, cannot be empty");
+            ret =  FAILURE;
+            break;
+        }
+
+        std::string* str = new std::string;
+        *str = snd;
+
+        const_map[fst] = str;
+        constants.push_back(fst);
+    }
+
+    ff.close();
+    return ret;
+}
+
+std::string* VCM::get_const(std::string& name) {
+    if(const_map.count(name)) {
+        return const_map.at(name);
+    } else {
+        return NULL;
+    }
 }
