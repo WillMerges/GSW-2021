@@ -107,7 +107,10 @@ namespace vcm {
         // returns NULL on error
         net_info_t* get_net(std::string& device_name);
         std::vector<std::string> net_devices; // list of network device names
-        size_t num_net_devices;
+
+        // get a network device in automatic set in port 'port'
+        // returns NULL on error
+        net_info_t* get_auto_net(uint16_t port);
 
         // TODO maybe put addr and port in another subclass
         // TODO maybe get rid of addr altogether, it isn't currently used anywhere
@@ -124,11 +127,13 @@ namespace vcm {
         endianness_t sys_endianness; // endianness of the system GSW is running on
 
         uint32_t num_packets; // number of telemetry packets
+        uint32_t num_net_devices; // number of network devices
     private:
         // local vars
         std::ifstream* f;
         std::unordered_map<std::string, measurement_info_t*> addr_map;
         std::unordered_map<std::string, net_info_t*> net_map;
+        std::unordered_map<uint16_t, net_info_t*> auto_port_map; // ports mapped to network devices in automatic configuration
         std::unordered_map<std::string, std::string*> const_map;
     };
 }

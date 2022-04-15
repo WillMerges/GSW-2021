@@ -206,6 +206,7 @@ RetType TelemetryWriter::flush() {
             ret |= loggers[i]->log_packet(packet_buffers[i], packet_sizes[i]);
 
             // write to shared mem
+            // TODO it would be faster if each call to 'write' updated the underlying shm buffer (since it's locked, we can do that)
             ret |= shm->write(i, packet_buffers[i]);
 
             updated[i] = false;
@@ -226,6 +227,11 @@ RetType TelemetryWriter::lock(bool check_for_updates) {
 
             // copy the current contents of the packet to our cache
             // we want to not overwrite someone else's write with what's in our cache
+            // NOTE: shm->updated could be true because the same tshm is being used by a TelemetryViewer that called 'update'
+            // TODO efficiency issue: us flushing our buffers causes update to be true, but we already have that update cached
+            //      ^^^ hard problem, can't just not set updated in the telemetryshm, any viewer won't see our updates
+            //      need to know if we changed it, or someone else did
+            //      ^^^ keep track of the nonce from our last flush and see if it matches the current nonce
             if(check_for_updates || shm->updated[i]) {
                 memcpy(packet_buffers[i], (void*)(shm->get_buffer(i)), packet_sizes[i]);
             }

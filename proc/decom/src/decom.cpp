@@ -35,7 +35,7 @@ using namespace shm;
 
 VCM* veh = NULL;
 
-NetworkManager* net = NULL;
+NetworkReceiver* net = NULL;
 std::string decom_id = "DECOM[master]"; // id for each decom proc spawned
 
 bool child_proc = false;
@@ -102,39 +102,41 @@ void execute(size_t packet_id, packet_info_t* packet) {
     // set packet name to use for logging messages and network manager name
     std::string packet_name = veh->device + "(" + std::to_string(packet_id) + ")";
 
-    // create a receive buffer
-    uint8_t* buffer = new uint8_t[packet->size];
+    // create/init the network receiver
+    if(veh->get_auto_net(packet->port)) {
+        AutoNetworkReceiver* n = new AutoNetworkReceiver();
 
-    // open the network manager (use default timeout)
-    net = new NetworkManager(packet->port, packet_name.c_str(), buffer,
-                                        packet->size, veh->port, veh->multicast_addr, 500);
-    if(FAILURE == net->Open()) {
-        logger.log_message("failed to open network manager");
-        return;
+        if(SUCCESS != n->init(veh, packet->port, veh->multicast_addr, 0, packet->size)) {
+            logger.log_message("failed to initialize auto network receiver");
+            delete n;
+            return;
+        }
+
+        net = n;
+    } else {
+        net = new NetworkReceiver();
+
+        if(SUCCESS != net->init(packet->port, veh->multicast_addr, 0, packet->size)) {
+            logger.log_message("failed to initialized network receiver");
+            delete net;
+            return;
+        }
     }
 
     // open shared memory
     TelemetryShm shmem;
     if(shmem.init(veh) == FAILURE) {
         logger.log_message("failed to init telemetry shared memory");
+        delete net;
         return;
     }
 
     // attach to shared memory
     if(shmem.open() == FAILURE) {
         logger.log_message("failed to attach to telemetry shared memory");
+        delete net;
         return;
     }
-
-    // clear our packet's shared memory
-    // This should be done at creation time by the shmctl proc actually
-    // don't want to clear shmem if we restarted the decom procs
-    /*
-    if(shmem.clear(packet_id) == FAILURE) {
-        logger.log_message("failed to clear telemetry shared memory");
-        return;
-    }
-    */
 
     // create packet logger
     PacketLogger plogger(packet_name);
@@ -142,27 +144,20 @@ void execute(size_t packet_id, packet_info_t* packet) {
     // main loop
     size_t n = 0;
     while(!killed) {
-        // TODO this should go somewhere else, in a single network process? (uplink?)
-        // it should basically only call net->Send repeatedly/block on the mqueue read
-        // maybe add a block bool to Send
-        // how to determine what port/addr to send to? before we just stripped it from the packet, idk now (maybe use VCM file)
-        // send any outgoing messages
-        // net->Send(); // don't care about the return
-
         // read any incoming message and write it to shared memory
-        if(SUCCESS == net->Receive(&n)) {
+        if((n = net->rx()) > 0) {
             if(n != packet->size) {
                 logger.log_message("Packet size mismatch, " + std::to_string(packet->size) +
                                    " != " + std::to_string(n) + " (received)");
             } else { // only write the packet to shared mem if it's the correct size
-                // mem.write_to_shm((void*)net->in_buffer, net->in_size);
-                if(shmem.write(packet_id, buffer) == FAILURE) {
+                // no need to lock the packet for writing here, telemetry (non-virtual) packets should only have one writer
+                if(shmem.write(packet_id, net->rx_buffer) == FAILURE) {
                     logger.log_message("failed to write packet to shared memory");
                     // ignore and continue
                 }
             }
 
-            plogger.log_packet((unsigned char*)buffer, n); // log the packet either way
+            plogger.log_packet((unsigned char*)net->rx_buffer, n); // log the packet either way
         }
     }
 

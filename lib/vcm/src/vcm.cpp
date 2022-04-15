@@ -128,6 +128,14 @@ net_info_t* VCM::get_net(std::string& device_name) {
     }
 }
 
+net_info_t* VCM::get_auto_net(uint16_t port) {
+    if(auto_port_map.count(port)) {
+        return auto_port_map.at(port);
+    } else {
+        return NULL;
+    }
+}
+
 RetType VCM::init() {
     MsgLogger logger("VCM", "init");
 
@@ -191,30 +199,46 @@ RetType VCM::init() {
                 info->unique_id = net_id;
                 net_id++;
 
-                net_map[snd] = info;
-                net_devices.push_back(snd);
-            } else if(third == "static") {
-                info->mode = ADDR_STATIC;
-                uint32_t* addr = new uint32_t;
+                if(get_auto_net(*port) != NULL) {
+                    logger.log_message("already a device in auto configuration on this port");
 
-                try {
-                    // IPv4 is currently only type supported
-                    inet_pton(AF_INET, third.c_str(), &addr);
-                } catch(std::invalid_argument& ia) {
-                    logger.log_message("Invalid IPv4 address for static net device: " + line);
-
-                    delete addr;
+                    delete port;
                     delete info;
 
                     return FAILURE;
                 }
 
-                info->addr_info = (void*)addr;
-                info->unique_id = net_id;
-                net_id++;
-
+                auto_port_map[*port] = info;
                 net_map[snd] = info;
                 net_devices.push_back(snd);
+            } else if(third == "static") {
+                logger.log_message("static configuration not yet supported");
+
+                delete info;
+                return FAILURE;
+            // TODO need to store port as well for static configuration
+            // } else if(third == "static") {
+            //     info->mode = ADDR_STATIC;
+            //     uint32_t* addr = new uint32_t;
+            //
+            //     try {
+            //         // IPv4 is currently only type supported
+            //         inet_pton(AF_INET, third.c_str(), &addr);
+            //     } catch(std::invalid_argument& ia) {
+            //         logger.log_message("Invalid IPv4 address for static net device: " + line);
+            //
+            //         delete addr;
+            //         delete info;
+            //
+            //         return FAILURE;
+            //     }
+            //
+            //     info->addr_info = (void*)addr;
+            //     info->unique_id = net_id;
+            //     net_id++;
+            //
+            //     net_map[snd] = info;
+            //     net_devices.push_back(snd);
             } else {
                 logger.log_message("invalid address mode for net device: " + line);
 
