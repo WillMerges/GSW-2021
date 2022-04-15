@@ -6,8 +6,9 @@
 using namespace dls;
 using namespace shm;
 
-NmShm::NmShm() {
+NmShm::NmShm(unsigned int block_count) {
     shm = NULL;
+    this->block_count = block_count;
 }
 
 NmShm::~NmShm() {
@@ -29,6 +30,8 @@ RetType NmShm::init() {
     key_filename = env;
     key_filename += "/";
     key_filename += "lib/bin/libnm.so";
+
+    last_nonce = 0;
 
     shm = new Shm(key_filename.c_str(), key_id, sizeof(nm_shm_t));
 
@@ -67,6 +70,8 @@ RetType NmShm::create() {
         return FAILURE;
     }
 
+    data->nonce = 0;
+
     return SUCCESS;
 }
 
@@ -77,6 +82,8 @@ RetType NmShm::destroy() {
 RetType NmShm::get_addr(struct sockaddr_in* addr) {
     MsgLogger logger("NmShm", "get_addr");
 
+    static unsigned int blocked = block_count; // make sure we block the first time so we get whatever address we have
+
     nm_shm_t* data = (nm_shm_t*)shm->data;
     if(data == NULL) {
         logger.log_message("Shared memory not attached, invalid address");
@@ -84,10 +91,31 @@ RetType NmShm::get_addr(struct sockaddr_in* addr) {
     }
 
     // lock shared memory
-    if(0 != sem_wait(&(data->sem))) {
-        logger.log_message("Error locking semaphore");
-        return FAILURE;
+    if(blocked < block_count) {
+        // non-blocking
+        if(0 != sem_trywait(&(data->sem))) {
+            if(EAGAIN != errno) {
+                logger.log_message("Error locking semaphore");
+                return FAILURE;
+            } else {
+                blocked++;
+                return BLOCKED;
+            }
+        }
+    } else {
+        // blocking
+        if(0 != sem_wait(&(data->sem))) {
+            logger.log_message("Error locking semaphore");
+            return FAILURE;
+        }
     }
+
+    if(data->nonce == last_nonce) {
+        last_nonce = data->nonce;
+        return NOCHANGE;
+    }
+
+    last_nonce = data->nonce;
 
     // copy data out
     *addr = data->addr;
@@ -97,6 +125,9 @@ RetType NmShm::get_addr(struct sockaddr_in* addr) {
         logger.log_message("Error unlocking semaphore");
         return FAILURE;
     }
+
+    // reset blocked counter
+    blocked = 0;
 
     return SUCCESS;
 }

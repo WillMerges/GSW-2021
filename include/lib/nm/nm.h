@@ -13,6 +13,38 @@
 #define NM_MAX_MSG_SIZE 2048
 
 namespace nm {
+
+    // receives packets over the network
+    // listens on a port
+    // if the port is used as an auto port for a network device, writes address to shared memory when it receives
+    // NOTE: should only have one per port! or else the packets get split between the two
+    class NetworkReceiver {
+        // create a network receiver for a specific port
+        NetworkReceiver(uint16_t port, VCM::VCM* vcm);
+    };
+
+    // transmits packets over the network
+    // reads messages from an mqueue with name /net[network_device_id]
+    // NOTE: should only have one per device! doesn't break anything since they both read from the mqueue, but doesn't really make sense either
+    class NetworkTransmitter {
+        // transmitter that sends to device 'device_name' from port 'port'
+        // if no port is specified, lets the OS pick
+        NetworkTransmitter(std::string& device_name, VCM::VCM* vcm, uint16_t port = 0);
+        NetworkTransmitter(uint32_t device_id, VCM::VCM* vcm, uint16_t port = 0);
+    };
+
+    // gives an interface to request the network transmitter send a packet
+    // can have many of these!
+    // queues message up to mqueue with name /net[network_device_id]
+    class NetworkInterface {
+        NetworkInterface(std::string& device_name, VCM::VCM* vcm);
+        NetworkInterface(uint32_t device_id, VCM::VCM* vcm);
+        RetType QueueUDPMessage(const char* msg, size_t size);
+    }
+
+
+
+
     // checks an mqueue of name /'name' for messages to send over UDP
     // checks the UDP socket with 'port' for incoming messages and writes them
     // to passed in 'buffer' of 'size' bytes

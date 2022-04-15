@@ -20,7 +20,6 @@ VCM::VCM() {
     port = 0; // treat zero as an invalid port
     protocol = PROTOCOL_NOT_SET;
     multicast_addr = 0; // treat address of zero as invalid
-    // packet_size = 0;
     num_packets = 0;
     device = "";
     trigger_file = "";
@@ -44,29 +43,29 @@ VCM::VCM() {
     config_dir += "/";
     config_dir += DEFAULT_CONFIG_DIR;
     config_file = config_dir + "/config";
-
-    // init
-    // NEW CHANGE: user has to call init themself
-    // if(init() != SUCCESS) {
-    //     throw new std::runtime_error("Error in VCM init");
-    // }
 }
 
 VCM::VCM(std::string config_file) {
+    MsgLogger logger("VCM", "Constructor(string)");
+
     this->config_file = config_file;
 
     // default values
+    port = 0; // treat zero as an invalid port
     protocol = PROTOCOL_NOT_SET;
-    // packet_size = 0;
+    multicast_addr = 0; // treat address of zero as invalid
     num_packets = 0;
-    // compressed_size = 0;
     device = "";
+    trigger_file = "";
 
-    // init
-    // NEW CHANGE: user has to call init themself
-    // if(init() != SUCCESS) {
-    //     throw new std::runtime_error("Error in VCM init");
-    // }
+    if(__BYTE_ORDER == __BIG_ENDIAN) {
+        sys_endianness = GSW_BIG_ENDIAN;
+    } else if(__BYTE_ORDER == __LITTLE_ENDIAN) {
+        sys_endianness = GSW_LITTLE_ENDIAN;
+    } else {
+        logger.log_message("Could not determine endianness of system, assuming little endian");
+        sys_endianness = GSW_LITTLE_ENDIAN;
+    }
 }
 
 VCM::~VCM() {
@@ -78,6 +77,24 @@ VCM::~VCM() {
     // free all pointers in packets
     for(auto i : packets) {
         delete i;
+    }
+
+    for(auto i : net_map) {
+        net_info_t* info;
+        info = net_map[i.first];
+
+        if(info->addr_info) {
+            switch(info->mode) {
+                case ADDR_AUTO:
+                    delete (uint16_t*)(info->addr_info);
+                    break;
+                case ADDR_STATIC:
+                    delete (uint32_t*)(info->addr_info);
+                    break;
+            }
+        }
+
+        delete info;
     }
 
     if(f) {
@@ -97,6 +114,14 @@ measurement_info_t* VCM::get_info(std::string& measurement) {
     }
 }
 
+net_info_t* VCM::get_net(std::string& device_name) {
+    if(net_map.count(device_name)) {
+        return net_map.at(device_name);
+    } else {
+        return NULL;
+    }
+}
+
 RetType VCM::init() {
     MsgLogger logger("VCM", "init");
 
@@ -108,6 +133,9 @@ RetType VCM::init() {
 
     // hash set to check uniqueness of telemetry packet ports
     std::unordered_set<uint16_t> port_set;
+
+    // unique_id for net devices
+    uint32_t net_id = 0;
 
     // read the config file
     for(std::string line; std::getline(*f,line); ) {
@@ -125,8 +153,63 @@ RetType VCM::init() {
         std::string third;
         ss >> third;
 
-        // port or addr or protocol line
-        if(snd == "=") {
+        if(fst == "net") {
+            // new net device
+            std::string fourth;
+            ss >> fourth;
+
+            net_info_t* info = new net_info_t;
+
+            if(third == "auto") {
+                info->mode = ADDR_AUTO;
+                uint16_t* port = new uint16_t; // port to listen on
+
+                try {
+                    *port = std::stoi(fourth, NULL, 10);
+                } catch(std::invalid_argument& ia) {
+                    logger.log_message("Invalid port for auto net device: " + line);
+
+                    delete port;
+                    delete info;
+
+                    return FAILURE;
+                }
+
+                info->addr_info = (void*)port;
+                info->unique_id = net_id;
+                net_id++;
+
+                net_map[snd] = info;
+                net_devices.push_back(snd);
+            } else if(third == "static") {
+                info->mode = ADDR_STATIC;
+                uint32_t* addr = new uint32_t;
+
+                try {
+                    // IPv4 is currently only type supported
+                    inet_pton(AF_INET, third.c_str(), &addr);
+                } catch(std::invalid_argument& ia) {
+                    logger.log_message("Invalid IPv4 address for static net device: " + line);
+
+                    delete addr;
+                    delete info;
+
+                    return FAILURE;
+                }
+
+                info->addr_info = (void*)addr;
+                info->unique_id = net_id;
+                net_id++;
+
+                net_map[snd] = info;
+                net_devices.push_back(snd);
+            } else {
+                logger.log_message("invalid address mode for net device: " + line);
+
+                delete info;
+                return FAILURE;
+            }
+        } else if(snd == "=") {
             if(fst == "multicast") {
                 try {
                     // IPv4 is currently only type supported
@@ -188,6 +271,10 @@ RetType VCM::init() {
             // we don't allow comments or empty lines after starting a packet
             // BUT we don't check for anything following a measurement name, we only look at the first token
             for(std::string line; std::getline(*f,line); ) {
+                if(line == "" || !line.rfind("#",0)) { // blank or comment '#'
+                    continue;
+                }
+
                 std::istringstream ss(line);
                 std::string token;
                 ss >> token;

@@ -46,6 +46,19 @@ namespace vcm {
         UDP, PROTOCOL_NOT_SET
     } protocol_t;
 
+    typedef enum {
+        ADDR_AUTO,   // automatically determine IP address
+        ADDR_STATIC  // statically set IP address
+        // TODO domain name lookup
+    } addr_mode_t;
+
+    // network device info
+    typedef struct {
+        uint32_t unique_id;
+        addr_mode_t mode;
+        void* addr_info; // depends on address mode
+    } net_info_t;
+
     typedef struct {
         size_t size;
         uint32_t timeout; // time before packet is considered stale (in milliseconds) TODO implement this
@@ -81,8 +94,10 @@ namespace vcm {
 
         std::vector<packet_info_t*> packets; // list of packets
 
-        // size_t packet_size; // bytes, size of packet after padding is added
-        // size_t compressed_size; // bits, size of packet before padding added
+        // get network device info
+        // returns NULL on error
+        net_info_t* get_net(std::string& device_name);
+        std::vector<std::string> net_devices; // list of network device names
 
         // TODO maybe put addr and port in another subclass
         // TODO maybe get rid of addr altogether, it isn't currently used anywhere
@@ -102,6 +117,7 @@ namespace vcm {
         // local vars
         std::ifstream* f;
         std::unordered_map<std::string, measurement_info_t*> addr_map;
+        std::unordered_map<std::string, net_info_t*> net_map;
     };
 }
 

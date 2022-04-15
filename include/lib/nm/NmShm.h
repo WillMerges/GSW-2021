@@ -25,7 +25,8 @@ All operations are blocking (for now).
 class NmShm {
 public:
     // constructor
-    NmShm();
+    // block count is how many times 'get_addr' can fail to lock shared memory before it forces a block
+    NmShm(unsigned int block_count = 1000);
 
     // destructor
     virtual ~NmShm();
@@ -46,7 +47,7 @@ public:
     RetType destroy();
 
     // Get the address stored in shared memory
-    // NOTE: blocking function
+    // If shared memory is currently locked, we just unblock
     RetType get_addr(struct sockaddr_in* addr);
 
     // Updated shared memory with this address
@@ -60,8 +61,15 @@ private:
     // layout of Network Manager shared memory
     typedef struct {
         sem_t sem;
+        uint32_t nonce;
         struct sockaddr_in addr;
     } nm_shm_t;
+
+    // last nonce we've read
+    uint32_t last_nonce;
+
+    // max times before we block on get_addr
+    unsigned int block_count;
 
     // file to use for generating shared memory token
     std::string key_filename;

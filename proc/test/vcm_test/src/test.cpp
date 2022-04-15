@@ -33,6 +33,31 @@ int main() {
         std::cout << "multicast address: " << inet_ntoa(addr) << "\n";
     }
 
+    for(std::string device : vcm.net_devices) {
+        net_info_t* info = vcm.get_net(device);
+        std::cout << "network device " + device + " id=" << info->unique_id;
+
+        switch(info->mode) {
+            case ADDR_AUTO:
+                std::cout << " [auto:";
+                std::cout << *((uint16_t*)(info->addr_info));
+                std::cout << "]\n";
+
+                break;
+            case ADDR_STATIC:
+                std::cout << " [static:";
+                std::cout << "]\n";
+
+                struct in_addr addr;
+                memset(&addr, 0, sizeof(addr));
+                addr.s_addr = *((uint32_t*)(info->addr_info));
+
+                std::cout << inet_ntoa(addr) << "]\n";
+
+                break;
+        }
+    }
+
     size_t packet_count = 0;
 
     std::cout << "\npackets: \n";

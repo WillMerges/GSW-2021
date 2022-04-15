@@ -7,6 +7,9 @@ port = 8080     # port of the controller, since that's where outgoing messages s
 triggers = triggers
 multicast = 224.0.0.1
 
+# network devices
+net engine_controller auto 8084
+net daq auto 9082
 
 # DAQ measurements
 MILLISEC    4 int unsigned big
