@@ -26,7 +26,4 @@ $(TARGET): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LIBS)
 
 clean:
-	-chmod -x GPSTrack.py
-	-chmod -x CreateLink.py
-	-chmod -x run.sh
 	-rm src/*.o $(TARGET)
