@@ -464,8 +464,6 @@ RetType VCM::parse_consts() {
     RetType ret = SUCCESS;
 
     for(std::string line; std::getline(ff, line); ) {
-        logger.log_message(line);
-
         std::istringstream ss(line);
         std::string fst;
         ss >> fst;

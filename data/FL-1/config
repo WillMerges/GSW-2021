@@ -68,7 +68,7 @@ LC0_FORCE_MAX   8 float
 SOLENOID_OX          2 int unsigned little
 SOLENOID_FUEL        2 int unsigned little
 SOLENOID_OX_PURGE    2 int unsigned little
-#SOLENOID_FUEL_PURGE  2 int unsigned little
+SOLENOID_FUEL_PURGE  2 int unsigned little
 IGNITER_MAIN         2 int unsigned little
 LED_G                2 int unsigned little
 LED_Y                2 int unsigned little
@@ -84,7 +84,7 @@ SAFING               2 int unsigned little
 OX_STR          10 string
 FUEL_STR        10 string
 OX_PURGE_STR    10 string
-# FUEL_PURGE_STR 10 string
+FUEL_PURGE_STR 10 string
 IGNITER_STR     10 string
 MODE_STR        10 string
 SAFING_STR      10 string
@@ -100,6 +100,7 @@ SEQ_NUM_EC
 SOLENOID_OX
 SOLENOID_FUEL
 SOLENOID_OX_PURGE
+SOLENOID_FUEL_PURGE
 SEQ_NUM_EC
 }
 
@@ -120,12 +121,15 @@ SEQ_NUM_EC
 SOLENOID_OX
 SOLENOID_FUEL
 SOLENOID_OX_PURGE
+SOLENOID_FUEL_PURGE
 IGNITER_MAIN
 LED_G
 LED_Y
 LED_R
 LED_BUZZ
 SEQ_NUM_EC
+MODE
+SAFING
 HEARTBEAT
 }
 
@@ -139,6 +143,7 @@ virtual {
 OX_STR
 FUEL_STR
 OX_PURGE_STR
+FUEL_PURGE_STR
 }
 
 virtual {

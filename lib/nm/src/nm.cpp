@@ -385,7 +385,7 @@ NetworkInterface::~NetworkInterface() {
 }
 
 RetType NetworkInterface::init(uint32_t device_id) {
-    MsgLogger logger("NetworkInterface", "init");
+    MsgLogger logger("NetworkInterface", "init(device_id)");
 
     if(inited) {
         logger.log_message("already initialized");
@@ -405,6 +405,19 @@ RetType NetworkInterface::init(uint32_t device_id) {
 
     inited = true;
     return SUCCESS;
+}
+
+RetType NetworkInterface::init(std::string& device_name, VCM* vcm) {
+    MsgLogger logger("NetworkInterface", "init(device_name)");
+
+    net_info_t* net = vcm->get_net(device_name);
+
+    if(NULL == net) {
+        logger.log_message("no such device: " + device_name);
+        return FAILURE;
+    }
+
+    return init(net->unique_id);
 }
 
 RetType NetworkInterface::QueueUDPMessage(const uint8_t* msg, size_t size) {

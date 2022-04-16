@@ -34,7 +34,6 @@ NetworkTransmitter* net;
 
 bool child_proc = false;
 bool ignore_kill = false;
-bool killed = false;
 
 int received_sig = 0;
 
@@ -73,8 +72,8 @@ void sighandler(int signum) {
         // mark us as killed, don't want to kill immediately in case we have shared memory locked
         logger.log_message("child process received kill signal");
 
-        killed = true;
-        received_sig = signum;
+        child_cleanup();
+        exit(signum);
     }
 }
 
@@ -101,7 +100,7 @@ void execute(std::string device_name) {
         return;
     }
 
-    while(!killed) {
+    while(1) {
         net->tx();
     }
 
