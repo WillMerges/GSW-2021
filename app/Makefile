@@ -12,6 +12,7 @@ all:
 	-$(MAKE) -C clock_ctrl all
 	-$(MAKE) -C http_server all
 	-$(MAKE) -C print_meas all
+	-$(MAKE) -C ksp all
 
 clean:
 	-$(MAKE) -C log_view clean
@@ -25,3 +26,4 @@ clean:
 	-$(MAKE) -C clock_ctrl clean
 	-$(MAKE) -C http_server clean 
 	-$(MAKE) -C print_meas clean 
+	-$(MAKE) -C ksp clean 
