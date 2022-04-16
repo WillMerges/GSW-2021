@@ -4,6 +4,9 @@ protocol = udp
 port = 8080
 name = engine_controller
 
+net engine_controller auto 8084
+
+constants = consts
 
 ## measurements ##
 

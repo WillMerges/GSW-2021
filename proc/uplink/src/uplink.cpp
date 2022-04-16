@@ -42,6 +42,15 @@ std::vector<pid_t> pids;
 std::string uplink_id = "UPLINK[master]";
 
 
+void child_cleanup() {
+    MsgLogger logger(uplink_id.c_str(), "child_cleanup");
+
+    logger.log_message("killed, cleaning up resources");
+    if(net) { // it's possible we get killed before we can create our network manager
+        delete net; // this also calls close
+    }
+}
+
 void sighandler(int signum) {
     MsgLogger logger(uplink_id.c_str(), "sighandler");
 
@@ -74,15 +83,6 @@ void sighandler(int signum) {
 
         child_cleanup();
         exit(signum);
-    }
-}
-
-void child_cleanup() {
-    MsgLogger logger(uplink_id.c_str(), "child_cleanup");
-
-    logger.log_message("killed, cleaning up resources");
-    if(net) { // it's possible we get killed before we can create our network manager
-        delete net; // this also calls close
     }
 }
 

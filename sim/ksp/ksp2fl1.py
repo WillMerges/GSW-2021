@@ -11,6 +11,8 @@ Usage: ./ksp2fl1 [IP address of kRPC server]
 """
 import sys
 import os
+import time
+from threading import Lock
 import krpc
 
 if len(sys.argv) < 2:
@@ -18,6 +20,7 @@ if len(sys.argv) < 2:
     quit()
 
 
+"""
 gsw_dir = os.getenv("GSW_HOME")
 if gsw_dir is None:
     print("GSW_HOME variable not set!")
@@ -25,6 +28,7 @@ if gsw_dir is None:
 
 # directory with linked commands/scripts
 cmd_dir = gsw_dir + "/app/http_server/links"
+"""
 
 # connect to kRPC
 conn = krpc.connect(address=sys.argv[1])
@@ -35,54 +39,72 @@ launched = False
 
 # when the thrust changes
 def burn():
-    os.system(cmd_dir + "/change_mode hot")
-    os.system(cmd_dir + "/ec_cmd 100 1") # ox on
-    os.system(cmd_dir + "/ec_cmd 101 1") # fuel on
+    print("hot")
+    os.system("../propulsion/FL-1/change_mode.py hot")
+    os.system("../propulsion/ec_cmd/ec_cmd 100 1") # ox on
+    os.system("../propulsion/ec_cmd/ec_cmd 101 1") # fuel on
 
     launched = True
 
 # no thrust, but throttled up
 def cold():
-    os.system(cmd_dir + "/change_mode cold")
-    os.system(cmd_dir + "/ec_cmd 100 1") # ox on
-    os.system(cmd_dir + "/ec_cmd 101 1") # fuel on
+    print("cold")
+    os.system("../propulsion/FL-1/change_mode.py cold")
+    os.system("../propulsion/ec_cmd/ec_cmd 100 0") # ox off
+    os.system("../propulsion/ec_cmd/ec_cmd 101 0") # fuel off
     
 # no thrust, no throttle
 def disable():
-    os.system(cmd_dir + "/change_mode disabled")
-    os.system(cmd_dir + "/ec_cmd 100 0") # fuel on
-    os.system(cmd_dir + "/ec_cmd 101 0") # ox on
+    print("disable")
+    os.system("../propulsion/FL-1/change_mode.py disabled")
+    os.system("../propulsion/ec_cmd/ec_cmd 100 0") # ox off
+    os.system("../propulsion/ec_cmd/ec_cmd 101 0") # fuel off
     
     if not launched:
         return
 
     # run purge
-    os.system(cmd_dir + "/ec_cmd 102 1") # ox purge on
-    os.system(cmd_dir + "/ec_cmd 103 1") # fuel purge on
-    sleep(2)
-    os.system(cmd_dir + "/ec_cmd 102 0") # ox purge on
-    os.system(cmd_dir + "/ec_cmd 103 0") # fuel purge on
+    os.system("../propulsion/ec_cmd/ec_cmd 102 1") # ox purge on
+    os.system("../propulsion/ec_cmd/ec_cmd 103 1") # fuel purge on
+    time.sleep(2)
+    os.system("../propulsion/ec_cmd/ec_cmd 102 0") # ox purge off
+    os.system("../propulsion/ec_cmd/ec_cmd 103 0") # fuel purge off
 
-
+global burning
 burning = False
+thrust_mutex = Lock()
 def thrust_callback(t):
-    if t > 1 and not burning:
+    thrust_mutex.acquire()
+
+    global burning
+    print("thrust: " + str(t))
+    if t >= 1 and not burning:
         # just started burning
         burn()
         burning = True
-    elif burning:
+    elif t < 1 and burning:
         # just stopped burning
         cold()
         burning = False
 
-throttle_up = False
+    thrust_mutex.release()
+
+global throttle_up
+throttle_up = True
+throttle_mutex = Lock()
 def throttle_callback(t):
-    if t < 0.05 and throttle_up:
+    throttle_mutex.acquire()
+
+    global throttle_up
+    print("throttle: " + str(t))
+    if t <= 0.05 and throttle_up:
         disable()
         throttle_up = False
-    elif not throttle_up:
+    elif t > 0.05 and not throttle_up:
         cold()
         throttle_up = True
+
+    throttle_mutex.release()
 
 
 thrust = conn.add_stream(getattr, vessel, "thrust")
