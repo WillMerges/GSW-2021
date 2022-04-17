@@ -1,5 +1,7 @@
 #!/bin/bash
 
+USER="will"
+
 if ! [ -v GSW_HOME ]
 then
     echo environment not set, must run '. setenv' first
@@ -27,4 +29,4 @@ fi
 
 # stop Grafana on remote machine
 echo "stopping Grafana on remote machine"
-${GSW_HOME}/app/db/grafana/remote_stop.sh
+${GSW_HOME}/app/db/grafana/remote_stop.sh $USER

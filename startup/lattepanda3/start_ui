@@ -28,7 +28,7 @@ echo $! >> ui_pids
 
 # clear InfluxDB
 echo "clearing InfluxDB"
-${GSW_HOME}/app/db/fwd_influx/clear_influx.sh
+${GSW_HOME}/app/db/run_influx/clear_influx.sh
 
 # start measurement/log forwarding to InfluxDB
 echo "starting database forwaring"
