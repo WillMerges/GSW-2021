@@ -19,46 +19,47 @@ OFF = 0         # off state
 # Run through a basic program
 # Format is [absolute time in ms (time referenced from countdown clock)] [control] [state]
 
-# beep the buzzer 5 times
-# starts beeping 4.5s before turning fuel on
+# beep the buzzer 5 times, last buzz is longer
+# starts beeping 5s before turning fuel on
 # end of last buzz is when fuel valve opens
+-5000 BUZZER ON
+-4500 BUZZER OFF
 -4000 BUZZER ON
--2500 BUZZER OFF
+-3500 BUZZER OFF
 -3000 BUZZER ON
 -2500 BUZZER OFF
 -2000 BUZZER ON
 -1500 BUZZER OFF
 -1000 BUZZER ON
--500 BUZZER OFF
-0 BUZZER ON
-500 BUZZER OFF
+-500  BUZZER OFF
+0 BUZZER OFF
 
-500 FUEL ON
-500 MSG "fuel on"
+0 FUEL ON
+0 MSG "fuel on"
 
-1000 IGNITER ON
-1000 OX ON
-1000 MSG "ox/igniter on"
+500 IGNITER ON
+500 OX ON
+500 MSG "ox/igniter on"
 
-2500 IGNITER OFF
-2500 MSG "igniter off"
+2000 IGNITER OFF
+2000 MSG "igniter off"
 
-6000 FUEL OFF
-6000 MSG "fuel off"
+5500 FUEL OFF
+5500 MSG "fuel off"
 
-7000 OX OFF
-7000 MSG "ox off"
+6500 OX OFF
+6500 MSG "ox off"
 
-9000 PURGE_OX ON
-9000 MSG "purge ox on"
+8500 PURGE_OX ON
+8500 MSG "purge ox on"
 
-11000 PURGE_OX OFF
-11000 MSG "purge ox off"
+10500 PURGE_OX OFF
+10500 MSG "purge ox off"
 
-12000 PURGE_FUEL ON
-12000 MSG "purge fuel on"
+11500 PURGE_FUEL ON
+11500 MSG "purge fuel on"
 
-12000 PURGE_FUEL OFF
-12000 MSG "purge fuel off"
+13500 PURGE_FUEL OFF
+13500 MSG "purge fuel off"
 
 end

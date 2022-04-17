@@ -25,6 +25,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
+#include <limits.h>
 
 using namespace dls;
 using namespace vcm;
@@ -106,7 +107,7 @@ void sighandler(int signum) {
 RetType parse() {
     MsgLogger logger("EC_PROGRAM", "parse");
 
-    uint32_t curr_time = 0; // ms
+    long curr_time = LONG_MIN; // ms
 
     for(std::string line; std::getline(std::cin, line); ) {
         if(line == "" || !line.rfind("#",0)) { // blank or comment '#'
@@ -152,7 +153,7 @@ RetType parse() {
             }
 
             if(abs_time < curr_time) {
-                printf("absolute time is less than current time, invalid command!\n");
+                printf("absolute time (%li) is less than current time (%li), invalid command!\n", abs_time, curr_time);
                 logger.log_message("absolute time is less than current time, invalid command!");
 
                 return FAILURE;
@@ -215,7 +216,7 @@ RetType parse() {
                 }
 
                 if(abs_time < curr_time) {
-                    printf("absolute time is less than current time, invalid command!\n");
+                    printf("absolute time (%li) is less than current time (%li), invalid command!\n", abs_time, curr_time);
                     logger.log_message("absolute time is less than current time, invalid command!");
 
                     return FAILURE;
