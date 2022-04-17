@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if ! [ -v GSW_HOME ]
+then
+    echo environment not set, must run '. setenv' first
+    exit
+fi
+
+cd ${GSW_HOME}/startup/propulsion
+
+set +e
+
+if ! [ -f ui_pids ]
+then
+    echo "UI not running!"
+    exit
+else
+    # kill local UI processes
+    while read l; do
+        echo "killing PID $l"
+        sudo kill $l
+        sleep 0.5
+    done <ui_pids
+
+    rm ui_pids
+fi
+
+# stop Grafana on remote machine
+echo "stopping Grafana on remote machine"
+${GSW_HOME}/app/db/grafana/remote_stop.sh
