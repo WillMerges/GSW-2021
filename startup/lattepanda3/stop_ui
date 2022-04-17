@@ -1,6 +1,6 @@
 #!/bin/bash
 
-USER="will"
+USER="launch"
 
 if ! [ -v GSW_HOME ]
 then
