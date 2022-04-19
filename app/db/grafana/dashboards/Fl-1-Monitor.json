@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 5,
-  "iteration": 1649532202307,
+  "iteration": 1650342277477,
   "links": [],
   "panels": [
     {
@@ -1734,8 +1734,8 @@
       {
         "current": {
           "selected": false,
-          "text": "engine_controller",
-          "value": "engine_controller"
+          "text": "",
+          "value": ""
         },
         "error": null,
         "hide": 0,
@@ -1743,20 +1743,20 @@
         "name": "Vehicle",
         "options": [
           {
-            "selected": true,
-            "text": "engine_controller",
-            "value": "engine_controller"
+            "selected": false,
+            "text": "FL_1",
+            "value": "FL_1"
           }
         ],
-        "query": "engine_controller",
+        "query": "",
         "skipUrlSync": false,
         "type": "textbox"
       },
       {
         "current": {
           "selected": false,
-          "text": "gs.local",
-          "value": "gs.local"
+          "text": "",
+          "value": ""
         },
         "error": null,
         "hide": 0,
@@ -1764,20 +1764,20 @@
         "name": "GroundStationIP",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "gs.local",
             "value": "gs.local"
           }
         ],
-        "query": "gs.local",
+        "query": "",
         "skipUrlSync": false,
         "type": "textbox"
       },
       {
         "current": {
           "selected": false,
-          "text": "8080",
-          "value": "8080"
+          "text": "",
+          "value": ""
         },
         "error": null,
         "hide": 0,
@@ -1785,12 +1785,12 @@
         "name": "GroundStationPort",
         "options": [
           {
-            "selected": true,
+            "selected": false,
             "text": "8080",
             "value": "8080"
           }
         ],
-        "query": "8080",
+        "query": "",
         "skipUrlSync": false,
         "type": "textbox"
       }
@@ -1805,11 +1805,12 @@
       "100ms",
       "500ms",
       "1s",
+      "2s",
       "5s"
     ]
   },
   "timezone": "",
   "title": "FL-1 - Monitor",
   "uid": "yqaFLGfnk",
-  "version": 30
+  "version": 33
 }
