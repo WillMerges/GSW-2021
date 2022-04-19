@@ -1034,7 +1034,7 @@
       },
       "id": 69,
       "options": {
-        "backgroundColor": "rgb(165, 173, 34)",
+        "backgroundColor": "rgb(219, 119, 59)",
         "contentType": "text/plain",
         "icon": "clock-nine",
         "isAuth": false,
@@ -3548,5 +3548,5 @@
   "timezone": "",
   "title": "FL-1 - Control",
   "uid": "zTMJUmw7z",
-  "version": 13
+  "version": 14
 }
