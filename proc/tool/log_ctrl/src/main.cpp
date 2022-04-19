@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    MsgLogger logger("LOG_CTRL", "main");
+    MsgLogger logger("LOG_CTRL");
 
     DlShm shm;
 
@@ -45,11 +45,15 @@ int main(int argc, char* argv[]) {
             logger.log_message("failed to enabled telemetry logging");
             return -1;
         }
+
+        logger.log_message("enabled telemetry logging");
     } else if(arg == "disabled") {
         if(SUCCESS != shm.set_logging(false)) {
             logger.log_message("failed to disable telemetry logging");
             return -1;
         }
+
+        logger.log_message("disabled telemetry logging");
     } else {
         printf("usage: ./log_ctrl [enable | disable]\n");
         return -1;

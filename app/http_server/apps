@@ -8,3 +8,4 @@ ec_program app/propulsion/ec_program/ec_program
 clock_ctrl app/clock_ctrl/clock_ctrl
 change_mode app/propulsion/FL-1/change_mode.py
 set_safing app/propulsion/FL-1/set_safing.py
+log_ctrl proc/tool/log_ctrl/log_ctrl
