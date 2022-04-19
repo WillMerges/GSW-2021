@@ -15,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 3,
-  "iteration": 1650343529909,
+  "id": 11,
+  "iteration": 1650343593955,
   "links": [],
   "panels": [
     {
@@ -166,51 +166,49 @@
       "type": "cloudspout-button-panel"
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
       "datasource": "InfluxDB",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
         },
         "overrides": []
       },
-      "fill": 1,
-      "fillGradient": 0,
       "gridPos": {
-        "h": 6,
-        "w": 4,
+        "h": 3,
+        "w": 2,
         "x": 4,
         "y": 0
       },
-      "hiddenSeries": false,
-      "id": 16,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
+      "id": 64,
       "options": {
-        "alertThreshold": true
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "textMode": "auto"
       },
-      "percentage": false,
       "pluginVersion": "7.3.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": true,
       "targets": [
         {
           "groupBy": [
@@ -229,7 +227,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SOLENOID_OX from $Vehicle",
+          "query": "SELECT OX_STR from $Vehicle",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -250,424 +248,10 @@
           "tags": []
         }
       ],
-      "thresholds": [],
       "timeFrom": null,
-      "timeRegions": [],
       "timeShift": null,
-      "title": "OX Valve",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "InfluxDB",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 8,
-        "y": 0
-      },
-      "hiddenSeries": false,
-      "id": 40,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.3.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": true,
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT SOLENOID_FUEL from $Vehicle",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "FUEL Valve",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "InfluxDB",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 12,
-        "y": 0
-      },
-      "hiddenSeries": false,
-      "id": 19,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.3.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": true,
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT SOLENOID_OX_PURGE from $Vehicle",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "OX Purge",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "InfluxDB",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 16,
-        "y": 0
-      },
-      "hiddenSeries": false,
-      "id": 53,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.3.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": true,
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT SOLENOID_FUEL_PURGE from $Vehicle",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "FUEL Purge",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
+      "title": "",
+      "type": "stat"
     },
     {
       "datasource": "InfluxDB",
@@ -681,7 +265,245 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 20,
+        "x": 7,
+        "y": 0
+      },
+      "id": 55,
+      "options": {
+        "backgroundColor": "rgb(199, 108, 227)",
+        "contentType": "text/plain",
+        "icon": "clock-nine",
+        "isAuth": false,
+        "method": "POST",
+        "orientation": "center",
+        "payload": "./change_mode test",
+        "text": "Test",
+        "type": "header",
+        "url": "http://$GroundStationIP:$GroundStationPort",
+        "variant": "custom"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT mean(\"value\") FROM \"measurement\" WHERE $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Mode",
+      "type": "cloudspout-button-panel"
+    },
+    {
+      "datasource": "InfluxDB",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 9,
+        "y": 0
+      },
+      "id": 54,
+      "options": {
+        "backgroundColor": "rgb(65, 69, 64)",
+        "contentType": "text/plain",
+        "icon": "clock-nine",
+        "isAuth": false,
+        "method": "POST",
+        "orientation": "center",
+        "payload": "./change_mode disabled",
+        "text": "Disabled",
+        "type": "header",
+        "url": "http://$GroundStationIP:$GroundStationPort",
+        "variant": "custom"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT mean(\"value\") FROM \"measurement\" WHERE $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Mode",
+      "type": "cloudspout-button-panel"
+    },
+    {
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 26,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT CLOCK from $Vehicle",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Clock",
+      "type": "stat"
+    },
+    {
+      "datasource": "InfluxDB",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 18,
         "y": 0
       },
       "id": 29,
@@ -754,18 +576,18 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 22,
+        "x": 20,
         "y": 0
       },
-      "id": 30,
+      "id": 34,
       "options": {
         "contentType": "text/plain",
         "icon": "clock-nine",
         "isAuth": false,
         "method": "POST",
         "orientation": "center",
-        "payload": "./clock_ctrl hold -10000",
-        "text": "T-10",
+        "payload": "./clock_ctrl set -5000",
+        "text": "T-5",
         "type": "header",
         "url": "http://$GroundStationIP:$GroundStationPort",
         "variant": "secondary"
@@ -811,7 +633,80 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Hold",
+      "title": "Countdown",
+      "transparent": true,
+      "type": "cloudspout-button-panel"
+    },
+    {
+      "datasource": "InfluxDB",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 22,
+        "y": 0
+      },
+      "id": 31,
+      "options": {
+        "contentType": "text/plain",
+        "icon": "clock-nine",
+        "isAuth": false,
+        "method": "POST",
+        "orientation": "center",
+        "payload": "./clock_ctrl set -1000",
+        "text": "T-1",
+        "type": "header",
+        "url": "http://$GroundStationIP:$GroundStationPort",
+        "variant": "secondary"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Countdown",
       "transparent": true,
       "type": "cloudspout-button-panel"
     },
@@ -961,6 +856,405 @@
     },
     {
       "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 4,
+        "y": 3
+      },
+      "id": 66,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT FUEL_STR from $Vehicle",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "",
+      "type": "stat"
+    },
+    {
+      "datasource": "InfluxDB",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 7,
+        "y": 3
+      },
+      "id": 57,
+      "options": {
+        "backgroundColor": "rgb(52, 162, 240)",
+        "contentType": "text/plain",
+        "icon": "clock-nine",
+        "isAuth": false,
+        "method": "POST",
+        "orientation": "center",
+        "payload": "./change_mode cold",
+        "text": "Cold",
+        "type": "header",
+        "url": "http://$GroundStationIP:$GroundStationPort",
+        "variant": "custom"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT mean(\"value\") FROM \"measurement\" WHERE $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Mode",
+      "type": "cloudspout-button-panel"
+    },
+    {
+      "datasource": "InfluxDB",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 9,
+        "y": 3
+      },
+      "id": 69,
+      "options": {
+        "backgroundColor": "rgb(165, 173, 34)",
+        "contentType": "text/plain",
+        "icon": "clock-nine",
+        "isAuth": false,
+        "method": "POST",
+        "orientation": "center",
+        "payload": "./change_mode cold; ./ec_cmd 303 1",
+        "text": "Pressure",
+        "type": "header",
+        "url": "http://$GroundStationIP:$GroundStationPort",
+        "variant": "custom"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT mean(\"value\") FROM \"measurement\" WHERE $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Mode",
+      "type": "cloudspout-button-panel"
+    },
+    {
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 12,
+        "y": 3
+      },
+      "id": 27,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "last"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT HOLD from $Vehicle",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Hold",
+      "type": "stat"
+    },
+    {
+      "datasource": "InfluxDB",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 18,
+        "y": 3
+      },
+      "id": 30,
+      "options": {
+        "contentType": "text/plain",
+        "icon": "clock-nine",
+        "isAuth": false,
+        "method": "POST",
+        "orientation": "center",
+        "payload": "./clock_ctrl hold -10000",
+        "text": "T-10",
+        "type": "header",
+        "url": "http://$GroundStationIP:$GroundStationPort",
+        "variant": "secondary"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Hold",
+      "transparent": true,
+      "type": "cloudspout-button-panel"
+    },
+    {
+      "datasource": "InfluxDB",
       "description": "",
       "fieldConfig": {
         "defaults": {
@@ -974,14 +1268,14 @@
         "x": 20,
         "y": 3
       },
-      "id": 34,
+      "id": 35,
       "options": {
         "contentType": "text/plain",
         "icon": "clock-nine",
         "isAuth": false,
         "method": "POST",
         "orientation": "center",
-        "payload": "./clock_ctrl set -5000",
+        "payload": "./clock_ctrl hold -5000",
         "text": "T-5",
         "type": "header",
         "url": "http://$GroundStationIP:$GroundStationPort",
@@ -1028,7 +1322,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Countdown",
+      "title": "Hold",
       "transparent": true,
       "type": "cloudspout-button-panel"
     },
@@ -1047,15 +1341,15 @@
         "x": 22,
         "y": 3
       },
-      "id": 35,
+      "id": 36,
       "options": {
         "contentType": "text/plain",
         "icon": "clock-nine",
         "isAuth": false,
         "method": "POST",
         "orientation": "center",
-        "payload": "./clock_ctrl hold -5000",
-        "text": "T-5",
+        "payload": "./clock_ctrl hold -1000",
+        "text": "T-1",
         "type": "header",
         "url": "http://$GroundStationIP:$GroundStationPort",
         "variant": "secondary"
@@ -1250,51 +1544,49 @@
       "type": "cloudspout-button-panel"
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
       "datasource": "InfluxDB",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
         },
         "overrides": []
       },
-      "fill": 1,
-      "fillGradient": 0,
       "gridPos": {
-        "h": 6,
-        "w": 4,
+        "h": 3,
+        "w": 2,
         "x": 4,
         "y": 6
       },
-      "hiddenSeries": false,
-      "id": 17,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
+      "id": 65,
       "options": {
-        "alertThreshold": true
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "textMode": "auto"
       },
-      "percentage": false,
       "pluginVersion": "7.3.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": true,
       "targets": [
         {
           "groupBy": [
@@ -1313,7 +1605,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT IGNITER_MAIN from $Vehicle",
+          "query": "SELECT OX_PURGE_STR from $Vehicle",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1334,424 +1626,10 @@
           "tags": []
         }
       ],
-      "thresholds": [],
       "timeFrom": null,
-      "timeRegions": [],
       "timeShift": null,
-      "title": "Igniter",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "InfluxDB",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 8,
-        "y": 6
-      },
-      "hiddenSeries": false,
-      "id": 41,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.3.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": true,
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT LED_G from $Vehicle",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Light Green",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "InfluxDB",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 12,
-        "y": 6
-      },
-      "hiddenSeries": false,
-      "id": 20,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.3.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": true,
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT LED_Y from $Vehicle",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Light Yellow",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": "InfluxDB",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "fill": 1,
-      "fillGradient": 0,
-      "gridPos": {
-        "h": 6,
-        "w": 4,
-        "x": 16,
-        "y": 6
-      },
-      "hiddenSeries": false,
-      "id": 42,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
-      "options": {
-        "alertThreshold": true
-      },
-      "percentage": false,
-      "pluginVersion": "7.3.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": true,
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT LED_R from $Vehicle",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeRegions": [],
-      "timeShift": null,
-      "title": "Light Red",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
+      "title": "",
+      "type": "stat"
     },
     {
       "datasource": "InfluxDB",
@@ -1765,21 +1643,188 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 20,
+        "x": 7,
         "y": 6
       },
-      "id": 31,
+      "id": 56,
       "options": {
+        "backgroundColor": "rgb(171, 0, 0)",
         "contentType": "text/plain",
         "icon": "clock-nine",
         "isAuth": false,
         "method": "POST",
         "orientation": "center",
-        "payload": "./clock_ctrl set -1000",
-        "text": "T-1",
+        "payload": "./change_mode hot",
+        "text": "Hot",
         "type": "header",
         "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "secondary"
+        "variant": "custom"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT mean(\"value\") FROM \"measurement\" WHERE $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Mode",
+      "type": "cloudspout-button-panel"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 9,
+        "y": 6
+      },
+      "id": 61,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT MODE FROM $Vehicle",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Mode",
+      "type": "stat"
+    },
+    {
+      "datasource": "InfluxDB",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 13,
+        "y": 6
+      },
+      "id": 32,
+      "options": {
+        "backgroundColor": "rgb(100, 166, 52)",
+        "contentType": "text/plain",
+        "icon": "clock-nine",
+        "isAuth": false,
+        "method": "POST",
+        "orientation": "center",
+        "payload": "./clock_ctrl start",
+        "text": "Start",
+        "type": "header",
+        "url": "http://$GroundStationIP:$GroundStationPort",
+        "variant": "custom"
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -1838,21 +1883,96 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 22,
+        "x": 15,
         "y": 6
       },
-      "id": 36,
+      "id": 33,
       "options": {
         "contentType": "text/plain",
         "icon": "clock-nine",
         "isAuth": false,
         "method": "POST",
         "orientation": "center",
-        "payload": "./clock_ctrl hold -1000",
-        "text": "T-1",
+        "payload": "./clock_ctrl stop",
+        "text": "Stop",
         "type": "header",
         "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "secondary"
+        "variant": "destructive"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Countdown",
+      "transparent": true,
+      "type": "cloudspout-button-panel"
+    },
+    {
+      "datasource": "InfluxDB",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 19,
+        "y": 6
+      },
+      "id": 37,
+      "options": {
+        "backgroundColor": "rgb(15, 46, 11)",
+        "contentType": "text/plain",
+        "foregroundColor": "rgb(255, 255, 255)",
+        "icon": "clock-nine",
+        "isAuth": false,
+        "method": "POST",
+        "orientation": "center",
+        "payload": "./clock_ctrl release",
+        "text": "Release",
+        "type": "header",
+        "url": "http://$GroundStationIP:$GroundStationPort",
+        "variant": "primary"
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -1896,6 +2016,81 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "Hold",
+      "transparent": true,
+      "type": "cloudspout-button-panel"
+    },
+    {
+      "datasource": "InfluxDB",
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 21,
+        "y": 6
+      },
+      "id": 50,
+      "options": {
+        "contentType": "text/plain",
+        "icon": "clock-nine",
+        "isAuth": false,
+        "method": "POST",
+        "orientation": "center",
+        "payload": "./clock_ctrl set 0;",
+        "text": "RESET",
+        "type": "header",
+        "url": "http://$GroundStationIP:$GroundStationPort",
+        "variant": "primary"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT mean(\"value\") FROM \"measurement\" WHERE $timeFilter GROUP BY time($__interval) fill(null)",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Clock",
       "transparent": true,
       "type": "cloudspout-button-panel"
     },
@@ -2045,105 +2240,46 @@
     },
     {
       "datasource": "InfluxDB",
-      "description": "",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 20,
-        "y": 9
-      },
-      "id": 32,
-      "options": {
-        "backgroundColor": "rgb(100, 166, 52)",
-        "contentType": "text/plain",
-        "icon": "clock-nine",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "./clock_ctrl start",
-        "text": "Start",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "custom"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
               {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
+                "color": "green",
+                "value": null
               },
               {
-                "params": [],
-                "type": "mean"
+                "color": "red",
+                "value": 80
               }
             ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Countdown",
-      "transparent": true,
-      "type": "cloudspout-button-panel"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
+          }
         },
         "overrides": []
       },
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 22,
+        "x": 4,
         "y": 9
       },
-      "id": 50,
+      "id": 67,
       "options": {
-        "contentType": "text/plain",
-        "icon": "clock-nine",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "./clock_ctrl set 0;",
-        "text": "RESET",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "primary"
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "textMode": "auto"
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -2162,10 +2298,9 @@
               "type": "fill"
             }
           ],
-          "hide": true,
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT mean(\"value\") FROM \"measurement\" WHERE $timeFilter GROUP BY time($__interval) fill(null)",
+          "query": "SELECT FUEL_PURGE_STR from $Vehicle",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -2188,9 +2323,71 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Clock",
+      "title": "",
+      "type": "stat"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 13,
+        "x": 7,
+        "y": 9
+      },
+      "id": 71,
+      "options": {
+        "content": "",
+        "mode": "markdown"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "",
       "transparent": true,
-      "type": "cloudspout-button-panel"
+      "type": "text"
     },
     {
       "datasource": "InfluxDB",
@@ -2337,51 +2534,49 @@
       "type": "cloudspout-button-panel"
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
       "datasource": "InfluxDB",
       "fieldConfig": {
         "defaults": {
-          "custom": {}
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
         },
         "overrides": []
       },
-      "fill": 1,
-      "fillGradient": 0,
       "gridPos": {
-        "h": 6,
-        "w": 4,
+        "h": 3,
+        "w": 2,
         "x": 4,
         "y": 12
       },
-      "hiddenSeries": false,
-      "id": 43,
-      "legend": {
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "nullPointMode": "null",
+      "id": 68,
       "options": {
-        "alertThreshold": true
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "textMode": "auto"
       },
-      "percentage": false,
       "pluginVersion": "7.3.7",
-      "pointradius": 2,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": true,
       "targets": [
         {
           "groupBy": [
@@ -2400,7 +2595,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT LED_BUZZ from $Vehicle",
+          "query": "SELECT IGNITER_STR from $Vehicle",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -2421,66 +2616,17 @@
           "tags": []
         }
       ],
-      "thresholds": [],
       "timeFrom": null,
-      "timeRegions": [],
       "timeShift": null,
-      "title": "Light Buzzer",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
+      "title": "",
+      "type": "stat"
     },
     {
       "datasource": "InfluxDB",
+      "description": "",
       "fieldConfig": {
         "defaults": {
-          "custom": {},
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
+          "custom": {}
         },
         "overrides": []
       },
@@ -2489,1397 +2635,6 @@
         "w": 2,
         "x": 8,
         "y": 12
-      },
-      "id": 63,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT SEQ_NUM_EC from $Vehicle",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Sequence",
-      "type": "stat"
-    },
-    {
-      "datasource": "InfluxDB",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 10,
-        "y": 12
-      },
-      "id": 22,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT HEARTBEAT from $Vehicle",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Heartbeat",
-      "type": "stat"
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 12,
-        "y": 12
-      },
-      "id": 24,
-      "options": {
-        "backgroundColor": "dark-green",
-        "contentType": "text/plain",
-        "foregroundColor": "semi-dark-green",
-        "icon": "cog",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "cat ${GSW_HOME}/app/propulsion/ec_program/programs/$Program | ./ec_program",
-        "text": "LOAD",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "secondary"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Program",
-      "type": "cloudspout-button-panel"
-    },
-    {
-      "datasource": "InfluxDB",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 6,
-        "x": 14,
-        "y": 12
-      },
-      "id": 26,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT CLOCK from $Vehicle",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Clock",
-      "type": "stat"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 20,
-        "y": 12
-      },
-      "id": 33,
-      "options": {
-        "contentType": "text/plain",
-        "icon": "clock-nine",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "./clock_ctrl stop",
-        "text": "Stop",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "destructive"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Countdown",
-      "transparent": true,
-      "type": "cloudspout-button-panel"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 22,
-        "y": 12
-      },
-      "id": 37,
-      "options": {
-        "backgroundColor": "rgb(15, 46, 11)",
-        "contentType": "text/plain",
-        "foregroundColor": "rgb(255, 255, 255)",
-        "icon": "clock-nine",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "./clock_ctrl release",
-        "text": "Release",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "primary"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Hold",
-      "transparent": true,
-      "type": "cloudspout-button-panel"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 0,
-        "y": 15
-      },
-      "id": 44,
-      "options": {
-        "backgroundColor": "rgb(100, 166, 52)",
-        "contentType": "text/plain",
-        "icon": "clock-nine",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "./ec_cmd 300 0; ./ec_cmd 301 0; ./ec_cmd 302 1;",
-        "text": "G",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "custom"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT mean(\"value\") FROM \"measurement\" WHERE $timeFilter GROUP BY time($__interval) fill(null)",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Light",
-      "type": "cloudspout-button-panel"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 2,
-        "y": 15
-      },
-      "id": 46,
-      "options": {
-        "backgroundColor": "rgb(235, 213, 43)",
-        "contentType": "text/plain",
-        "icon": "clock-nine",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "./ec_cmd 300 0; ./ec_cmd 302 0 ; ./ec_cmd 301 1;",
-        "text": "Y",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "custom"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Light",
-      "type": "cloudspout-button-panel"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 9,
-        "y": 15
-      },
-      "id": 54,
-      "options": {
-        "backgroundColor": "rgb(65, 69, 64)",
-        "contentType": "text/plain",
-        "icon": "clock-nine",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "./change_mode disabled",
-        "text": "Disabled",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "custom"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT mean(\"value\") FROM \"measurement\" WHERE $timeFilter GROUP BY time($__interval) fill(null)",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Mode",
-      "type": "cloudspout-button-panel"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 11,
-        "y": 15
-      },
-      "id": 55,
-      "options": {
-        "backgroundColor": "rgb(199, 108, 227)",
-        "contentType": "text/plain",
-        "icon": "clock-nine",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "./change_mode test",
-        "text": "Test",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "custom"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT mean(\"value\") FROM \"measurement\" WHERE $timeFilter GROUP BY time($__interval) fill(null)",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Mode",
-      "type": "cloudspout-button-panel"
-    },
-    {
-      "datasource": "InfluxDB",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {},
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 6,
-        "x": 14,
-        "y": 15
-      },
-      "id": 27,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "last"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT HOLD from $Vehicle",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Hold",
-      "type": "stat"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 0,
-        "y": 18
-      },
-      "id": 47,
-      "options": {
-        "backgroundColor": "red",
-        "contentType": "text/plain",
-        "icon": "clock-nine",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "./ec_cmd 301 0; ./ec_cmd 302 0; ./ec_cmd 300 1;",
-        "text": "R",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "destructive"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Light",
-      "type": "cloudspout-button-panel"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 2,
-        "y": 18
-      },
-      "id": 45,
-      "options": {
-        "backgroundColor": "rgb(100, 166, 52)",
-        "contentType": "text/plain",
-        "icon": "clock-nine",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "./ec_cmd 300 0; ./ec_cmd 301 0; ./ec_cmd 302 0;",
-        "text": "OFF",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "secondary"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Light",
-      "type": "cloudspout-button-panel"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 4,
-        "y": 18
-      },
-      "id": 48,
-      "options": {
-        "backgroundColor": "red",
-        "contentType": "text/plain",
-        "icon": "clock-nine",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "./ec_cmd 303 1",
-        "text": "ON",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "secondary"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Buzzer",
-      "type": "cloudspout-button-panel"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 6,
-        "y": 18
-      },
-      "id": 49,
-      "options": {
-        "backgroundColor": "red",
-        "contentType": "text/plain",
-        "icon": "clock-nine",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "./ec_cmd 303 0",
-        "text": "OFF",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "destructive"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Buzzer",
-      "type": "cloudspout-button-panel"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 9,
-        "y": 18
-      },
-      "id": 56,
-      "options": {
-        "backgroundColor": "rgb(171, 0, 0)",
-        "contentType": "text/plain",
-        "icon": "clock-nine",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "./change_mode hot",
-        "text": "Hot",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "custom"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT mean(\"value\") FROM \"measurement\" WHERE $timeFilter GROUP BY time($__interval) fill(null)",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Mode",
-      "type": "cloudspout-button-panel"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 11,
-        "y": 18
-      },
-      "id": 57,
-      "options": {
-        "backgroundColor": "rgb(52, 162, 240)",
-        "contentType": "text/plain",
-        "icon": "clock-nine",
-        "isAuth": false,
-        "method": "POST",
-        "orientation": "center",
-        "payload": "./change_mode cold",
-        "text": "Cold",
-        "type": "header",
-        "url": "http://$GroundStationIP:$GroundStationPort",
-        "variant": "custom"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "hide": true,
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT mean(\"value\") FROM \"measurement\" WHERE $timeFilter GROUP BY time($__interval) fill(null)",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Mode",
-      "type": "cloudspout-button-panel"
-    },
-    {
-      "datasource": null,
-      "fieldConfig": {
-        "defaults": {
-          "custom": {
-            "align": null,
-            "filterable": false
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 13,
-        "y": 18
-      },
-      "id": 61,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "auto"
-      },
-      "pluginVersion": "7.3.7",
-      "targets": [
-        {
-          "groupBy": [
-            {
-              "params": [
-                "$__interval"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "null"
-              ],
-              "type": "fill"
-            }
-          ],
-          "orderByTime": "ASC",
-          "policy": "default",
-          "query": "SELECT MODE FROM $Vehicle",
-          "rawQuery": true,
-          "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        }
-      ],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "Mode",
-      "type": "stat"
-    },
-    {
-      "datasource": "InfluxDB",
-      "description": "",
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 3,
-        "w": 2,
-        "x": 15,
-        "y": 18
       },
       "id": 58,
       "options": {
@@ -3953,8 +2708,8 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 17,
-        "y": 18
+        "x": 10,
+        "y": 12
       },
       "id": 59,
       "options": {
@@ -4044,13 +2799,174 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 19,
-        "y": 18
+        "x": 12,
+        "y": 12
       },
       "id": 62,
       "options": {
         "colorMode": "value",
         "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SAFING FROM $Vehicle",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Safing",
+      "type": "stat"
+    },
+    {
+      "datasource": null,
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 15,
+        "y": 12
+      },
+      "id": 24,
+      "options": {
+        "backgroundColor": "dark-green",
+        "contentType": "text/plain",
+        "foregroundColor": "semi-dark-green",
+        "icon": "cog",
+        "isAuth": false,
+        "method": "POST",
+        "orientation": "center",
+        "payload": "cat ${GSW_HOME}/app/propulsion/ec_program/programs/$Program | ./ec_program",
+        "text": "LOAD",
+        "type": "header",
+        "url": "http://$GroundStationIP:$GroundStationPort",
+        "variant": "secondary"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "hide": true,
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Program",
+      "type": "cloudspout-button-panel"
+    },
+    {
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 17,
+        "y": 12
+      },
+      "id": 22,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -4081,7 +2997,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SAFE FROM $Vehicle",
+          "query": "SELECT HEARTBEAT from $Vehicle",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -4104,7 +3020,95 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Safing",
+      "title": "Heartbeat",
+      "type": "stat"
+    },
+    {
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 19,
+        "y": 12
+      },
+      "id": 63,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SEQ_NUM_EC from $Vehicle",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Sequence",
       "type": "stat"
     },
     {
@@ -4133,10 +3137,10 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 10,
         "w": 22,
         "x": 0,
-        "y": 21
+        "y": 15
       },
       "id": 39,
       "options": {
@@ -4198,29 +3202,25 @@
   "templating": {
     "list": [
       {
-        "allValue": null,
         "current": {
           "selected": false,
-          "text": "engine_controller",
-          "value": "engine_controller"
+          "text": "FL-1",
+          "value": "FL-1"
         },
         "error": null,
         "hide": 0,
-        "includeAll": false,
         "label": "",
-        "multi": false,
         "name": "Vehicle",
         "options": [
           {
             "selected": true,
-            "text": "engine_controller",
-            "value": "engine_controller"
+            "text": "FL_1",
+            "value": "FL_1"
           }
         ],
-        "query": "engine_controller",
-        "queryValue": "",
+        "query": "FL_1",
         "skipUrlSync": false,
-        "type": "custom"
+        "type": "textbox"
       },
       {
         "current": {
@@ -4333,7 +3333,7 @@
     ]
   },
   "timezone": "",
-  "title": "Engine Controller",
-  "uid": "yg3nqk27k",
-  "version": 68
+  "title": "FL-1 - Control",
+  "uid": "zTMJUmw7z",
+  "version": 10
 }
