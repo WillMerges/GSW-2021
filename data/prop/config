@@ -23,7 +23,7 @@ LED_R     2 int unsigned little
 LED_BUZZ  2 int unsigned little
 
 # command sequence number
-SEQ_NUM 4 int unsigned little
+SEQ_NUM_EC 4 int unsigned little
 
 # heartbeat number
 HEARTBEAT 2 int unsigned little
@@ -57,13 +57,13 @@ SEQ_NUM
 SOLENOID_OX
 SOLENOID_FUEL
 SOLENOID_OX_PURGE
-SEQ_NUM
+SEQ_NUM_EC
 }
 
 # igniters
 8082 {
 IGNITER_MAIN
-SEQ_NUM
+SEQ_NUM_EC
 }
 
 # light tower
@@ -72,7 +72,7 @@ LED_G
 LED_Y
 LED_R
 LED_BUZZ
-SEQ_NUM
+SEQ_NUM_EC
 }
 
 # everything
@@ -85,12 +85,12 @@ LED_G
 LED_Y
 LED_R
 LED_BUZZ
-SEQ_NUM
+SEQ_NUM_EC
 HEARTBEAT
 }
 
 8085 {
-SEQ_NUM
+SEQ_NUM_EC
 MODE
 SAFING
 }
