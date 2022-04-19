@@ -22,16 +22,35 @@ using namespace dls;
 bool verbose = false;
 struct timeval curr_time;
 
+// whether logging is enabled (only used for telemetry logging)
+bool logging_enabled = true;
 
 // list of mqueues to close
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
 std::vector<std::string> mqs;
 
+// shared memory used by telemetry logger
+DlShm dshm;
+bool shm_open = false;
+
+// whether signal should be ignored
+bool ignore_sig = false;
+
 void sighandler(int signum) {
+    if(ignore_sig) {
+        return;
+    }
+
     // close any open mqueues
     for(std::string mq : mqs) {
         mq_unlink(mq.c_str()); // hopefully this doesn't fail
         // if it does fail just move one, don't want to leave the process hanging
+    }
+
+    if(shm_open) {
+        if(SUCCESS != dshm.destroy()) {
+            printf("failed to destroy data logger shared memory\n");
+        }
     }
 
     exit(signum);
@@ -68,11 +87,37 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
     attr.mq_msgsize = MAX_Q_SIZE;
     attr.mq_curmsgs = 0;
 
+    // make sure we log the mqueue to close before taking any signals
+    ignore_sig = true;
+
     mq = mq_open(queue_name, O_CREAT | O_RDONLY, 0644, &attr);
     CHECK((mqd_t)-1 != mq);
 
     std::string mq_name = queue_name;
     add_mq_to_close(mq_name);
+
+    // create shared memory if we're the binary thread
+    if(binary) {
+        if(SUCCESS != dshm.init()) {
+            printf("failed to initialize shared memory\n");
+            return;
+        }
+
+        if(SUCCESS != dshm.create()) {
+            printf("failed to attach to shared memory\n");
+            return;
+        }
+
+        if(SUCCESS != dshm.attach()) {
+            printf("failed to attach to shared memory\n");
+            return;
+        }
+
+        // mark shared memory to be destroyed in the signal handler
+        shm_open = true;
+    }
+
+    ignore_sig = false;
 
     bool started = false;
 
@@ -121,13 +166,25 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
 
             if(!binary) {
                 buffer[read] = '\0';
+            } else {
+                // check our shared memory to see if telemetry logging is enabled
+                if(SUCCESS != dshm.logging_enabled(&logging_enabled)) {
+                    printf("failed to read data logging shared memory\n");
+                    // always assume we log if we don't know
+                    logging_enabled = true;
+                }
+
+                if(!logging_enabled) {
+                    usleep(50000); // wait 50ms
+                    continue;
+                }
             }
 
             if(verbose) {
                 if(binary) {
-                    gettimeofday(&curr_time, NULL);
-                    std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
-                    printf("%s received telemetry packet\n", timestamp.c_str());
+                    // gettimeofday(&curr_time, NULL);
+                    // std::string timestamp = "[" + std::to_string(curr_time.tv_sec) + "]";
+                    // printf("%s received telemetry packet\n", timestamp.c_str());
                 } else {
                     printf("%s\n", buffer);
                 }

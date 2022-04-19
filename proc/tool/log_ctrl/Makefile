@@ -1,17 +1,17 @@
-# data logging process
+# logging control
 
-TARGET = dlp
+TARGET = log_ctrl
 
 CXX = g++
 CC = gcc
 
 OPTIONS +=
 
-CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic
-CPPFLAGS = -I$(GSW_HOME)/include -ggdb -Wall -Wextra -Wpedantic
+CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -ggdb
+CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -ggdb
 LDFLAGS = -L$(GSW_HOME)/lib/bin/ -Wl,-rpath=$(GSW_HOME)/lib/bin/
 
-LIBS = -pthread -ldls -lshm -lrt
+LIBS = -ldls -lshm -lrt
 
 CPP_FILES := $(wildcard src/*.cpp)
 C_FILES := $(wildcard src/*.c)
