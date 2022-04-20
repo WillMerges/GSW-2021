@@ -1,7 +1,7 @@
 # FL-1 Engine Configuration
 # Includes engine controller and DAQ
 
-name = FL-1
+name = FL_1
 protocol = udp
 multicast = 224.0.0.1
 triggers = triggers

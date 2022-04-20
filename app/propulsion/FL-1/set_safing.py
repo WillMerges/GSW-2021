@@ -9,9 +9,16 @@ if len(sys.argv) != 2:
 
 safing = sys.argv[1]
 
-cmd = "../ec_cmd/ec_cmd "
+gsw = os.getenv("GSW_HOME")
+if gsw is None:
+    print("GSW_HOME not set!")
+    quit()
+
+cmd = gsw + "/app/propulsion/ec_cmd/ec_cmd "
+
 def exec_cmd(control, state):
     os.system(cmd + control + " " + state)
+
 
 if safing == "high":
     exec_cmd("901", "1")

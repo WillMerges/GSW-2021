@@ -279,7 +279,7 @@ int main(int argc, char* argv[]) {
                 } else {
                     msg += "=";
                     msg += val;
-                } 
+                }
             }
         }
 

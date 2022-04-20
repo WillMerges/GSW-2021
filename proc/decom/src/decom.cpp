@@ -103,6 +103,10 @@ void execute(size_t packet_id, packet_info_t* packet) {
     std::string packet_name = veh->device + "(" + std::to_string(packet_id) + ")";
 
     // create/init the network receiver
+    // NOTE: on linux kernel 4.15 (tested on) if in a recvfrom call (like in rx() function) the default action is SA_RESTART
+    // this means if we catch signal while blocked in recvfrom, we'll never wake up
+    // we can either use sigaction instead of signal, or just set a timeout so we wake up once in a while to check if we got a signal
+    // for now we just use a timeout, 1s is reasonable and doesn't kill our performance (hence the 1000ms timeout in NetworkReceiver init function)
     if(veh->get_auto_net(packet->port)) {
         AutoNetworkReceiver* n = new AutoNetworkReceiver();
 
@@ -161,7 +165,7 @@ void execute(size_t packet_id, packet_info_t* packet) {
         }
     }
 
-    // we got killed and got a signal, making net->Receive fail
+    // we got killed and got a signal, making net->rx fail
     child_cleanup();
     exit(received_sig);
 }

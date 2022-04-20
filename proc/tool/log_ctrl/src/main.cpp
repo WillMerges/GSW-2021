@@ -40,14 +40,14 @@ int main(int argc, char* argv[]) {
 
     std::string arg = argv[1];
 
-    if(arg == "enabled") {
+    if(arg == "enable") {
         if(SUCCESS != shm.set_logging(true)) {
             logger.log_message("failed to enabled telemetry logging");
             return -1;
         }
 
         logger.log_message("enabled telemetry logging");
-    } else if(arg == "disabled") {
+    } else if(arg == "disable") {
         if(SUCCESS != shm.set_logging(false)) {
             logger.log_message("failed to disable telemetry logging");
             return -1;

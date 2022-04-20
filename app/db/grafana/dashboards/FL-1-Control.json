@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 11,
-  "iteration": 1650344446902,
+  "iteration": 1650431611186,
   "links": [],
   "panels": [
     {
@@ -166,26 +166,65 @@
       "type": "cloudspout-button-panel"
     },
     {
-      "datasource": "InfluxDB",
+      "datasource": null,
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {},
           "mappings": [],
+          "max": 1,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "purple",
                 "value": null
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "FL_1.SOLENOID_OX"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "from": "",
+                    "id": 1,
+                    "text": "ON",
+                    "to": "",
+                    "type": 1,
+                    "value": "1"
+                  },
+                  {
+                    "from": "",
+                    "id": 2,
+                    "text": "OFF",
+                    "to": "",
+                    "type": 1,
+                    "value": "0"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 3,
@@ -193,20 +232,17 @@
         "x": 4,
         "y": 0
       },
-      "id": 64,
+      "id": 78,
       "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/.*/",
+          "fields": "/^FL_1\\.SOLENOID_OX$/",
           "values": false
         },
-        "textMode": "auto"
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -227,7 +263,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT OX_STR from $Vehicle",
+          "query": "SELECT SOLENOID_OX from $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -251,7 +287,8 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "",
-      "type": "stat"
+      "transparent": true,
+      "type": "gauge"
     },
     {
       "datasource": "InfluxDB",
@@ -441,7 +478,7 @@
           "calcs": [
             "last"
           ],
-          "fields": "",
+          "fields": "/^FL_1\\.CLOCK$/",
           "values": false
         },
         "textMode": "auto"
@@ -465,7 +502,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT CLOCK from $Vehicle",
+          "query": "SELECT CLOCK from $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -855,26 +892,65 @@
       "type": "cloudspout-button-panel"
     },
     {
-      "datasource": "InfluxDB",
+      "datasource": null,
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {},
           "mappings": [],
+          "max": 1,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "purple",
                 "value": null
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "FL_1.SOLENOID_FUEL"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "from": "",
+                    "id": 1,
+                    "text": "ON",
+                    "to": "",
+                    "type": 1,
+                    "value": "1"
+                  },
+                  {
+                    "from": "",
+                    "id": 2,
+                    "text": "OFF",
+                    "to": "",
+                    "type": 1,
+                    "value": "0"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 3,
@@ -882,20 +958,17 @@
         "x": 4,
         "y": 3
       },
-      "id": 66,
+      "id": 79,
       "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/.*/",
+          "fields": "/^FL_1\\.SOLENOID_FUEL$/",
           "values": false
         },
-        "textMode": "auto"
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -916,7 +989,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT FUEL_STR from $Vehicle",
+          "query": "SELECT SOLENOID_FUEL from $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -940,7 +1013,8 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "",
-      "type": "stat"
+      "transparent": true,
+      "type": "gauge"
     },
     {
       "datasource": "InfluxDB",
@@ -1128,9 +1202,9 @@
         "orientation": "auto",
         "reduceOptions": {
           "calcs": [
-            "last"
+            "lastNotNull"
           ],
-          "fields": "",
+          "fields": "/^FL_1\\.HOLD$/",
           "values": false
         },
         "textMode": "auto"
@@ -1544,26 +1618,65 @@
       "type": "cloudspout-button-panel"
     },
     {
-      "datasource": "InfluxDB",
+      "datasource": null,
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {},
           "mappings": [],
+          "max": 1,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "purple",
                 "value": null
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "FL_1.SOLENOID_OX_PURGE"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "from": "",
+                    "id": 1,
+                    "text": "ON",
+                    "to": "",
+                    "type": 1,
+                    "value": "1"
+                  },
+                  {
+                    "from": "",
+                    "id": 2,
+                    "text": "OFF",
+                    "to": "",
+                    "type": 1,
+                    "value": "0"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 3,
@@ -1571,20 +1684,17 @@
         "x": 4,
         "y": 6
       },
-      "id": 65,
+      "id": 80,
       "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/.*/",
+          "fields": "/^FL_1\\.SOLENOID_OX_PURGE$/",
           "values": false
         },
-        "textMode": "auto"
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -1605,7 +1715,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT OX_PURGE_STR from $Vehicle",
+          "query": "SELECT SOLENOID_OX_PURGE from $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1629,7 +1739,8 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "",
-      "type": "stat"
+      "transparent": true,
+      "type": "gauge"
     },
     {
       "datasource": "InfluxDB",
@@ -1771,7 +1882,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT MODE FROM $Vehicle",
+          "query": "SELECT MODE FROM $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -2239,26 +2350,65 @@
       "type": "cloudspout-button-panel"
     },
     {
-      "datasource": "InfluxDB",
+      "datasource": null,
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {},
           "mappings": [],
+          "max": 1,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "purple",
                 "value": null
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "FL_1.SOLENOID_FUEL_PURGE"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "from": "",
+                    "id": 1,
+                    "text": "ON",
+                    "to": "",
+                    "type": 1,
+                    "value": "1"
+                  },
+                  {
+                    "from": "",
+                    "id": 2,
+                    "text": "OFF",
+                    "to": "",
+                    "type": 1,
+                    "value": "0"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 3,
@@ -2266,20 +2416,17 @@
         "x": 4,
         "y": 9
       },
-      "id": 67,
+      "id": 81,
       "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/.*/",
+          "fields": "/^FL_1\\.SOLENOID_FUEL_PURGE$/",
           "values": false
         },
-        "textMode": "auto"
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -2300,7 +2447,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT FUEL_PURGE_STR from $Vehicle",
+          "query": "SELECT SOLENOID_FUEL_PURGE from $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -2324,7 +2471,8 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "",
-      "type": "stat"
+      "transparent": true,
+      "type": "gauge"
     },
     {
       "datasource": null,
@@ -2336,7 +2484,7 @@
       },
       "gridPos": {
         "h": 3,
-        "w": 13,
+        "w": 15,
         "x": 7,
         "y": 9
       },
@@ -2398,7 +2546,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
+        "h": 3,
         "w": 2,
         "x": 22,
         "y": 9
@@ -2597,26 +2745,65 @@
       "type": "cloudspout-button-panel"
     },
     {
-      "datasource": "InfluxDB",
+      "datasource": null,
       "fieldConfig": {
         "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
           "custom": {},
           "mappings": [],
+          "max": 1,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "purple",
                 "value": null
               },
               {
                 "color": "red",
-                "value": 80
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
               }
             ]
           }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "FL_1.IGNITER_MAIN"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "from": "",
+                    "id": 1,
+                    "text": "SPARK",
+                    "to": "",
+                    "type": 1,
+                    "value": "1"
+                  },
+                  {
+                    "from": "",
+                    "id": 2,
+                    "text": "OFF",
+                    "to": "",
+                    "type": 1,
+                    "value": "0"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 3,
@@ -2624,20 +2811,17 @@
         "x": 4,
         "y": 12
       },
-      "id": 68,
+      "id": 82,
       "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/.*/",
+          "fields": "/^FL_1\\.IGNITER_MAIN$/",
           "values": false
         },
-        "textMode": "auto"
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false
       },
       "pluginVersion": "7.3.7",
       "targets": [
@@ -2658,7 +2842,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT IGNITER_STR from $Vehicle",
+          "query": "SELECT IGNITER_MAIN from $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -2682,7 +2866,8 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "",
-      "type": "stat"
+      "transparent": true,
+      "type": "gauge"
     },
     {
       "datasource": "InfluxDB",
@@ -2696,7 +2881,7 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 8,
+        "x": 7,
         "y": 12
       },
       "id": 58,
@@ -2771,7 +2956,7 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 10,
+        "x": 9,
         "y": 12
       },
       "id": 59,
@@ -2862,7 +3047,7 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 12,
+        "x": 11,
         "y": 12
       },
       "id": 62,
@@ -2899,7 +3084,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SAFING FROM $Vehicle",
+          "query": "SELECT SAFING FROM $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -2936,7 +3121,7 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 15,
+        "x": 14,
         "y": 12
       },
       "id": 24,
@@ -3023,7 +3208,7 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 17,
+        "x": 16,
         "y": 12
       },
       "id": 63,
@@ -3060,7 +3245,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SEQ_NUM_EC from $Vehicle",
+          "query": "SELECT SEQ_NUM_EC from $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -3083,7 +3268,7 @@
       ],
       "timeFrom": null,
       "timeShift": null,
-      "title": "Sequence",
+      "title": "Controller SEQ",
       "type": "stat"
     },
     {
@@ -3111,7 +3296,7 @@
       "gridPos": {
         "h": 3,
         "w": 2,
-        "x": 19,
+        "x": 18,
         "y": 12
       },
       "id": 22,
@@ -3148,7 +3333,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT HEARTBEAT from $Vehicle",
+          "query": "SELECT HEARTBEAT from $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -3172,6 +3357,94 @@
       "timeFrom": null,
       "timeShift": null,
       "title": "Heartbeat",
+      "type": "stat"
+    },
+    {
+      "datasource": "InfluxDB",
+      "fieldConfig": {
+        "defaults": {
+          "custom": {},
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 2,
+        "x": 21,
+        "y": 12
+      },
+      "id": 76,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "7.3.7",
+      "targets": [
+        {
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "orderByTime": "ASC",
+          "policy": "default",
+          "query": "SELECT SEQ_NUM_DAQ from $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
+          "rawQuery": true,
+          "refId": "A",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "mean"
+              }
+            ]
+          ],
+          "tags": []
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "DAQ SEQ",
       "type": "stat"
     },
     {
@@ -3270,7 +3543,7 @@
         "h": 3,
         "w": 2,
         "x": 22,
-        "y": 16
+        "y": 15
       },
       "id": 72,
       "options": {
@@ -3345,7 +3618,7 @@
         "h": 3,
         "w": 2,
         "x": 22,
-        "y": 19
+        "y": 18
       },
       "id": 75,
       "options": {
@@ -3408,7 +3681,7 @@
       "type": "cloudspout-button-panel"
     }
   ],
-  "refresh": false,
+  "refresh": "500ms",
   "schemaVersion": 26,
   "style": "dark",
   "tags": [],
@@ -3416,9 +3689,9 @@
     "list": [
       {
         "current": {
-          "selected": false,
-          "text": "FL-1",
-          "value": "FL-1"
+          "selected": true,
+          "text": "FL_1",
+          "value": "FL_1"
         },
         "error": null,
         "hide": 0,
@@ -3437,7 +3710,7 @@
       },
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "gs.local",
           "value": "gs.local"
         },
@@ -3481,38 +3754,12 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "FL-1_hot-fire.ec",
-          "value": "FL-1_hot-fire.ec"
+          "text": "None",
+          "value": ""
         },
         "datasource": "InfluxDB",
         "definition": "",
-        "error": {
-          "config": {
-            "data": "q=SELECT%20program%20from%20ec_programs",
-            "headers": {
-              "Content-type": "application/x-www-form-urlencoded",
-              "X-Grafana-Org-Id": 1
-            },
-            "hideFromInspector": false,
-            "inspect": {
-              "type": "influxdb"
-            },
-            "method": "POST",
-            "params": {
-              "db": "gsw",
-              "epoch": "ms"
-            },
-            "precision": "ms",
-            "retry": 0,
-            "url": "api/datasources/proxy/1/query"
-          },
-          "data": {
-            "error": "Bad Gateway",
-            "message": "Bad Gateway",
-            "response": ""
-          },
-          "message": "InfluxDB Error: Bad Gateway"
-        },
+        "error": null,
         "hide": 0,
         "includeAll": false,
         "label": null,
@@ -3548,5 +3795,5 @@
   "timezone": "",
   "title": "FL-1 - Control",
   "uid": "zTMJUmw7z",
-  "version": 14
+  "version": 22
 }

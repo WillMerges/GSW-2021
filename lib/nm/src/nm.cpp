@@ -47,16 +47,20 @@ RetType NetworkReceiver::init(uint16_t port, uint32_t multicast_addr, size_t rx_
     this->buffer_size = buffer_size;
 
     // set up the socket
-    if(rx_timeout <= 0) { // blocking mode
-        if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { // ipv4, UDP
+    // if(rx_timeout >= 0) { // blocking mode
+    //     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { // ipv4, UDP
+    //        logger.log_message("socket creation failed");
+    //        return FAILURE;
+    //     }
+    // } else { // non-blocking
+    //     if ((sockfd = socket(AF_INET, SOCK_DGRAM | O_NONBLOCK, 0)) < 0 ) { // ipv4, UDP
+    //        logger.log_message("socket creation failed");
+    //        return FAILURE;
+    //     }
+    // }
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) { // ipv4, UDP
            logger.log_message("socket creation failed");
            return FAILURE;
-        }
-    } else { // non-blocking
-        if ((sockfd = socket(AF_INET, SOCK_DGRAM | O_NONBLOCK, 0)) < 0 ) { // ipv4, UDP
-           logger.log_message("socket creation failed");
-           return FAILURE;
-        }
     }
 
     // these options are needed hopefully just for simulation

@@ -29,7 +29,7 @@ namespace nm {
         // initialize
         // listens on port 'port'
         // if multicast_addr is non-zero, joins the multicast group to listen for packets
-        // if rx_timeout is > 0, receives timeout after that many millsec, otherwise it blocks
+        // if rx_timeout is > 0, receives timeout after that many millsec, otherwise it blocks indefinitely
         // stores received data in a buffer of size 'buffer_size'
         RetType init(uint16_t port, uint32_t multicast_addr = 0, size_t rx_timeout = 0, size_t buffer_size = 2048);
 
