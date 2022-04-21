@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 5,
-  "iteration": 1650511746503,
+  "iteration": 1650512769051,
   "links": [],
   "panels": [
     {
@@ -862,7 +862,15 @@
       "fieldConfig": {
         "defaults": {
           "custom": {},
-          "mappings": [],
+          "mappings": [
+            {
+              "from": "",
+              "id": 1,
+              "text": "",
+              "to": "",
+              "type": 1
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -895,7 +903,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/.*/",
+          "fields": "/^FL_1\\.CLOCK$/",
           "values": false
         },
         "textMode": "auto"
@@ -983,7 +991,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/.*/",
+          "fields": "/^FL_1\\.HOLD$/",
           "values": false
         },
         "textMode": "auto"
@@ -1737,8 +1745,8 @@
       {
         "current": {
           "selected": false,
-          "text": "engine_controller",
-          "value": "engine_controller"
+          "text": "FL_1",
+          "value": "FL_1"
         },
         "error": null,
         "hide": 0,
@@ -1746,12 +1754,12 @@
         "name": "Vehicle",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "FL_1",
             "value": "FL_1"
           }
         ],
-        "query": "",
+        "query": "FL_1",
         "skipUrlSync": false,
         "type": "textbox"
       },
@@ -1767,12 +1775,12 @@
         "name": "GroundStationIP",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "gs.local",
             "value": "gs.local"
           }
         ],
-        "query": "",
+        "query": "gs.local",
         "skipUrlSync": false,
         "type": "textbox"
       },
@@ -1788,12 +1796,12 @@
         "name": "GroundStationPort",
         "options": [
           {
-            "selected": false,
+            "selected": true,
             "text": "8080",
             "value": "8080"
           }
         ],
-        "query": "",
+        "query": "8080",
         "skipUrlSync": false,
         "type": "textbox"
       }
@@ -1815,5 +1823,5 @@
   "timezone": "",
   "title": "FL-1 - Monitor",
   "uid": "yqaFLGfnk",
-  "version": 35
+  "version": 37
 }
