@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 5,
-  "iteration": 1650342277477,
+  "iteration": 1650511746503,
   "links": [],
   "panels": [
     {
@@ -84,7 +84,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT PT0_PSI_MEAN from $Vehicle",
+          "query": "SELECT PT0_PSI_MEAN FROM $Vehicle WHERE $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -211,7 +211,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT PT1_PSI_MEAN from $Vehicle",
+          "query": "SELECT PT1_PSI_MEAN FROM $Vehicle WHERE $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -338,7 +338,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT TC0_CORRECTED from $Vehicle",
+          "query": "SELECT TC0_CORRECTED FROM $Vehicle WHERE $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -465,7 +465,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT TC1_CORRECTED from $Vehicle",
+          "query": "SELECT TC1_CORRECTED FROM $Vehicle WHERE $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -592,7 +592,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT TC2_CORRECTED from $Vehicle",
+          "query": "SELECT TC2_CORRECTED FROM $Vehicle WHERE $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -721,7 +721,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT LC0_FORCE_MEAN from $Vehicle",
+          "query": "SELECT LC0_FORCE_MEAN FROM $Vehicle WHERE $timeFilter GROUP BY time($__interval) fill(none)",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -895,7 +895,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^engine_controller\\.CLOCK$/",
+          "fields": "/.*/",
           "values": false
         },
         "textMode": "auto"
@@ -919,7 +919,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT CLOCK from $Vehicle",
+          "query": "SELECT CLOCK from $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -983,7 +983,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^engine_controller\\.HOLD$/",
+          "fields": "/.*/",
           "values": false
         },
         "textMode": "auto"
@@ -1007,7 +1007,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT HOLD from $Vehicle",
+          "query": "SELECT HOLD from $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1145,7 +1145,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^engine_controller\\.OX_STR$/",
+          "fields": "/.*/",
           "values": false
         },
         "textMode": "auto"
@@ -1169,7 +1169,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT OX_STR FROM $Vehicle",
+          "query": "SELECT OX_STR FROM $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1233,7 +1233,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^engine_controller\\.FUEL_STR$/",
+          "fields": "/.*/",
           "values": false
         },
         "textMode": "auto"
@@ -1257,7 +1257,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT FUEL_STR FROM $Vehicle",
+          "query": "SELECT FUEL_STR FROM $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1322,7 +1322,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^engine_controller\\.OX_PURGE_STR$/",
+          "fields": "/.*/",
           "values": false
         },
         "textMode": "auto"
@@ -1346,7 +1346,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT OX_PURGE_STR FROM $Vehicle",
+          "query": "SELECT OX_PURGE_STR FROM $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1376,7 +1376,10 @@
       "datasource": null,
       "fieldConfig": {
         "defaults": {
-          "custom": {},
+          "custom": {
+            "align": null,
+            "filterable": false
+          },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -1403,7 +1406,7 @@
       "id": 22,
       "options": {
         "colorMode": "value",
-        "graphMode": "none",
+        "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
         "reduceOptions": {
@@ -1434,7 +1437,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT FUEL_PURGE_STR FROM $Vehicle",
+          "query": "SELECT FUEL_PURGE_STR FROM $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1498,7 +1501,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^engine_controller\\.IGNITER_STR$/",
+          "fields": "/.*/",
           "values": false
         },
         "textMode": "auto"
@@ -1522,7 +1525,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT IGNITER_STR FROM $Vehicle",
+          "query": "SELECT IGNITER_STR FROM $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1586,7 +1589,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^engine_controller\\.MODE_STR$/",
+          "fields": "/.*/",
           "values": false
         },
         "textMode": "auto"
@@ -1610,7 +1613,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT MODE_STR FROM $Vehicle",
+          "query": "SELECT MODE_STR FROM $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1674,7 +1677,7 @@
           "calcs": [
             "lastNotNull"
           ],
-          "fields": "/^engine_controller\\.SAFING_STR$/",
+          "fields": "/.*/",
           "values": false
         },
         "textMode": "auto"
@@ -1698,7 +1701,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT SAFING_STR FROM $Vehicle",
+          "query": "SELECT SAFING_STR FROM $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -1734,8 +1737,8 @@
       {
         "current": {
           "selected": false,
-          "text": "",
-          "value": ""
+          "text": "engine_controller",
+          "value": "engine_controller"
         },
         "error": null,
         "hide": 0,
@@ -1755,8 +1758,8 @@
       {
         "current": {
           "selected": false,
-          "text": "",
-          "value": ""
+          "text": "gs.local",
+          "value": "gs.local"
         },
         "error": null,
         "hide": 0,
@@ -1776,8 +1779,8 @@
       {
         "current": {
           "selected": false,
-          "text": "",
-          "value": ""
+          "text": "8080",
+          "value": "8080"
         },
         "error": null,
         "hide": 0,
@@ -1812,5 +1815,5 @@
   "timezone": "",
   "title": "FL-1 - Monitor",
   "uid": "yqaFLGfnk",
-  "version": 33
+  "version": 35
 }

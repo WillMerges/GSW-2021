@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 11,
-  "iteration": 1650431611186,
+  "iteration": 1650512386745,
   "links": [],
   "panels": [
     {
@@ -1228,7 +1228,7 @@
           ],
           "orderByTime": "ASC",
           "policy": "default",
-          "query": "SELECT HOLD from $Vehicle",
+          "query": "SELECT HOLD from $Vehicle GROUP BY * ORDER BY DESC LIMIT 1",
           "rawQuery": true,
           "refId": "A",
           "resultFormat": "time_series",
@@ -3689,9 +3689,9 @@
     "list": [
       {
         "current": {
-          "selected": true,
-          "text": "FL_1",
-          "value": "FL_1"
+          "selected": false,
+          "text": "FL-1",
+          "value": "FL-1"
         },
         "error": null,
         "hide": 0,
@@ -3710,7 +3710,7 @@
       },
       {
         "current": {
-          "selected": true,
+          "selected": false,
           "text": "gs.local",
           "value": "gs.local"
         },
@@ -3754,12 +3754,38 @@
         "allValue": null,
         "current": {
           "selected": false,
-          "text": "None",
-          "value": ""
+          "text": "FL-1_hot-fire.ec",
+          "value": "FL-1_hot-fire.ec"
         },
         "datasource": "InfluxDB",
         "definition": "",
-        "error": null,
+        "error": {
+          "config": {
+            "data": "q=SELECT%20program%20from%20ec_programs",
+            "headers": {
+              "Content-type": "application/x-www-form-urlencoded",
+              "X-Grafana-Org-Id": 1
+            },
+            "hideFromInspector": false,
+            "inspect": {
+              "type": "influxdb"
+            },
+            "method": "POST",
+            "params": {
+              "db": "gsw",
+              "epoch": "ms"
+            },
+            "precision": "ms",
+            "retry": 0,
+            "url": "api/datasources/proxy/1/query"
+          },
+          "data": {
+            "error": "Bad Gateway",
+            "message": "Bad Gateway",
+            "response": ""
+          },
+          "message": "InfluxDB Error: Bad Gateway"
+        },
         "hide": 0,
         "includeAll": false,
         "label": null,
@@ -3795,5 +3821,5 @@
   "timezone": "",
   "title": "FL-1 - Control",
   "uid": "zTMJUmw7z",
-  "version": 22
+  "version": 23
 }
