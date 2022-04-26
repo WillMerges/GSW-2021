@@ -1,3 +1,26 @@
+/**
+ * Parses csv files in a given directory and graphs data based
+ * on user specifications.
+ *
+ * Required Flag Usage:
+ *  -x flag specifies the the column being read as the X value
+ *  -y flag specifies the the column being read as the Y value
+ *  -d flag specifies the directory to read csv files
+ *     NOTE: Should be labelled log<NUMBER>.csv since GSW generates files that way
+ *
+ * Optional Flag Usage:
+ *  -s flag specifies the time period to analyze specifically
+ *
+ *  Example Usages:
+ *      ./analysis -x MILLISEC -y Y_DATA -d data -s 1000 10000
+ *      ./analysis -y Y_DATA -x MILLISEC -d data -s 1000 10000
+ *      ./analysis -x MILLISEC -y Y_DATA -d data
+ *
+ *
+ * @author Aaron Chan
+ */
+
+
 #include "include/analysis.h"
 #include <sstream>
 #include <fstream>
