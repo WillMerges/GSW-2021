@@ -8,7 +8,6 @@
 #ifndef DATA_ANALYSIS_ANALYSIS_H
 #define DATA_ANALYSIS_ANALYSIS_H
 
-#endif //DATA_ANALYSIS_ANALYSIS_H
 
 #include <stdint.h>
 #include <iostream>
@@ -63,3 +62,4 @@ std::vector<std::string> splitCSVLine(const std::string &str);
  */
 void plotData();
 
+#endif //DATA_ANALYSIS_ANALYSIS_H

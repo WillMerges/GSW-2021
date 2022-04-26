@@ -142,6 +142,9 @@ array<vector<npy_double>, 2> parseCSV(const string &filename) {
 
     if (millisecColNum == -1 || microsecColNum == -1 || xColNum == -1 || yColNum == -1) {
         cout << "Columns not found" << endl;
+
+        file.close();
+
         return {};
     }
 
