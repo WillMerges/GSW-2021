@@ -108,7 +108,7 @@ int main() {
                 return -1;
             }
 
-            while(num && !closed) {
+            while(num) {
                 event = (struct inotify_event*)inotify_buff;
                 // if(event->mask & IN_CLOSE_WRITE) { // TODO this seems to be always missed, gets handled by "end of log file" message anyways
                 //     // file is closed, need to open a new log file
