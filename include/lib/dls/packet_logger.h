@@ -17,7 +17,11 @@ namespace dls {
     static const char* const TELEMETRY_MQUEUE_NAME = "/telemetry_queue";
 
     typedef struct {
-        std::string* timestamp;
+
+    } timestamp_t;
+
+    typedef struct {
+        struct timeval timestamp;
         std::string* device;
         size_t size;
         uint8_t* data;

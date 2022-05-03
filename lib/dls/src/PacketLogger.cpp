@@ -12,17 +12,20 @@ PacketLogger::PacketLogger(std::string device_name):
 
 // logged packets look like:
 // | [timestamp] | <device_name> | size of packet | packet data |
+// NOTE: timestamp is written as a raw 'struct timeval'
 RetType PacketLogger::log_packet(unsigned char* buffer, size_t size) {
     gettimeofday(&curr_time, NULL);
-    std::string header = "[" + std::to_string(curr_time.tv_sec) + "." +
-                               std::to_string(curr_time.tv_usec) + "]";
 
-    header += "<" + device_name + ">";
+    std::string header = "<" + device_name + ">";
     size_t len = strlen(header.c_str()) * sizeof(char); // want to get actual # of bytes
 
-    size_t out_size = len + size + sizeof(size_t);
+    size_t out_size = 2*sizeof(char) + sizeof(curr_time) + len + size + sizeof(size_t);
 
     char* out_buff = new char[out_size];
+
+    memcpy(out_buff, "[", sizeof(char));
+    memcpy(out_buff, (void*)&curr_time, sizeof(curr_time));
+    memcpy(out_buff, "]", sizeof(char));
 
     memcpy(out_buff, header.c_str(), len); // write the header
     memcpy(out_buff+len, &size, sizeof(size_t)); // write the packet size
@@ -36,7 +39,8 @@ RetType PacketLogger::log_packet(unsigned char* buffer, size_t size) {
 
 packet_record_t* dls::retrieve_record(std::istream& f) {
     // get the timestamp
-    std::string* timestamp = new std::string();
+    uint8_t t_buff[sizeof(struct timeval)];
+    size_t i = 0;
 
     char c = 0;
     bool done = false;
@@ -61,7 +65,12 @@ packet_record_t* dls::retrieve_record(std::istream& f) {
                     break;
                 }
 
-                *timestamp += c;
+                t_buff[i++] = c;
+
+                if(i >= sizeof(struct timeval)) {
+                    // timestamp too long
+                    return NULL;
+                }
             }
         }
     }
@@ -109,7 +118,7 @@ packet_record_t* dls::retrieve_record(std::istream& f) {
 
     // put together the record to return
     packet_record_t* rec = (packet_record_t*)malloc(sizeof(packet_record_t));
-    rec->timestamp = timestamp;
+    rec->timestamp = *((struct timeval*)(t_buff));
     rec->device = device;
     rec->size = size;
     rec->data = data;
@@ -121,10 +130,6 @@ void dls::free_record(packet_record_t* packet) {
     if(!packet) {
         // nothing to free, NULL pointer
         return;
-    }
-
-    if(packet->timestamp != NULL) {
-        delete packet->timestamp;
     }
 
     if(packet->device != NULL) {

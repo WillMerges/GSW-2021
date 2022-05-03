@@ -266,8 +266,8 @@ int main(int argc, char* argv[]) {
 
             if(!first) {
                 msg += ",";
+                first = 0;
             }
-            first &= 0;
 
 
             if(SUCCESS == tlm.get_str(m_info, &val)) {

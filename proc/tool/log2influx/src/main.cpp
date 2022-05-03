@@ -1,9 +1,10 @@
 /********************************************************************
 *  Name: main.cpp
 *
-*  Purpose: Parses log files into a single CSV file of measurements
+*  Purpose: Uploads log files to InfluxDB, assumes InfluxDB server is hosted
+*           at domain name 'influx.local'
 *
-*  Usage: ./log2csv [log file directory] (vcm config file path)
+*  Usage: ./log2influx [log file directory] (vcm config file path)
 *         vcm config file path is optional, uses the default if not set
 *
 *  Author: Will Merges
@@ -13,21 +14,28 @@
 #include "lib/vcm/vcm.h"
 #include "lib/dls/dls.h"
 #include "lib/convert/convert.h"
-#include <string>
-#include <vector>
-#include <unordered_map>
+#include "common/types.h"
+#include "common/net.h"
 
-// maximum number of rows for each output file
-// set to 10,000 so each file can be opened in LibreOffice
-#define MAX_OUTPUT_ROWS 10000
+#include <string>
+#include <string.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+
+#define INFLUXDB_HOST "influx.local"
+#define INFLUXDB_UDP_PORT 8089
 
 using namespace vcm;
 using namespace dls;
 using namespace convert;
 
-int main(int argc, char** argv) {
+
+int main(int argc, char* argv[]) {
     if(argc < 2) {
-        printf("usage: ./log2csv [log file directory] (vcm config file path)");
+        printf("usage: ./log2influx [log file directory] (vcm config file path)");
         return -1;
     }
 
@@ -71,25 +79,23 @@ int main(int argc, char** argv) {
         temp.clear();
     }
 
-    // open the first output file
-    std::ofstream of;
-    std::string of_name = dir;
-    of_name += "/log0.csv";
-    of.open(of_name.c_str(), std::ios::out | std::ios::trunc);
-    size_t num_ofile = 0;
+    // create network socket
+    int sockfd = -1;
+    if((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0 ) {
+       printf("socket creation failed\n");
+       return -1;
+    }
 
-    if(!of.is_open()) {
-        printf("Failed to open output file: %s\n", of_name.c_str());
+    struct sockaddr_in servaddr;
+    memset(&servaddr, 0, sizeof(servaddr));
+
+    servaddr.sin_family = AF_INET;
+    servaddr.sin_port = htons(INFLUXDB_UDP_PORT);
+
+    if(FAILURE == get_addr(INFLUXDB_HOST, &servaddr.sin_addr)) {
+        printf("failed to resolve host name: %s\n", INFLUXDB_HOST);
         return -1;
     }
-
-    // write out the first entry
-    of << "timestamp,packet id,";
-    for(std::string m : veh->measurements) {
-        of << m << ",";
-    }
-    of << '\n';
-    of.flush();
 
     // open the first input file
     std::string base_filename = dir;
@@ -98,7 +104,9 @@ int main(int argc, char** argv) {
 
     std::string filename = base_filename;
 
-    size_t line_cnt = 1;
+    struct timeval t0 = {0, 0};
+
+    printf("uploading logged measurements to InfluxDB\n");
 
     while(1) {
         std::ifstream f(filename.c_str(), std::ifstream::binary);
@@ -109,20 +117,13 @@ int main(int argc, char** argv) {
             break;
         }
 
-        // f.open(filename.c_str(), std::ifstream::binary);
+        printf("uploading file: %s\n", filename.c_str());
 
-        // if(!f.is_open()) {
-        //     break;
-        // }
-
-        packet_record_t* rec = NULL;
-
-        // should hit eof on last case
+        packet_record_t* rec;
         while(!f.eof()) {
             rec = retrieve_record(f);
 
-            if(rec == NULL) {
-                // something bad happened, try and parse the next record
+            if(NULL == rec) {
                 printf("Unexpected failure to parse record in file: %s\n", filename.c_str());
                 continue;
             }
@@ -130,13 +131,13 @@ int main(int argc, char** argv) {
             // set to some large number, want it to break if scanf has a bad string
             uint32_t packet_id = 1 << 31;
 
-            size_t first = rec->device->find('(');
+            size_t fst = rec->device->find('(');
             size_t second = rec->device->find(')');
-            if(first == std::string::npos || second == std::string::npos) {
+            if(fst == std::string::npos || second == std::string::npos) {
                 printf("packet id not found in device name in file: %s\n", filename.c_str());
             }
 
-            std::string id_str = rec->device->substr(first, second);
+            std::string id_str = rec->device->substr(fst, second);
             if(EOF == sscanf(id_str.c_str(), "(%u)", &packet_id)) {
                 printf("scanf error in file: %s\n", filename.c_str());
 
@@ -158,51 +159,19 @@ int main(int argc, char** argv) {
                 continue;
             }
 
-            // check if we need a new output file before we write a new line
-            if(line_cnt > MAX_OUTPUT_ROWS) {
-                // close the last output file
-                of.close();
-                printf("file written to: %s\n", of_name.c_str());
-
-                // open a new output file
-                num_ofile++;
-                of_name = dir;
-                of_name += "/log";
-                of_name += std::to_string(num_ofile);
-                of_name += ".csv";
-
-                of.open(of_name.c_str(), std::ios::out | std::ios::trunc);
-
-                if(!of.is_open()) {
-                    printf("Failed to open output file: %s\n", of_name.c_str());
-                    return -1;
-                }
-
-                // write out the first entry
-                of << "timestamp,packet id,";
-                for(std::string m : veh->measurements) {
-                    of << m << ",";
-                }
-                of << '\n';
-                of.flush();
-
-                // reset the line counter
-                line_cnt = 1;
-            }
-
-            // write out the record to the CSV file
-            of << std::to_string(rec->timestamp.tv_sec);
-            of << "." << std::to_string(rec->timestamp.tv_usec);
-            of << "," << std::to_string(packet_id) << ",";
-
             std::string val;
             measurement_info_t* meas = NULL;
             uint8_t* data = NULL;
             std::unordered_map<std::string, size_t>* packet_map = &(packets[packet_id]);
+            uint8_t first = 1;
+
+            // write the measurement name
+            std::string msg = veh->device;
+            msg += " ";
 
             for(std::string m : veh->measurements) {
                 if(packet_map->find(m) != packet_map->end()) {
-                    // this measurement is in this record, add it to the csv
+                    // we found a measurement in this record
                     val = "";
                     meas = veh->get_info(m);
                     data = rec->data + (*packet_map)[m];
@@ -213,15 +182,50 @@ int main(int argc, char** argv) {
                         // try the next measurement
                         continue;
                     }
-                }
 
-                // NOTE: we leave an extra comma on each line, but who cares
-                of << val << ',';
+                    // write each field
+                    if(!first) {
+                        msg += ",";
+                        first = 0;
+                    }
+
+                    msg += m;
+                    msg += "=";
+                    msg += val;
+                }
             }
 
-            of << '\n';
-            of.flush();
-            line_cnt++;
+            // if this is our first data point, record the start timestamp
+            if(t0.tv_sec == 0 && t0.tv_usec == 0) {
+                t0 = rec->timestamp;
+            }
+
+            // calculate the timestamp relative to t0
+            long int sec = rec->timestamp.tv_sec - t0.tv_sec;
+            long int usec = rec->timestamp.tv_usec - t0.tv_usec;
+
+            if(usec < 0) {
+                sec--;
+                usec = 1000000 + usec;
+            }
+
+            if(sec < 0) {
+                // this should never happen
+                printf("record occurred after first record, not uploading\n");
+            } else {
+                unsigned long int nanosec = (sec * 1000000000) + (usec * 1000);
+                msg += " ";
+                msg += std::to_string(nanosec);
+
+                // send the message to the InfluxDB server
+                ssize_t sent = -1;
+                sent = sendto(sockfd, msg.c_str(), msg.length(), 0,
+                    (struct sockaddr*)&servaddr, sizeof(servaddr));
+
+                if(sent == -1) {
+                    printf("failed to send UDP line protocol message\n");
+                }
+            }
 
             free_record(rec);
 
@@ -240,8 +244,6 @@ int main(int argc, char** argv) {
         filename += std::to_string(file_index);
     }
 
-    of.close();
-    printf("file written to: %s\n", of_name.c_str());
-
-    printf("completed parsing\n");
+    close(sockfd);
+    printf("upload to InfluxDB complete\n");
 }
