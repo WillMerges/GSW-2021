@@ -1,6 +1,6 @@
 # upload log file to InfluxDB 
 
-TARGET = log2csv
+TARGET = log2influx
 
 CXX = g++
 CC = gcc
