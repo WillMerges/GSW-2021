@@ -27,7 +27,7 @@ using namespace convert;
 
 int main(int argc, char** argv) {
     if(argc < 2) {
-        printf("usage: ./log2csv [log file directory] (vcm config file path)");
+        printf("usage: ./log2csv [log file directory] (vcm config file path)\n");
         return -1;
     }
 
