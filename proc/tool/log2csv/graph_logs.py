@@ -4,9 +4,14 @@ Run as: ./graph_logs [log CSV file directory] [X measurement] [Y measurement]
 import os
 import sys
 import matplotlib.pyplot as plt
+import math
 
+
+l = [0] * 20 
 
 def get_pts(file_name, x_col_name, y_col_name):
+    global l
+    
     f = open(file_name, "r")
 
     line = f.readline()
@@ -38,18 +43,42 @@ def get_pts(file_name, x_col_name, y_col_name):
     for line in f:
         tokens = line.split(',')
 
-        if tokens[xi] != "":
-            last_x = int(tokens[xi])
+        #if tokens[xi] != "":
+        #    last_x = int(tokens[xi])
 
-        #if tokens[xi] != "" and tokens[yi] != "":
-        if tokens[yi] != "" and last_x != None:
+        if tokens[xi] != "" and tokens[yi] != "":
+        #if tokens[yi] != "" and last_x != None:
             #t = tokens[xi].split('.')
             #millis = int(t[0])
             #micros = int(t[1]) + (millis * 1000)
+            millis = int(tokens[xi])
+            micros = int(tokens[xi + 1]) + (millis * 1000)
+
+            if micros < 9.3 * 1e8 or micros > 9.4 * 1e8:
+                continue
+
+            xs.append(micros)
+            #xs.append(last_x)
+            #ys.append(float(tokens[yi]))
             
-            #xs.append(micros)
-            xs.append(last_x)
-            ys.append(float(tokens[yi]))
+            y = float(tokens[yi]) * 2.442 / (1 << 23)
+            ff = (((y / 0.01)) / 352)
+            ff = ff * 2.06579
+
+            a = -9.417589e-11
+            b = -8.261031e-4
+            c = 1.294404e-4 - ff
+            xx = (-b - math.sqrt((b*b) - (4 * a * c))) / (2 * a)
+    
+            l = l[1::]
+            l.append(xx)
+            s = 0.0
+            for i in l:
+                s = s + i
+            
+            ys.append(s / len(l))
+
+            #ys.append(xx)
 
     f.close()
     return (xs, ys)
@@ -81,6 +110,8 @@ if __name__ == "__main__":
     
     print(xs[0:10])
     print(ys[0:10])
+    print(xs[-10::])
+    print(ys[-10::])
 
     plt.plot(xs, ys)
     plt.show()

@@ -12,9 +12,9 @@ net engine_controller auto 8084
 net daq auto 9082
 
 # DAQ measurements
-MILLISEC    4 int unsigned big
-MICROSEC    4 int unsigned big
-SEQ_NUM_DAQ 4 int unsigned big
+MILLISEC    4 int unsigned little
+MICROSEC    4 int unsigned little
+SEQ_NUM_DAQ 4 int unsigned little
 ADC0_STATUS 3 int unsigned big
 IEPE0_DATA  3 int signed big
 IEPE1_DATA  3 int signed big
