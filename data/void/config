@@ -1,0 +1,27 @@
+# simulation
+
+protocol = udp
+port = 8080
+
+name = VOID
+
+
+# java uses big endian ordering
+
+X_VELOCITY 4 float signed big
+VELOCITY 4 float signed big # really Y velocity
+X_ACCEL 4 float signed big
+Y_ACCEL 4 float signed big
+ALTITUDE 4 float signed big
+TEMP 4 float signed big
+UPTIME 4 float signed big
+
+8080 {
+X_VELOCITY
+VELOCITY
+X_ACCEL
+Y_ACCEL
+ALTITUDE
+TEMP
+UPTIME
+}
