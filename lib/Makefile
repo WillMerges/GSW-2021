@@ -14,11 +14,13 @@ build:
 	-$(MAKE) -C trigger all
 	-$(MAKE) -C daq all
 	-$(MAKE) -C ec all
+	-$(MAKE) -C dev all
 
 copy:
 	rm -rf bin || true > /dev/null
 	mkdir bin
 	-cp */*.so bin/
+	-cp dev/*/*.so bin/
 
 
 clean:
@@ -34,6 +36,7 @@ clean:
 	-$(MAKE) -C trigger clean
 	-$(MAKE) -C daq clean
 	-$(MAKE) -C ec clean
+	-$(MAKE) -C dev clean
 	rm -r bin
 
 # build special library used by Python ctypes
