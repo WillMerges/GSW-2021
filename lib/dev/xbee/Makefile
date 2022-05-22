@@ -7,8 +7,9 @@ CC = g++
 
 OPTIONS +=
 
-CFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -fpic
-CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wextra -Wpedantic -fpic -ggdb
+# we don't use the -Wextra flag so we don't get warnings for switch case fall through
+CFLAGS = -I$(GSW_HOME)/include -Wall -Wpedantic -fpic
+CPPFLAGS = -I$(GSW_HOME)/include -Wall -Wpedantic -fpic -ggdb
 LDFLAGS = -shared
 
 LIBS =

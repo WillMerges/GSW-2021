@@ -1,6 +1,3 @@
-/*
- * XBEE Radio Library
-*/
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -74,7 +71,6 @@ xb_ret_t xb_sendto(uint64_t addr, uint8_t* data, size_t len) {
     xb_tx_frame_t* frame = (xb_tx_frame_t*)tx_buff;
 
     frame->header.start_delimiter = START_DELIMETER;
-    // length = payload + frame - header
     frame->header.length = hton16(len + sizeof(xb_tx_frame_t) - sizeof(xb_header_t));
     frame->frame_type = TX_FRAME_TYPE;
     frame->frame_id = 0;
@@ -94,7 +90,7 @@ xb_ret_t xb_sendto(uint64_t addr, uint8_t* data, size_t len) {
     check = 0xFF - check;
     memcpy(tx_buff + len + sizeof(xb_tx_frame_t), &check, 1);
 
-    size_t write_len = len + sizeof(xb_tx_frame_t) + 1;
+    int write_len = len + sizeof(xb_tx_frame_t) + 1;
     if(xb_write(tx_buff, write_len) != write_len) {
         // write error
         return XB_ERR;
@@ -234,7 +230,6 @@ static xb_ret_t xb_remote_at_cmd(const char cmd[2], uint8_t* param, size_t param
     xb_remote_at_frame_t* frame = (xb_remote_at_frame_t*)tx_buff;
 
     frame->header.start_delimiter = START_DELIMETER;
-    // length = frame - header + param
     frame->header.length = hton16(sizeof(xb_remote_at_frame_t) - sizeof(xb_header_t) + param_size);
     frame->frame_type = REMOTE_AT_CMD_FRAME_TYPE;
     frame->frame_id = 0; // NOTE: this means we won't get a response frame!
@@ -255,7 +250,7 @@ static xb_ret_t xb_remote_at_cmd(const char cmd[2], uint8_t* param, size_t param
 
     tx_buff[i] = 0xFF - check;
 
-    if(xb_write(tx_buff, i + 1) < i + 1) {
+    if(xb_write(tx_buff, i + 1) < int(i + 1)) {
         // write error
         return XB_ERR;
     }
@@ -284,7 +279,7 @@ xb_ret_t xb_at_cmd(const char cmd[2], uint8_t* param, size_t param_size) {
 
     tx_buff[i] = 0xFF - check;
 
-    if(xb_write(tx_buff, i + 1) < i + 1) {
+    if(xb_write(tx_buff, i + 1) < int(i + 1)) {
         // write error
         return XB_ERR;
     }
