@@ -36,7 +36,7 @@ void xb_rx_complete(xb_rx_request* req);
 
 // attach a callback function to call when an rx frame is received
 // 'buff' points to the payload of length 'len' in the frame
-void xb_attach_rx_callback(void (*rx)(uint8_t* buff, size_t len));
+void xb_attach_rx_callback(void (*rx)(uint8_t* buff, size_t len, uint64_t src_addr));
 
 // set the default destination address of transmitted packets
 // assumes 'addr' is in system endianness
