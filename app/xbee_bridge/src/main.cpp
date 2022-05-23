@@ -12,7 +12,7 @@
 *
 * Author: Will Merges
 *
-* Usage ./xbee_bridge [path_to_serial_device] []-f optional_path_to_VCM_file]
+* Usage ./xbee_bridge [path_to_serial_device] [-f optional_path_to_VCM_file]
 *       The -f flag is optional
 *
 * RIT Launch Initiative
@@ -47,13 +47,14 @@ int main(int argc, char* argv[]) {
     MsgLogger logger("xbee_bridge");
 
     if(argc < 2) {
-        printf("usage: ./xbee_bridge [path_to_serial_device] []-f optional_path_to_VCM_file]\n");
+        printf("usage: ./xbee_bridge [path_to_serial_device] [-f optional_path_to_VCM_file]\n");
         logger.log_message("invalid number of args");
         exit(-1);
     }
 
     std::string dev = argv[1];
     logger.log_message("starting XBee network bridge on device: " + dev);
+    printf("starting XBee network bridge on device: %s\n", dev.c_str());
 
     serial_sd = serial_init(argv[1]);
     if(serial_sd == -1) {
@@ -97,10 +98,10 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
 
-    sd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    sd = socket(AF_INET, SOCK_RAW, IPPROTO_UDP);
 
     if(sd == -1) {
-        printf("failed to create socket\n");
+        printf("failed to create socket, permissions error?\n");
         logger.log_message("failed to create socket");
 
         exit(-1);
@@ -112,7 +113,7 @@ int main(int argc, char* argv[]) {
     src_addr.sin_addr.s_addr = INADDR_ANY;
 
     if(-1 == bind(sd, (struct sockaddr*)&src_addr, sizeof(src_addr))) {
-        printf("socket bind failed, not running as root?\n");
+        printf("socket bind failed, permissions error?\n");
         logger.log_message("socket bind failed");
 
         exit(-1);
@@ -123,11 +124,19 @@ int main(int argc, char* argv[]) {
 
     if(veh->multicast_addr) {
         dst_addr.sin_addr.s_addr = veh->multicast_addr;
+        std::string ascii_addr = inet_ntoa(dst_addr.sin_addr);
+        logger.log_message("bridging to multicast address: " + ascii_addr);
+        printf("bridging to multicast addr: %s\n", ascii_addr.c_str());
     } else {
         inet_aton("127.0.0.1", &(dst_addr.sin_addr));
+        logger.log_message("bridging to localhost");
+        printf("bridging to localhost\n");
     }
 
     xb_attach_rx_callback(&packet_received);
+
+    logger.log_message("bridge initialized");
+    printf("bridge initialized\n");
 
     xb_rx_request req;
     req.len = 0;
