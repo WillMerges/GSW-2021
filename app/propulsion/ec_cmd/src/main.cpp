@@ -226,7 +226,7 @@ int main(int argc, char* argv[]) {
 
         if(FAILURE == tlm.update(time_remaining)) {
             printf("failed to update telemetry\n");
-            logger.log_message("failde to update telemetry");
+            logger.log_message("failed to update telemetry");
 
             continue;
         } // otherwise success or timeout

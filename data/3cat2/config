@@ -1,17 +1,29 @@
-# FL-1 Engine Configuration
-# Includes engine controller and DAQ
+# Engine Controller
 
-name = FL_1
 protocol = udp
+port = 8080
+name = 2cat2
 multicast = 224.0.0.1
 triggers = triggers
 constants = consts
 
-# network devices
-net engine_controller auto 8084
+net engine_controller auto 8080
 net daq auto 9082
 
-# DAQ measurements
+## measurements ##
+
+# engine controller #
+IGNITER_OX          2 int unsigned little
+IGNITER_FUEL        2 int unsigned little
+VALVE_OX            2 int unsigned little
+VALVE_FUEL          2 int unsigned little
+DEBUG1              2 int unsigned little
+DEBUG2              2 int unsigned little
+
+SEQ_NUM_EC   4 int unsigned little
+HEARTBEAT    4  int unsigned little
+
+# DAQ #
 MILLISEC    4 int unsigned little
 MICROSEC    4 int unsigned little
 SEQ_NUM_DAQ 4 int unsigned little
@@ -30,9 +42,13 @@ TC1_DATA    4 int unsigned big
 TC2_DATA    4 int unsigned big
 TC3_DATA    4 int unsigned big
 
+## virtual measurements ##
 
-# DAQ virtual measurements
-# don't specify endianness, use same as the system
+# engine controller
+IGNITER_OX_STR      10 string
+IGNITER_FUEL_STR    10 string
+
+# DAQ
 FB0_VOLTS   8 float
 FB1_VOLTS   8 float
 CL0_VOLTS   8 float
@@ -64,99 +80,25 @@ PT1_PSI_MAX     8 float
 LC0_FORCE_MAX   8 float
 
 
-# Engine Controller measurements
-SOLENOID_OX          2 int unsigned little
-SOLENOID_FUEL        2 int unsigned little
-SOLENOID_OX_PURGE    2 int unsigned little
-SOLENOID_FUEL_PURGE  2 int unsigned little
-IGNITER_MAIN         2 int unsigned little
-LED_G                2 int unsigned little
-LED_Y                2 int unsigned little
-LED_R                2 int unsigned little
-LED_BUZZ             2 int unsigned little
-SEQ_NUM_EC           4 int unsigned little
-HEARTBEAT            2 int unsigned little
-MODE                 2 int unsigned little
-SAFING               2 int unsigned little
-
-
-# Engine Controller virtual measurements
-OX_STR          10 string
-FUEL_STR        10 string
-OX_PURGE_STR    10 string
-FUEL_PURGE_STR  10 string
-IGNITER_STR     10 string
-MODE_STR        10 string
-SAFING_STR      10 string
-
-
-# Engine Controller Telemetry
+## telemetry packets ##
 
 8080 {
-SEQ_NUM_EC
-}
-
-8081 {
-SOLENOID_OX
-SOLENOID_FUEL
-SOLENOID_OX_PURGE
-SOLENOID_FUEL_PURGE
-SEQ_NUM_EC
-}
-
-8082 {
-IGNITER_MAIN
-SEQ_NUM_EC
-}
-
-8083 {
-LED_G
-LED_Y
-LED_R
-LED_BUZZ
-SEQ_NUM_EC
-}
-
-8084 {
-SOLENOID_OX
-SOLENOID_FUEL
-SOLENOID_OX_PURGE
-SOLENOID_FUEL_PURGE
-IGNITER_MAIN
-LED_G
-LED_Y
-LED_R
-LED_BUZZ
-SEQ_NUM_EC
-MODE
-SAFING
+SEQ_NUM
 HEARTBEAT
-}
-
-8085 {
-SEQ_NUM_EC
-MODE
-SAFING
-}
-
-virtual {
-OX_STR
-FUEL_STR
-OX_PURGE_STR
-FUEL_PURGE_STR
+IGNITER_OX
+IGNITER_FUEL
+VALVE_OX
+VALVE_FUEL
+DEBUG1
+DEBUG2
 }
 
 virtual {
-IGNITER_STR
+IGNITER_OX_STR
+IGNITER_FUEL_STR
 }
 
-virtual {
-MODE_STR
-SAFING_STR
-}
-
-
-# DAQ Telemetry
+# DAQ #
 
 # ADC0
 9080 {
