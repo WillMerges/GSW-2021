@@ -40,4 +40,9 @@ RetType PCB1403_CURRENT_EXCITE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* 
 // @arg2 measured pressure (PSI)
 RetType PRESSURE_TRANSDUCER_8252(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* arg);
 
+// calculates load cell values for a LT-LJ-S 500kg load cell using current excitation
+// @arg1 input measured voltage (double)
+// @arg2 measured force in lbF (double)
+RetType LTLJS_CURRENT_EXCITE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* arg);
+
 #endif

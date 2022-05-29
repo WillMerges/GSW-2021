@@ -221,6 +221,25 @@ RetType PCB1403_CURRENT_EXCITE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* 
 }
 
 // @arg1 input measured voltage (double)
+// @arg2 measured force in lbF (double)
+RetType LTLJS_CURRENT_EXCITE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
+    double vmeas;
+
+    if(unlikely(tv->get_double(args->args[0], &vmeas))) {
+        return FAILURE;
+    }
+
+    double f = (((vmeas / 0.01)) / 352.0) * 500;
+    f *= 2.20462; // kg to lb
+
+    if(unlikely(tw->write(args->args[1], (uint8_t*)&f, sizeof(double)))) {
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}
+
+// @arg1 input measured voltage (double)
 // @arg2 measured pressure (PSI)
 RetType PRESSURE_TRANSDUCER_8252(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
     double vmeas;
