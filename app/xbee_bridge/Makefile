@@ -21,7 +21,7 @@ OBJS := $(CPP_FILES:.cpp=.o) $(C_FILES:.c=.o)
 .PHONY: all clean
 
 all: $(TARGET)
-	sudo setcap cap_net_admin,cap_net_raw=eip xbee_bridge
+	#sudo setcap cap_net_admin,cap_net_raw=eip xbee_bridge
 
 $(TARGET): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LIBS)
