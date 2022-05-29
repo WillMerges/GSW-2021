@@ -2,7 +2,7 @@
 
 protocol = udp
 port = 8080
-name = 2cat2
+name = halfcat
 multicast = 224.0.0.1
 triggers = triggers
 constants = consts
@@ -83,7 +83,7 @@ LC0_FORCE_MAX   8 float
 ## telemetry packets ##
 
 8080 {
-SEQ_NUM
+SEQ_NUM_EC
 HEARTBEAT
 IGNITER_OX
 IGNITER_FUEL
