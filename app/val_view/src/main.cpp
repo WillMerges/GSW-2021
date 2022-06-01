@@ -9,7 +9,6 @@
 #include "lib/vcm/vcm.h"
 #include "lib/telemetry/TelemetryViewer.h"
 #include "lib/dls/dls.h"
-#include "lib/convert/convert.h"
 #include "common/types.h"
 
 // view telemetry values live
