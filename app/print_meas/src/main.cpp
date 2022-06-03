@@ -13,7 +13,7 @@
 #include "common/types.h"
 
 // print measurements separated by spaces
-// run as printgps [-f path_to_config_file] [space-separated list of measurement to print]
+// run as printmeas [-f path_to_config_file] [space-separated list of measurement to print] [-t to print timestamp before measurements | -g to print in feedgnuplot format]
 // if config file path not specified will use the default
 
 using namespace vcm;
@@ -42,6 +42,32 @@ void sighandler(int) {
 }
 
 
+static struct timespec tp;
+static unsigned long long start_time; //ms
+
+inline RetType init_clock() {
+    if(clock_gettime(CLOCK_MONOTONIC, &tp) != 0) {
+        return FAILURE;
+    }
+
+    start_time = (tp.tv_sec * 1000) + (tp.tv_nsec / 1000000);
+    return SUCCESS;
+}
+
+
+inline void print_timestamp() {
+    tp.tv_sec = 0;
+    tp.tv_nsec = 0;
+    if(clock_gettime(CLOCK_MONOTONIC, &tp) != 0) {
+        printf("error");
+        return;
+    }
+
+    unsigned long long millis = (tp.tv_sec * 1000) + (tp.tv_nsec / 1000000);
+    printf("%llu", millis - start_time);
+}
+
+
 int main(int argc, char* argv[]) {
     MsgLogger logger("print_meas");
 
@@ -66,6 +92,24 @@ int main(int argc, char* argv[]) {
             index = 3;
         }
     }
+
+    bool print_timestamps = false;
+    bool print_replots = false;
+
+    if(!strcmp(argv[argc - 1], "-t")) {
+        if(SUCCESS != init_clock()) {
+            logger.log_message("Failed to initialize clock");
+            printf("Failed to initialize clock\n");
+            return -1;
+        }
+
+        print_timestamps = true;
+        argc--;
+    } else if(!strcmp(argv[argc - 1], "-g")) {
+       print_replots = true;
+       argc--;
+    }
+
 
     std::vector<std::string> measurements;
     for(int i = index; i < argc; i++) {
@@ -131,6 +175,11 @@ int main(int argc, char* argv[]) {
             continue;
         }
 
+        if(print_timestamps) {
+            print_timestamp();
+            printf(" ");
+        }
+
         for(size_t i = 0; i < meas_infos.size(); i++) {
             if(FAILURE == tlm.get_str(info, &str)) {
                 // ignore and try updating again
@@ -144,7 +193,10 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        printf("\n");
+        if(print_replots) {
+            printf("\nreplot\n");
+            fflush(stdout);
+        }
 
         usleep(1000); // sleep for 1 ms
     }
