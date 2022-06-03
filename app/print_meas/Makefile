@@ -21,9 +21,11 @@ OBJS := $(CPP_FILES:.cpp=.o) $(C_FILES:.c=.o)
 .PHONY: all clean
 
 all: $(TARGET)
+	chmod +x ascii_plot.sh
 
 $(TARGET): $(OBJS)
 	$(CXX) $(LDFLAGS) -o $(TARGET) $(OBJS) $(LIBS)
 
 clean:
 	-rm src/*.o $(TARGET)
+	chmod -x ascii_plot.sh
