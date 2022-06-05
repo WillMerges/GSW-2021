@@ -107,6 +107,7 @@ int main(int argc, char* argv[]) {
         argc--;
     } else if(!strcmp(argv[argc - 1], "-g")) {
        print_replots = true;
+       print_timestamps = true;
        argc--;
     }
 
