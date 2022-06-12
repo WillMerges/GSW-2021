@@ -9,4 +9,4 @@ then
 fi
 
 ./CreateLink.py track.kml
-${GSW_HOME}/app/print_meas/print_meas GPS_LAT GPS_LONG ALT | ./GPSTrack.py
+${GSW_HOME}/app/print_meas/print_meas APRS_LAT APRS_LONG APRS_ALT | ./GPSTrack.py

@@ -33,7 +33,10 @@ using namespace nm;
 using namespace countdown_clock;
 
 // amount of time to wait for telemetry to indicate command was accepted
-#define TIMEOUT 500 // ms
+#define TIMEOUT 20 // ms
+
+// the amount of times to retransmit sending before erroring
+#define NUM_RETRANSMITS 5
 
 // value of this constant is the sequence number used
 #define CONST_SEQUENCE "SEQUENCE"
@@ -542,6 +545,7 @@ int main(int argc, char* argv[]) {
         }
 
         // wait for our command to be acknowledged
+        size_t retransmit_count = 0;
         uint32_t start = systime();
         uint32_t time_remaining = TIMEOUT;
         while(seq_num != cmd_num) {
@@ -550,14 +554,23 @@ int main(int argc, char* argv[]) {
                 logger.log_message("timed out waiting for acknowledgement");
                 printf("timed out waiting for acknowledgement\n");
 
-                release_resources();
+                retransmit_count++;
 
-                if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER_COMMAND)) {
-                    logger.log_message("failed to unlock engine controller command resource");
-                    printf("failed to unlock engine controller command resource\n");
+                if(retransmit_count == NUM_RETRANSMITS) {
+                    // release the engine controller command resouce
+                    if(SUCCESS != vlock::unlock(vlock::ENGINE_CONTROLLER_COMMAND)) {
+                        printf("failed to unlock engine controller command resource\n");
+                        logger.log_message("failed to unlock engine controller command resource");
+                    }
+
+                    return -1;
+                } else {
+                    logger.log_message("retransmitting command");
+                    printf("retransmitting command\n");
+
+                    start = now;
+                    continue;
                 }
-
-                return -1;
             } else {
                 time_remaining = TIMEOUT - (now - start);
             }

@@ -197,6 +197,9 @@ int main(int argc, char* argv[]) {
         if(print_replots) {
             printf("\nreplot\n");
             fflush(stdout);
+        } else {
+            printf("\n");
+            fflush(stdout);
         }
 
         usleep(1000); // sleep for 1 ms
