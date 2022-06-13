@@ -59,12 +59,12 @@ void_payload.addMeasurement('longitude', 'payload_longitude', [
 var server = new app.Server({
     host: process.env.HOST || 'localhost',
     port: process.env.PORT || 8080,
-    wss_port: process.env.WSS_PORT || 8082,
+    wss_port: process.env.WSS_PORT || 8089,
     broker: process.env.MSGFLO_BROKER || 'mqtt://localhost',
     dictionaries: [void_av, void_payload],
     history: {
         host: process.env.INFLUX_HOST || 'localhost',
-        db: process.env.INFLUX_DB || 'void'
+        db: process.env.INFLUX_DB || 'gsw'
     }
 });
 
