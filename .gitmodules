@@ -1,3 +1,6 @@
 [submodule "app/cbeam-telemetry-server"]
 	path = app/cbeam-telemetry-server
 	url = https://github.com/c-base/cbeam-telemetry-server
+[submodule "app/openmct"]
+	path = app/openmct
+	url = https://github.com/AarC10/openmct
