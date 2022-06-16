@@ -23,6 +23,9 @@ typedef enum {
 // NOTE: places the XBee in API mode
 xb_ret_t xb_init(int (*write) (uint8_t* buff, size_t len), void (*delay)(uint32_t ms));
 
+// passes the XBee write function handler without initializing (placing into API mode)
+void xb_set_handler(int (*write) (uint8_t* buff, size_t len));
+
 // receive request
 // used by the XBee to request data
 typedef struct {
@@ -51,7 +54,7 @@ xb_ret_t xb_send(uint8_t* data, size_t len);
 
 // set network ID, valid IDs range from 0 to 0x7FFF
 // devices on the same network ID are allowed to communicate with eachother
-// NOTE: netid assumed to be in system endianness
+// NOTE: 'id' assumed to be in system endianness
 xb_ret_t xb_set_net_id(uint16_t id);
 
 typedef enum {

@@ -56,8 +56,8 @@ typedef struct {
     uint8_t at_command[2];
 } __attribute__((packed)) xb_at_frame_t;
 
-int (*xb_write)(uint8_t* buf, size_t len);
-void (*xb_delay)(uint32_t ms);
+int (*xb_write)(uint8_t* buf, size_t len) = NULL;
+void (*xb_delay)(uint32_t ms) = NULL;
 
 static uint64_t default_dst = 0xFFFF000000000000; // broadcast address in network order
 static void (*rx_callback)(uint8_t* buff, size_t len, uint64_t src_addr);
@@ -79,7 +79,6 @@ xb_ret_t xb_sendto(uint64_t addr, uint8_t* data, size_t len) {
     frame->reserved = RESERVED_VALUE;
     frame->radius = 0;
     frame->options = 0x80;
-
 
     memcpy(tx_buff + sizeof(xb_tx_frame_t), data, len);
 
@@ -346,6 +345,10 @@ xb_ret_t xb_set_net_id(uint16_t id) {
 
     uint16_t param = hton16(id);
     return xb_at_cmd(cmd, (uint8_t*)&param, sizeof(uint16_t));
+}
+
+void xb_set_handler(int (*write) (uint8_t* buff, size_t len)) {
+    xb_write = write;
 }
 
 xb_ret_t xb_init(int (*write)(uint8_t* buf, size_t len), void (*delay)(uint32_t ms)) {
