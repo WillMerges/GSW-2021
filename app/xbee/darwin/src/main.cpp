@@ -68,11 +68,12 @@ int main(int argc, char* argv[]) {
             logger.log_message("init failed");
             return -1;
         }
+
+        logger.log_message("sent init command");
     } else if("net_id" == arg) {
         if(argc < 4) {
             printf("missing argument for 'net_id'\n");
             logger.log_message("missing argument for 'net_id'");
-            return -1;
         }
 
         char* endptr;
@@ -80,32 +81,37 @@ int main(int argc, char* argv[]) {
 
         if(endptr != NULL) {
             printf("invalid argument for 'net_id'\n");
-            logger.log_message("invalud argument for 'net_id'");
-            return -1;
+            logger.log_message("invalid argument for 'net_id'");
         }
 
         if(XB_OK != xb_set_net_id(id)) {
             printf("set net id failed\n");
             logger.log_message("set net id failed");
-            return -1;
         }
+
+        logger.log_message("sent set net_id command");
     } else if ("vtx-on" == arg) {
         if(XB_OK != xb_cmd_remote_dio(XB_DIO12, XB_DIO_HIGH)) {
             printf("failed to command remote digital I/O high\n");
             logger.log_message("failed to command remote digital I/O hig");
-            return -1;
         }
+
+        logger.log_message("video transmitter on");
     } else if ("vtx-off" == arg) {
         if(XB_OK != xb_cmd_remote_dio(XB_DIO12, XB_DIO_LOW)) {
             printf("failed to command remote digital I/O low\n");
             logger.log_message("failed to command remote digital I/O low");
-            return -1;
         }
+
+        logger.log_message("video transmitter off");
     } else {
         printf("unsupported option\n");
+        printf("usage: ./darwin [path_to_serial_device] [option]\n");
         logger.log_message("unsupported option");
-        return -1;
     }
+
+    printf("command sent\n");
+    logger.log_message("command sent");
 
     serial_close(sd);
     return 0;

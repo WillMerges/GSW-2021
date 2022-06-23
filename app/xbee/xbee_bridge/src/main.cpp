@@ -151,4 +151,7 @@ int main(int argc, char* argv[]) {
             req.len = (size_t)read;
         }
     }
+
+    printf("command sent\n");
+    logger.log_message("command sent");
 }
