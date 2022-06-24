@@ -9,7 +9,10 @@ RKT_APRS_ALT  8 float signed big
 PAY_APRS_LAT  8 float signed big
 PAY_APRS_LONG 8 float signed big
 PAY_APRS_ALT  8 float signed big
-
+RKT_ALT_MAX   8 float signed big
+PAY_ALT_MAX   8 float signed big
+RKT_ZVELOCITY 8 float signed big
+PAY_ZVELOCITY 8 float signed big
 
 # telemetry packets
 8080 {
