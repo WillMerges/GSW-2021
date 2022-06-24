@@ -129,3 +129,42 @@ RetType MIN_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
 
     return NOCHANGE;
 }
+
+// derivate velocity from multiple position measurements
+// @arg1 newest sample (double)
+// @arg2 output velocity (double)
+static double last_p = 0.0;
+static uint64_t last_us = 0;
+RetType VELOCITY_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
+    double p;
+    if(unlikely(SUCCESS != tv->get_double(args->args[0], &p))) {
+        return FAILURE;
+    }
+
+    double delta_p = last_p - p;
+    last_p = p;
+
+    double delta_t;
+    if(unlikely(last_us == 0)) {
+        delta_t = 0;
+    } else {
+        struct timespec time;
+        if(0 != clock_gettime(CLOCK_MONOTONIC_RAW, &time)) {
+            return FAILURE;
+        }
+
+        uint64_t curr_time = (time.tv_sec * 1000000) + (time.tv_nsec / 1000);
+        uint64_t delta_us = curr_time - last_us;
+        last_us = curr_time;
+
+        delta_t = delta_us / 1000000;
+    }
+
+    double v = delta_p / delta_t;
+
+    if(unlikely(SUCCESS != tw->write(args->args[1], (uint8_t*)&v, sizeof(double)))) {
+        return FAILURE;
+    }
+
+    return SUCCESS;
+}

@@ -37,3 +37,8 @@ RetType MAX_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args);
 // @arg1 newest sample (double)
 // @arg2 minimum value (double)
 RetType MIN_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args);
+
+// derivate velocity from multiple position measurements
+// @arg1 newest sample (double)
+// @arg2 output velocity (double)
+RetType VELOCITY_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args);

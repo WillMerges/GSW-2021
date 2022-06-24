@@ -44,6 +44,7 @@ const trigger_map_t trigger_func_list[] =
     {"IGNITER_STATE_TO_STR", &IGNITER_STATE_TO_STR, 2, 2},
     {"MODE_STATE_TO_STR", &MODE_STATE_TO_STR, 2, 2},
     {"SAFE_STATE_TO_STR", &SAFE_STATE_TO_STR, 2, 2},
+    {"VELOCITY_DOUBLE", &VELOCITY_DOUBLE, 2, 2},
     {NULL, NULL, 0, 0}
 };
 // ******************************************* //

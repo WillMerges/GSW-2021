@@ -1,27 +1,36 @@
-# simulation
-
+name = void
 protocol = udp
-port = 8080
-
-name = VOID
+triggers = triggers
 
 
-# java uses big endian ordering
+RKT_APRS_LAT  8 float signed big
+RKT_APRS_LONG 8 float signed big
+RKT_APRS_ALT  8 float signed big
+PAY_APRS_LAT  8 float signed big
+PAY_APRS_LONG 8 float signed big
+PAY_APRS_ALT  8 float signed big
 
-X_VELOCITY 4 float signed big
-VELOCITY 4 float signed big # really Y velocity
-X_ACCEL 4 float signed big
-Y_ACCEL 4 float signed big
-ALTITUDE 4 float signed big
-TEMP 4 float signed big
-UPTIME 4 float signed big
 
+# telemetry packets
 8080 {
-X_VELOCITY
-VELOCITY
-X_ACCEL
-Y_ACCEL
-ALTITUDE
-TEMP
-UPTIME
+RKT_APRS_LAT
+RKT_APRS_LONG
+RKT_APRS_ALT
+}
+
+8081 {
+PAY_APRS_LAT
+PAY_APRS_LONG
+PAY_APRS_ALT
+}
+
+# virtual telemetry
+virtual {
+RKT_ALT_MAX
+RKT_ZVELOCITY
+}
+
+virtual {
+PAY_ALT_MAX
+PAY_ZVELOCITY
 }
