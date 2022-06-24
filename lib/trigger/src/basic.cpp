@@ -144,9 +144,12 @@ RetType VELOCITY_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
     double delta_p = last_p - p;
     last_p = p;
 
-    double delta_t;
     if(unlikely(last_us == 0)) {
-        delta_t = 0;
+        double v = 0.0;
+
+        if(unlikely(SUCCESS != tw->write(args->args[1], (uint8_t*)&v, sizeof(double)))) {
+            return FAILURE;
+        }
     } else {
         struct timespec time;
         if(0 != clock_gettime(CLOCK_MONOTONIC_RAW, &time)) {
@@ -157,13 +160,13 @@ RetType VELOCITY_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
         uint64_t delta_us = curr_time - last_us;
         last_us = curr_time;
 
-        delta_t = delta_us / 1000000;
-    }
+        double delta_t = delta_us / 1000000;
 
-    double v = delta_p / delta_t;
+        double v = delta_p / delta_t;
 
-    if(unlikely(SUCCESS != tw->write(args->args[1], (uint8_t*)&v, sizeof(double)))) {
-        return FAILURE;
+        if(unlikely(SUCCESS != tw->write(args->args[1], (uint8_t*)&v, sizeof(double)))) {
+            return FAILURE;
+        }
     }
 
     return SUCCESS;
