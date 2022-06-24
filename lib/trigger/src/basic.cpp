@@ -152,7 +152,7 @@ RetType VELOCITY_DOUBLE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* args) {
         }
     } else {
         struct timespec time;
-        if(0 != clock_gettime(CLOCK_MONOTONIC_RAW, &time)) {
+        if(0 != clock_gettime(CLOCK_MONOTONIC, &time)) {
             return FAILURE;
         }
 
