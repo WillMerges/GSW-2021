@@ -133,6 +133,8 @@ int main(int argc, char** argv) {
         }
     }
 
+    // TODO add measurement that are triggers AND are arguments (we need to read them presumably)
+    // TODO or should this be all so each function has access to every measurement?
     tv.add_all();
 
     // whether we should flush to shared memory
