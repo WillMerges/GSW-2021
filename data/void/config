@@ -31,6 +31,9 @@ PAY_APRS_ALT
 virtual {
 RKT_ALT_MAX
 RKT_ZVELOCITY
+}
+
+virtual {
 PAY_ALT_MAX
 PAY_ZVELOCITY
 }

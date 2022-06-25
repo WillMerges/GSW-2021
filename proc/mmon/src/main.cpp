@@ -126,12 +126,14 @@ int main(int argc, char** argv) {
     }
 
     for(trigger_t t : triggers) {
-        tv.add(t.meas);
+        // tv.add(t.meas);
         for(location_info_t loc : t.meas->locations) {
             trigger_packets.insert(loc.packet_index);
             packet_map[loc.packet_index].insert(t);
         }
     }
+
+    tv.add_all();
 
     // whether we should flush to shared memory
     uint8_t flush = 0;
