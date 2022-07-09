@@ -229,7 +229,7 @@ RetType LTLJS_CURRENT_EXCITE(TelemetryViewer* tv, TelemetryWriter* tw, arg_t* ar
         return FAILURE;
     }
 
-    double f = (((vmeas / 0.01)) / 352.0) * 500;
+    double f = (((vmeas / 0.01)) / 350.0) * 500;
     f *= 2.20462; // kg to lb
 
     if(unlikely(tw->write(args->args[1], (uint8_t*)&f, sizeof(double)))) {
