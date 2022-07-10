@@ -13,26 +13,42 @@ PacketLogger::PacketLogger(std::string device_name):
 // logged packets look like:
 // | [timestamp] | <device_name> | size of packet | packet data |
 // NOTE: timestamp is written as a raw 'struct timeval'
+// TODO don't use malloc, use a static buffer since we already limit by mqueue size
 RetType PacketLogger::log_packet(unsigned char* buffer, size_t size) {
     gettimeofday(&curr_time, NULL);
 
+    static char out_buff[MAX_Q_SIZE];
+
+    // create the header with the device name
     std::string header = "<" + device_name + ">";
     size_t len = strlen(header.c_str()) * sizeof(char); // want to get actual # of bytes
 
     size_t out_size = 2*sizeof(char) + sizeof(curr_time) + len + size + sizeof(size_t);
 
-    char* out_buff = new char[out_size];
+    char* ptr = out_buff;
 
-    memcpy(out_buff, "[", sizeof(char));
-    memcpy(out_buff, (void*)&curr_time, sizeof(curr_time));
-    memcpy(out_buff, "]", sizeof(char));
+    // write timestamp
+    memcpy(ptr, "[", sizeof(char));
+    ptr += sizeof(char);
 
-    memcpy(out_buff, header.c_str(), len); // write the header
-    memcpy(out_buff+len, &size, sizeof(size_t)); // write the packet size
-    memcpy(out_buff+len+sizeof(size_t), buffer, size); // write the packet
+    memcpy(ptr, (void*)&curr_time, sizeof(curr_time));
+    ptr += sizeof(curr_time);
+
+    memcpy(ptr, "]", sizeof(char));
+    ptr += sizeof(char);
+
+    // write the header
+    memcpy(ptr, header.c_str(), len);
+    ptr += len;
+
+    // write the packet size
+    memcpy(ptr, &size, sizeof(size_t));
+    ptr += sizeof(size_t);
+
+    // write the packet
+    memcpy(ptr, buffer, size);
 
     RetType ret = queue_msg(out_buff, out_size);
-    delete[] out_buff;
 
     return ret;
 }
