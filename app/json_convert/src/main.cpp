@@ -15,7 +15,7 @@ TelemetryViewer tlm;
 bool killed = false;
 
 #define NUM_SIGNALS 5
-int signals[NUM_SIGNALS] = {SIGINT, SIGTERM, SIGSEGV, SIGFPE, SIGABRT};
+const int SIGNALS[NUM_SIGNALS] = {SIGINT, SIGTERM, SIGSEGV, SIGFPE, SIGABRT};
 
 void failed_start(std::string name, MsgLogger *logger) {
     logger->log_message("Failed to initialize " + name);
@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
     if (FAILURE == tlm.init()) failed_start("telemetry viewer", &logger);
 
     for (int i = 0; i < NUM_SIGNALS; i++) {
-        signal(signals[i], sighandler);
+        signal(SIGNALS[i], sighandler);
     }
 
 }
