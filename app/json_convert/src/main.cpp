@@ -75,4 +75,8 @@ int main(int argc, char* argv[]) {
         signal(SIGNALS[i], sighandler);
     }
 
+    while (1) {
+        if (killed) exit(0);
+    }
+
 }
