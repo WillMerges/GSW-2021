@@ -1,6 +1,7 @@
 #include <stdio.h>
-
 #include <string.h>
+
+#include <csignal>
 
 #include "lib/dls/dls.h"
 #include "lib/telemetry/TelemetryViewer.h"
@@ -13,10 +14,21 @@ TelemetryViewer tlm;
 
 bool killed = false;
 
+#define NUM_SIGNALS 5
+int signals[NUM_SIGNALS] = {SIGINT, SIGTERM, SIGSEGV, SIGFPE, SIGABRT};
+
 void failed_start(std::string name, MsgLogger *logger) {
     logger->log_message("Failed to initialize " + name);
     printf("%s failed to initialize", name);
     exit(-1);
+}
+
+void sighandler(int) {
+    killed = true;
+
+    // signal the shared memory control to force us to awaken
+    // tlm.sighandler();
+    tlm.sighandler();
 }
 
 int main(int argc, char* argv[]) {
@@ -58,4 +70,9 @@ int main(int argc, char* argv[]) {
 
     if (FAILURE == vcm->init()) failed_start("VCM", &logger);
     if (FAILURE == tlm.init()) failed_start("telemetry viewer", &logger);
+
+    for (int i = 0; i < NUM_SIGNALS; i++) {
+        signal(signals[i], sighandler);
+    }
+
 }
