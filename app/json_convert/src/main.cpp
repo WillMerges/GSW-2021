@@ -31,6 +31,10 @@ void sighandler(int) {
     tlm.sighandler();
 }
 
+void jsonConversion(measurement_info_t* m_info) {
+    
+}
+
 int main(int argc, char* argv[]) {
     MsgLogger logger("json_convert");
 
