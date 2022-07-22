@@ -42,6 +42,10 @@ int main(int argc, char* argv[]) {
 
     std::string config_file = "";
 
+    for (int i = 0; i < NUM_SIGNALS; i++) {
+        signal(SIGNALS[i], sighandler);
+    }
+
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-f")) {
             if (i + 1 > argc) {
@@ -75,12 +79,26 @@ int main(int argc, char* argv[]) {
     if (FAILURE == vcm->init()) failed_start("VCM", &logger);
     if (FAILURE == tlm.init()) failed_start("telemetry viewer", &logger);
 
-    for (int i = 0; i < NUM_SIGNALS; i++) {
-        signal(SIGNALS[i], sighandler);
+    tlm.add_all();
+    tlm.set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
+
+    unsigned int max_length = 0;
+    size_t max_size = 0;
+
+    // Sets the max sizes
+    for (std::string it : vcm->measurements) {
+        if (it.length() > max_length) {
+            max_length = it.length();
+        }
+
+        measurement_info_t* info = vcm->get_info(it);
+        // assuming info isn't NULL since it's in the vcm list
+        if (info->size > max_size) {
+            max_size = info->size;
+        }
     }
 
     while (1) {
         if (killed) exit(0);
     }
-
 }
