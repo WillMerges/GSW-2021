@@ -1,7 +1,8 @@
-#include <stdio.h>
-#include <string.h>
+#include <cstdio>
+#include <cstring>
 
 #include <csignal>
+#include <iostream>
 
 #include "lib/dls/dls.h"
 #include "lib/telemetry/TelemetryViewer.h"
@@ -19,7 +20,7 @@ const int SIGNALS[NUM_SIGNALS] = {SIGINT, SIGTERM, SIGSEGV, SIGFPE, SIGABRT};
 
 void failed_start(std::string name, MsgLogger *logger) {
     logger->log_message("Failed to initialize " + name);
-    printf("%s failed to initialize", name);
+    std::cout << name << " failed to initialize";
     exit(-1);
 }
 
@@ -31,8 +32,10 @@ void sighandler(int) {
     tlm.sighandler();
 }
 
-void jsonConversion(measurement_info_t* m_info) {
-    
+std::string jsonConversion(measurement_info_t* m_info) {
+    std::string jsonString = "";
+
+    return jsonString;
 }
 
 int main(int argc, char* argv[]) {
@@ -101,4 +104,6 @@ int main(int argc, char* argv[]) {
     while (1) {
         if (killed) exit(0);
     }
+
+    return 0;
 }
