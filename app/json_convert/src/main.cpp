@@ -21,21 +21,13 @@ const int SIGNALS[NUM_SIGNALS] = {SIGINT, SIGTERM, SIGSEGV, SIGFPE, SIGABRT};
 void failed_start(std::string name, MsgLogger *logger) {
     logger->log_message("Failed to initialize " + name);
     std::cout << name << " failed to initialize";
+
     exit(-1);
 }
 
 void sighandler(int) {
     killed = true;
-
-    // signal the shared memory control to force us to awaken
-    // tlm.sighandler();
     tlm.sighandler();
-}
-
-std::string jsonConversion(measurement_info_t* m_info) {
-    std::string jsonString = "";
-
-    return jsonString;
 }
 
 int main(int argc, char* argv[]) {
@@ -103,6 +95,25 @@ int main(int argc, char* argv[]) {
 
     while (1) {
         if (killed) exit(0);
+        
+        std::string jsonString = "{";
+
+        for (std::string measurement : vcm->measurements) {
+            measurement_info_t *meas_info = vcm->get_info(measurement);
+            // TODO: Do a format string so this doesnt look trash
+            jsonString.append("'");
+            jsonString.append(measurement);
+            jsonString.append("':");
+            jsonString.append("10"); // TODO: Change this to be X value
+            jsonString.append(",");
+        }
+
+        jsonString.append("}");
+
+        // TODO: Send it
+        std::cout << jsonString << std::endl;
+
+        jsonString = "";
     }
 
     return 0;
