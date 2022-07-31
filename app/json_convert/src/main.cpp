@@ -140,8 +140,8 @@ int main(int argc, char* argv[]) {
     struct sockaddr_in client_addr;
     
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-            err_handle("Socket File Descriptor initialization failed", &logger);
-        }
+        err_handle("Socket File Descriptor initialization failed", &logger);
+    }
 
     logger.log_message("JSON_Convert: Socket setup successful");
 
@@ -153,19 +153,18 @@ int main(int argc, char* argv[]) {
     server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     server_addr.sin_port = htons(SERVER_PORT);
 
-    if ((bind(sockfd, (struct sockaddr*) &server_addr, sizeof(server_addr))) < 0) {
-        err_handle("Failed to bind", &logger);
-    }
-
-
+    if ((bind(sockfd, (struct sockaddr*) &server_addr, sizeof(server_addr))) < 0) err_handle("Failed to bind", &logger);
+    
     while (1) {
         if (killed) {
-            logger.log_message("The JSON conversion is unaliving itself now");
+            logger.log_message("JSON_Convert: Unaliving process");
             exit(0);
         }
         
         std::string jsonString = getJSONString(vcm, &logger, max_size);
-        std::cout << jsonString << std::endl;
+        int bytes_sent = sendto(sockfd, &jsonString, strlen(jsonString.c_str()), 0, (sockaddr*) &server_addr, sizeof(server_addr));
+        std::cout << "Sent " << bytes_sent << " bytes" << std::endl;
+        // std::cout << jsonString << std::endl;
     }
 
     return 0;
