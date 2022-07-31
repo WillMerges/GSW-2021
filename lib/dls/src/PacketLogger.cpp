@@ -62,6 +62,7 @@ packet_record_t* dls::retrieve_record(std::istream& f) {
     bool done = false;
     while(!done) {
         if(!f.read(&c, sizeof(char))) {
+            printf("stream read failure (1)\n");
             return NULL;
         }
 
@@ -75,7 +76,7 @@ packet_record_t* dls::retrieve_record(std::istream& f) {
             while(f) {
                 f.read(&c, sizeof(char));
 
-                if(c == ']') {
+                if(c == ']' && i == sizeof(struct timeval)) {
                     // got the timestamp
                     done = true;
                     break;
@@ -85,6 +86,7 @@ packet_record_t* dls::retrieve_record(std::istream& f) {
 
                 if(i > sizeof(struct timeval)) {
                     // timestamp too long
+                    printf("timestamp too long, read more than %li bytes\n", sizeof(struct timeval));
                     return NULL;
                 }
             }
@@ -96,6 +98,7 @@ packet_record_t* dls::retrieve_record(std::istream& f) {
 
     f.read(&c, sizeof(char));
     if(!f || c != '<') {
+        printf("invalid character, expected '<', got %02x\n", c);
         return NULL;
     }
 
@@ -103,6 +106,7 @@ packet_record_t* dls::retrieve_record(std::istream& f) {
         f.read(&c, sizeof(char));
 
         if(!f) {
+            printf("stream read failure (2)\n");
             return NULL;
         }
 
@@ -119,6 +123,7 @@ packet_record_t* dls::retrieve_record(std::istream& f) {
     f.read((char*)buff, sizeof(size_t));
 
     if(!f) {
+        printf("stream read failure (3)\n");
         return NULL;
     }
 
@@ -129,6 +134,7 @@ packet_record_t* dls::retrieve_record(std::istream& f) {
     f.read((char*)data, size);
 
     if(!f) {
+        printf("stream read failure (4)\n");
         return NULL;
     }
 

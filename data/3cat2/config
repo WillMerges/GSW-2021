@@ -3,7 +3,7 @@
 protocol = udp
 port = 8080
 name = halfcat
-multicast = 224.0.0.1
+#multicast = 224.0.0.1
 triggers = triggers
 constants = consts
 
@@ -170,9 +170,12 @@ CL1_VOLTS
 # TC3_CORRECTED
 # }
 
-# calculated load cell values
 virtual {
 LC0_FORCE
+}
+
+# calculated load cell values
+virtual {
 LC0_FORCE_MEAN
 LC0_FORCE_MAX
 }
