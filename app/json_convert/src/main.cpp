@@ -164,7 +164,7 @@ int main(int argc, char* argv[]) {
         std::string jsonString = getJSONString(vcm, &logger, max_size);
         int bytes_sent = sendto(sockfd, &jsonString, strlen(jsonString.c_str()), 0, (sockaddr*) &server_addr, sizeof(server_addr));
 
-        std::cout << "Sent " << bytes_sent << " bytes" << std::endl;
+        std::cout << "Sent " << bytes_sent << " bytes to port " << ntohs(server_addr.sin_port) << std::endl;
         std::cout << jsonString << std::endl;
         usleep(20000); // (Should this)/(Fine to) be slowed down by 20ms? Mostly for prints anyways.
         std::cout << "\033[2J" << std::endl;
