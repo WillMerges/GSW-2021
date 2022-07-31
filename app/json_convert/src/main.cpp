@@ -56,7 +56,7 @@ std::string getJSONString(VCM *vcm, MsgLogger *logger, size_t max_size) {
 
         char pair_str[max_size];  // TODO: Causes warning about variable length.
                                   // Fix it?
-        sprintf(pair_str, "'%s':%s,", measurement.c_str(), value->c_str());
+        sprintf(pair_str, "\"%s\":%s,", measurement.c_str(), value->c_str());
 
         jsonString.append(pair_str);
     }
