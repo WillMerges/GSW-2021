@@ -109,12 +109,10 @@ int main(int argc, char* argv[]) {
                 continue;
             }
 
-            // TODO: Do a format string so this doesnt look trash
-            jsonString.append("'");
-            jsonString.append(measurement);
-            jsonString.append("':");
-            jsonString.append(*value);
-            jsonString.append(",");
+
+            char pair_str[max_size]; // TODO: Causes warning about variable length. Fix it?
+            sprintf(pair_str, "'%s':%s,", measurement.c_str(), value->c_str());
+            jsonString.append(pair_str);
         }
 
         jsonString.append("}");
