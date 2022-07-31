@@ -100,11 +100,17 @@ int main(int argc, char* argv[]) {
 
         for (std::string measurement : vcm->measurements) {
             measurement_info_t *meas_info = vcm->get_info(measurement);
+            std::string *value = new std::string();
+            if (FAILURE == tlm.get_str(meas_info, value)) {
+                logger.log_message("Failed to get telemetry data");
+                continue;
+            }
+
             // TODO: Do a format string so this doesnt look trash
             jsonString.append("'");
             jsonString.append(measurement);
             jsonString.append("':");
-            jsonString.append("10"); // TODO: Change this to be X value
+            jsonString.append(*value);
             jsonString.append(",");
         }
 
