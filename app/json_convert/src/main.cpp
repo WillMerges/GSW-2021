@@ -94,7 +94,10 @@ int main(int argc, char* argv[]) {
     }
 
     while (1) {
-        if (killed) exit(0);
+        if (killed) {
+            logger.log_message("The JSON conversion is unaliving itself now");
+            exit(0);
+        }
         
         std::string jsonString = "{";
 
