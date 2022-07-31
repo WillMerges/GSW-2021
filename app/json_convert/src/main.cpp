@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 
 #include "lib/dls/dls.h"
 #include "lib/telemetry/TelemetryViewer.h"
@@ -28,8 +29,11 @@ bool killed = false;
 const int SIGNALS[NUM_SIGNALS] = {SIGINT, SIGTERM, SIGSEGV, SIGFPE, SIGABRT};
 
 void err_handle(std::string message, MsgLogger *logger) {
-    logger->log_message(message);
-    std::cout << message << std::endl;
+    std::string err_msg = "JSON_Conversion: ";
+    err_msg.append(message);
+
+    logger->log_message(err_msg);
+    std::cout << err_msg << std::endl;
 
     exit(-1);
 }
@@ -140,7 +144,6 @@ int main(int argc, char* argv[]) {
     }
 
     logger.log_message("JSON_Convert: Socket setup");
-    logger.log_message(std::to_string(sock));
 
     memset(&server_addr, 0, sizeof(server_addr));
     memset(&client_addr, 0, sizeof(client_addr));
