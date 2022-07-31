@@ -138,10 +138,10 @@ int main(int argc, char* argv[]) {
     char buffer[max_size];
     struct sockaddr_in server_addr;
     struct sockaddr_in client_addr;
-
-    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0) < 0)) {
-        err_handle("Socket File Descriptor initialization failed", &logger);
-    }
+    
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+            err_handle("Socket File Descriptor initialization failed", &logger);
+        }
 
     logger.log_message("JSON_Convert: Socket setup successful");
 
