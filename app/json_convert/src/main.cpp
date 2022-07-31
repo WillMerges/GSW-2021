@@ -29,7 +29,7 @@ bool killed = false;
 const int SIGNALS[NUM_SIGNALS] = {SIGINT, SIGTERM, SIGSEGV, SIGFPE, SIGABRT};
 
 void err_handle(std::string message, MsgLogger *logger) {
-    std::string err_msg = "JSON_Conversion: ";
+    std::string err_msg = "JSON_Convert: ";
     err_msg.append(message);
 
     logger->log_message(err_msg);
@@ -134,26 +134,26 @@ int main(int argc, char* argv[]) {
     max_size += (fields * 4) + 2; // Extra characters for JSON formatting
 
     // Setup UDP server
-    int sock;
+    int sockfd;
     char buffer[max_size];
     struct sockaddr_in server_addr;
     struct sockaddr_in client_addr;
 
-    if ((sock = socket(AF_INET, SOCK_DGRAM, 0) < 0)) {
+    if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0) < 0)) {
         err_handle("Socket File Descriptor initialization failed", &logger);
     }
 
-    logger.log_message("JSON_Convert: Socket setup");
+    logger.log_message("JSON_Convert: Socket setup successful");
 
 
     bzero(&server_addr, sizeof(server_addr));
     bzero(&client_addr, sizeof(client_addr));
 
-            server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     server_addr.sin_port = htons(SERVER_PORT);
 
-    if ((bind(sock, (const struct sockaddr*) &server_addr, sizeof(server_addr))) < 0) {
+    if ((bind(sockfd, (struct sockaddr*) &server_addr, sizeof(server_addr))) < 0) {
         err_handle("Failed to bind", &logger);
     }
 
