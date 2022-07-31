@@ -1,6 +1,5 @@
 #include <cstdio>
 #include <cstring>
-
 #include <csignal>
 #include <iostream>
 
@@ -28,6 +27,29 @@ void failed_start(std::string name, MsgLogger *logger) {
 void sighandler(int) {
     killed = true;
     tlm.sighandler();
+}
+
+std::string getJSONString(VCM *vcm, MsgLogger *logger, size_t max_size) {
+    std::string jsonString = "{";
+
+    for (std::string measurement : vcm->measurements) {
+        measurement_info_t *meas_info = vcm->get_info(measurement);
+        std::string *value = new std::string();
+        if (FAILURE == tlm.get_str(meas_info, value)) {
+            logger->log_message("Failed to get telemetry data");
+            continue;
+        }
+
+        char pair_str[max_size];  // TODO: Causes warning about variable length.
+                                  // Fix it?
+        sprintf(pair_str, "'%s':%s,", measurement.c_str(), value->c_str());
+
+        jsonString.append(pair_str);
+    }
+
+    jsonString.append("}");
+
+    return jsonString;
 }
 
 int main(int argc, char* argv[]) {
@@ -99,28 +121,8 @@ int main(int argc, char* argv[]) {
             exit(0);
         }
         
-        std::string jsonString = "{";
-
-        for (std::string measurement : vcm->measurements) {
-            measurement_info_t *meas_info = vcm->get_info(measurement);
-            std::string *value = new std::string();
-            if (FAILURE == tlm.get_str(meas_info, value)) {
-                logger.log_message("Failed to get telemetry data");
-                continue;
-            }
-
-
-            char pair_str[max_size]; // TODO: Causes warning about variable length. Fix it?
-            sprintf(pair_str, "'%s':%s,", measurement.c_str(), value->c_str());
-            jsonString.append(pair_str);
-        }
-
-        jsonString.append("}");
-
-        // TODO: Send it
+        std::string jsonString = getJSONString(vcm, &logger, max_size);
         std::cout << jsonString << std::endl;
-
-        jsonString = "";
     }
 
     return 0;
