@@ -1,11 +1,20 @@
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <csignal>
 #include <cstdio>
 #include <cstring>
-#include <csignal>
 #include <iostream>
 
 #include "lib/dls/dls.h"
 #include "lib/telemetry/TelemetryViewer.h"
 #include "lib/vcm/vcm.h"
+
+#define NUM_SIGNALS 5
+#define SERVER_IP localhost
+#define SERVER_PORT 5000
+
 
 using namespace dls;
 using namespace vcm;
@@ -14,7 +23,6 @@ TelemetryViewer tlm;
 
 bool killed = false;
 
-#define NUM_SIGNALS 5
 const int SIGNALS[NUM_SIGNALS] = {SIGINT, SIGTERM, SIGSEGV, SIGFPE, SIGABRT};
 
 void failed_start(std::string name, MsgLogger *logger) {
@@ -101,6 +109,7 @@ int main(int argc, char* argv[]) {
 
     unsigned int max_length = 0;
     size_t max_size = 0;
+    int fields = 0;
 
     // Sets the max sizes
     for (std::string it : vcm->measurements) {
@@ -113,7 +122,31 @@ int main(int argc, char* argv[]) {
         if (info->size > max_size) {
             max_size = info->size;
         }
+        fields++;
     }
+
+    max_size += (fields * 4) + 2; // Extra characters for JSON formatting
+
+    // Setup UDP server
+    int sock;
+    char buffer[max_size];
+    struct sockaddr_in server_addr;
+    struct sockaddr_in client_addr;
+
+    if ((sock = socket(AF_INET, SOCK_DGRAM, 0) < 0)) {
+        failed_start("Socket File Descriptor", &logger);
+    }
+
+    logger.log_message("JSON_Convert: Socket setup");
+    logger.log_message(std::to_string(sock));
+
+    memset(&server_addr, 0, sizeof(server_addr));
+    memset(&client_addr, 0, sizeof(client_addr));
+
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_port = htons(SERVER_PORT);
+
 
     while (1) {
         if (killed) {
