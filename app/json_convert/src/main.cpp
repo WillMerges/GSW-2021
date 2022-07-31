@@ -1,7 +1,9 @@
+#include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 #include <csignal>
 #include <cstdio>
 #include <cstring>
@@ -25,9 +27,9 @@ bool killed = false;
 
 const int SIGNALS[NUM_SIGNALS] = {SIGINT, SIGTERM, SIGSEGV, SIGFPE, SIGABRT};
 
-void failed_start(std::string name, MsgLogger *logger) {
-    logger->log_message("Failed to initialize " + name);
-    std::cout << name << " failed to initialize";
+void err_handle(std::string message, MsgLogger *logger) {
+    logger->log_message(message);
+    std::cout << message << std::endl;
 
     exit(-1);
 }
@@ -101,8 +103,8 @@ int main(int argc, char* argv[]) {
         vcm = new VCM(config_file);
     }
 
-    if (FAILURE == vcm->init()) failed_start("VCM", &logger);
-    if (FAILURE == tlm.init()) failed_start("telemetry viewer", &logger);
+    if (FAILURE == vcm->init()) err_handle("VCM failed to initialize", &logger);
+    if (FAILURE == tlm.init()) err_handle("Telemetry Viewer failed to initialize", &logger);
 
     tlm.add_all();
     tlm.set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
@@ -134,7 +136,7 @@ int main(int argc, char* argv[]) {
     struct sockaddr_in client_addr;
 
     if ((sock = socket(AF_INET, SOCK_DGRAM, 0) < 0)) {
-        failed_start("Socket File Descriptor", &logger);
+        err_handle("Socket File Descriptor initialization failed", &logger);
     }
 
     logger.log_message("JSON_Convert: Socket setup");
@@ -144,8 +146,12 @@ int main(int argc, char* argv[]) {
     memset(&client_addr, 0, sizeof(client_addr));
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
+    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     server_addr.sin_port = htons(SERVER_PORT);
+
+    if ((bind(sock, (const struct sockaddr*) &server_addr, sizeof(server_addr))) < 0) {
+        err_handle("Failed to bind", &logger);
+    }
 
 
     while (1) {
