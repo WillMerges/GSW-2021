@@ -145,10 +145,11 @@ int main(int argc, char* argv[]) {
 
     logger.log_message("JSON_Convert: Socket setup");
 
-    memset(&server_addr, 0, sizeof(server_addr));
-    memset(&client_addr, 0, sizeof(client_addr));
 
-    server_addr.sin_family = AF_INET;
+    bzero(&server_addr, sizeof(server_addr));
+    bzero(&client_addr, sizeof(client_addr));
+
+            server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
     server_addr.sin_port = htons(SERVER_PORT);
 
