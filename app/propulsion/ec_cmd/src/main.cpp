@@ -21,7 +21,7 @@ using namespace vcm;
 using namespace nm;
 
 // amount of time to wait for telemetry to indicate command was accepted
-#define TIMEOUT 20 // ms
+#define TIMEOUT 200 // ms
 
 // the amount of times to retransmit sending before erroring
 #define NUM_RETRANSMITS 5

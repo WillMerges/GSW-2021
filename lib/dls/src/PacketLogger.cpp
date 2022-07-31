@@ -83,7 +83,7 @@ packet_record_t* dls::retrieve_record(std::istream& f) {
 
                 t_buff[i++] = c;
 
-                if(i >= sizeof(struct timeval)) {
+                if(i > sizeof(struct timeval)) {
                     // timestamp too long
                     return NULL;
                 }
