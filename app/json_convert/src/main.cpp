@@ -150,21 +150,35 @@ int main(int argc, char* argv[]) {
     bzero(&client_addr, sizeof(client_addr));
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
+    server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(SERVER_PORT);
 
-    // if ((bind(sockfd, (struct sockaddr*) &server_addr, sizeof(server_addr))) < 0) err_handle("Failed to bind", &logger);
+    // client_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
+    // client_addr.sin_port = htons(SERVER_PORT);
+
+    int optval = 1;
+    setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const void *) &optval, sizeof(int));
+
+    if ((bind(sockfd, (struct sockaddr*) &server_addr, sizeof(server_addr))) < 0) err_handle("Failed to bind", &logger);
     
     while (1) {
         if (killed) {
             logger.log_message("JSON_Convert: Unaliving process");
             exit(0);
-        }
-        
-        std::string jsonString = getJSONString(vcm, &logger, max_size);
-        int bytes_sent = sendto(sockfd, &jsonString, strlen(jsonString.c_str()), 0, (sockaddr*) &server_addr, sizeof(server_addr));
+        }   
 
-        std::cout << "Sent " << bytes_sent << " bytes to port " << ntohs(server_addr.sin_port) << std::endl;
+        // Receive data from client to know where to send
+        socklen_t client_len = sizeof(client_addr);
+        int bytes_received = recvfrom(sockfd, buffer, max_size, 0, (struct sockaddr*) &client_addr, &client_len);
+        if (bytes_received < 0) err_handle("Failed to receive data from client", &logger);
+        std::cout << "Received " << bytes_received << " bytes from client" << std::endl;
+
+        std::string jsonString = getJSONString(vcm, &logger, max_size);
+
+        // Send data to client
+        int bytes_sent = sendto(sockfd, jsonString.c_str(), jsonString.length(), 0, (struct sockaddr*) &client_addr, client_len);
+
+        std::cout << "Sent " << bytes_sent << " bytes to port " << client_addr.sin_port << std::endl;
         std::cout << jsonString << std::endl;
         usleep(20000); // (Should this)/(Fine to) be slowed down by 20ms? Mostly for prints anyways.
         std::cout << "\033[2J" << std::endl;
