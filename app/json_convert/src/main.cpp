@@ -15,7 +15,7 @@
 #include "lib/vcm/vcm.h"
 
 #define NUM_SIGNALS 5
-#define SERVER_IP localhost
+#define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 5000
 
 
@@ -150,10 +150,10 @@ int main(int argc, char* argv[]) {
     bzero(&client_addr, sizeof(client_addr));
 
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
     server_addr.sin_port = htons(SERVER_PORT);
 
-    if ((bind(sockfd, (struct sockaddr*) &server_addr, sizeof(server_addr))) < 0) err_handle("Failed to bind", &logger);
+    // if ((bind(sockfd, (struct sockaddr*) &server_addr, sizeof(server_addr))) < 0) err_handle("Failed to bind", &logger);
     
     while (1) {
         if (killed) {
@@ -163,6 +163,7 @@ int main(int argc, char* argv[]) {
         
         std::string jsonString = getJSONString(vcm, &logger, max_size);
         int bytes_sent = sendto(sockfd, &jsonString, strlen(jsonString.c_str()), 0, (sockaddr*) &server_addr, sizeof(server_addr));
+
         std::cout << "Sent " << bytes_sent << " bytes" << std::endl;
         std::cout << jsonString << std::endl;
         usleep(20000); // (Should this)/(Fine to) be slowed down by 20ms? Mostly for prints anyways.
