@@ -46,6 +46,8 @@ void sighandler(int) {
 std::string getJSONString(VCM *vcm, MsgLogger *logger, size_t max_size) {
     std::string jsonString = "{";
 
+    tlm.update();
+
     for (std::string measurement : vcm->measurements) {
         measurement_info_t *meas_info = vcm->get_info(measurement);
         std::string *value = new std::string();
