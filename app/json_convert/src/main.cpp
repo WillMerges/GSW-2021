@@ -181,11 +181,6 @@ int main(int argc, char* argv[]) {
 
         // Send data to client
         int bytes_sent = sendto(sockfd, jsonString.c_str(), jsonString.length(), 0, (struct sockaddr*) &client_addr, client_len);
-
-        std::cout << "Sent " << bytes_sent << " bytes to port " << client_addr.sin_port << std::endl;
-        std::cout << jsonString << std::endl;
-        usleep(20000); // (Should this)/(Fine to) be slowed down by 20ms? Mostly for prints anyways.
-        std::cout << "\033[2J" << std::endl;
     }
 
     return 0;
