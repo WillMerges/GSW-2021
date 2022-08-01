@@ -149,6 +149,15 @@ int main(int argc, char* argv[]) {
 
     logger.log_message("Socket setup successful");
 
+    std::string config_port_const = "JSON_PORT";
+    std::string* port_str = vcm->get_const(config_port_const);
+    if (port_str == NULL && argc > 1) {
+        port_str = new std::string(argv[1]);
+    }
+
+    int server_port = port_str != NULL ? std::stoi(*port_str) : SERVER_PORT;
+    std::cout << server_port << std::endl;
+
 
     bzero(&server_addr, sizeof(server_addr));
     bzero(&client_addr, sizeof(client_addr));
@@ -179,7 +188,8 @@ int main(int argc, char* argv[]) {
         std::string jsonString = getJSONString(vcm, max_size);
 
         // Send data to client
-        int bytes_sent = sendto(sockfd, jsonString.c_str(), jsonString.length(), 0, (struct sockaddr*) &client_addr, client_len);
+        int bytes_sent = sendto(sockfd, jsonString.c_str(), jsonString.length(), 0, (struct sockaddr *)&client_addr, sizeof(client_addr));
+        std::cout << bytes_sent << std::endl;
     }
 
     return 0;
