@@ -44,10 +44,11 @@ void sighandler(int) {
 }
 
 std::string getJSONString(VCM *vcm, size_t max_size) {
+    tlm.update();
+
     MsgLogger logger(logger_name);
     std::string jsonString = "{";
 
-    tlm.update();
 
     for (std::string measurement : vcm->measurements) {
         measurement_info_t *meas_info = vcm->get_info(measurement);
@@ -80,29 +81,7 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < NUM_SIGNALS; i++) {
         signal(SIGNALS[i], sighandler);
     }
-
-    for (int i = 1; i < argc; i++) {
-        if (!strcmp(argv[i], "-f")) {
-            if (i + 1 > argc) {
-                logger.log_message(
-                    "Must specify a path to the config file after using the -f "
-                    "option");
-                printf(
-                    "Must specify a path to the config file after using the -f "
-                    "option\n");
-                return -1;
-            } else {
-                config_file = argv[++i];
-            }
-        } else {
-            std::string msg = "Invalid argument: ";
-            msg += argv[i];
-            logger.log_message(msg.c_str());
-            printf("Invalid argument: %s\n", argv[i]);
-            return -1;
-        }
-    }
-
+    
     VCM* vcm;
 
     if (config_file == "") {
@@ -164,7 +143,11 @@ int main(int argc, char* argv[]) {
 
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(SERVER_PORT);
+    server_addr.sin_port = htons(server_port);
+
+    client_addr.sin_family = AF_INET;
+    client_addr.sin_addr.s_addr = INADDR_ANY;
+    client_addr.sin_port = htons(server_port);
 
     // client_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
     // client_addr.sin_port = htons(SERVER_PORT);
@@ -182,8 +165,8 @@ int main(int argc, char* argv[]) {
 
         // Receive data from client to know where to send
         socklen_t client_len = sizeof(client_addr);
-        int bytes_received = recvfrom(sockfd, buffer, max_size, 0, (struct sockaddr*) &client_addr, &client_len);
-        if (bytes_received < 0) err_handle("Failed to receive data from client");
+        // int bytes_received = recvfrom(sockfd, buffer, max_size, 0, (struct sockaddr*) &client_addr, &client_len);
+        // if (bytes_received < 0) err_handle("Failed to receive data from client");
 
         std::string jsonString = getJSONString(vcm, max_size);
 
