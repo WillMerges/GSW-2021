@@ -1,3 +1,17 @@
+/**
+ *  Name: main.cpp
+ *  
+ *  Purpose: Takes telemetry data and forwards it as a JSON through UDP
+ * 
+ *  Author: Aaron Chan
+ * 
+ *  Usage: ./json_convert [PORT]
+ *      - Port specification in CLI is optional
+ *      - Port in config file takes priority
+ *      - If no port is specified by either, default port will be set to 5000 
+ */
+
+
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -29,6 +43,9 @@ bool killed = false;
 const int SIGNALS[NUM_SIGNALS] = {SIGINT, SIGTERM, SIGSEGV, SIGFPE, SIGABRT};
 const std::string logger_name = "json_convert";
 
+/**
+ * Handles errors and provides error message to user and logger
+ */
 void err_handle(std::string err_msg) {
     MsgLogger logger(logger_name);
 
@@ -38,11 +55,17 @@ void err_handle(std::string err_msg) {
     exit(-1);
 }
 
+/**
+ * Handles signals
+ */
 void sighandler(int) {
     killed = true;
     tlm.sighandler();
 }
 
+/**
+ * Fetches data and converts it into a JSON string
+ */
 std::string getJSONString(VCM *vcm, size_t max_size) {
     tlm.update();
 
@@ -71,6 +94,9 @@ std::string getJSONString(VCM *vcm, size_t max_size) {
     return jsonString;
 }
 
+/**
+ * Main function for setup and sending through UDP
+ */
 int main(int argc, char* argv[]) {
     MsgLogger logger(logger_name);
 
@@ -137,7 +163,6 @@ int main(int argc, char* argv[]) {
     int server_port = port_str != NULL ? std::stoi(*port_str) : SERVER_PORT;
     std::cout << server_port << std::endl;
 
-
     bzero(&server_addr, sizeof(server_addr));
     bzero(&client_addr, sizeof(client_addr));
 
@@ -148,9 +173,6 @@ int main(int argc, char* argv[]) {
     client_addr.sin_family = AF_INET;
     client_addr.sin_addr.s_addr = INADDR_ANY;
     client_addr.sin_port = htons(server_port);
-
-    // client_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
-    // client_addr.sin_port = htons(SERVER_PORT);
 
     int optval = 1;
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const void *) &optval, sizeof(int));
@@ -163,15 +185,10 @@ int main(int argc, char* argv[]) {
             exit(0);
         }   
 
-        // Receive data from client to know where to send
-        socklen_t client_len = sizeof(client_addr);
-        // int bytes_received = recvfrom(sockfd, buffer, max_size, 0, (struct sockaddr*) &client_addr, &client_len);
-        // if (bytes_received < 0) err_handle("Failed to receive data from client");
-
         std::string jsonString = getJSONString(vcm, max_size);
 
         // Send data to client
-        int bytes_sent = sendto(sockfd, jsonString.c_str(), jsonString.length(), 0, (struct sockaddr *)&client_addr, sizeof(client_addr));
+        sendto(sockfd, jsonString.c_str(), jsonString.length(), 0, (struct sockaddr *)&client_addr, sizeof(client_addr));
     }
 
     return 0;
