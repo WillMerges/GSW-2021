@@ -175,7 +175,6 @@ int main(int argc, char* argv[]) {
         socklen_t client_len = sizeof(client_addr);
         int bytes_received = recvfrom(sockfd, buffer, max_size, 0, (struct sockaddr*) &client_addr, &client_len);
         if (bytes_received < 0) err_handle("Failed to receive data from client");
-        std::cout << "Received " << bytes_received << " bytes from client" << std::endl;
 
         std::string jsonString = getJSONString(vcm, max_size);
 
