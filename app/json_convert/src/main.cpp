@@ -81,7 +81,7 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < NUM_SIGNALS; i++) {
         signal(SIGNALS[i], sighandler);
     }
-    
+
     VCM* vcm;
 
     if (config_file == "") {
@@ -172,7 +172,6 @@ int main(int argc, char* argv[]) {
 
         // Send data to client
         int bytes_sent = sendto(sockfd, jsonString.c_str(), jsonString.length(), 0, (struct sockaddr *)&client_addr, sizeof(client_addr));
-        std::cout << bytes_sent << std::endl;
     }
 
     return 0;
