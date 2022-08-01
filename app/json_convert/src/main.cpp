@@ -27,9 +27,10 @@ TelemetryViewer tlm;
 bool killed = false;
 
 const int SIGNALS[NUM_SIGNALS] = {SIGINT, SIGTERM, SIGSEGV, SIGFPE, SIGABRT};
+const std::string logger_name = "json_convert";
 
 void err_handle(std::string message) {
-    MsgLogger logger("json_convert");
+    MsgLogger logger(logger_name);
     std::string err_msg = "JSON_Convert: ";
     err_msg.append(message);
 
@@ -45,7 +46,7 @@ void sighandler(int) {
 }
 
 std::string getJSONString(VCM *vcm, size_t max_size) {
-    MsgLogger logger("json_convert");
+    MsgLogger logger(logger_name);
     std::string jsonString = "{";
 
     tlm.update();
@@ -72,7 +73,7 @@ std::string getJSONString(VCM *vcm, size_t max_size) {
 }
 
 int main(int argc, char* argv[]) {
-    MsgLogger logger("json_convert");
+    MsgLogger logger(logger_name);
 
     logger.log_message("Starting JSON conversion");
 
