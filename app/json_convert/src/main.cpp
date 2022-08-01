@@ -29,10 +29,8 @@ bool killed = false;
 const int SIGNALS[NUM_SIGNALS] = {SIGINT, SIGTERM, SIGSEGV, SIGFPE, SIGABRT};
 const std::string logger_name = "json_convert";
 
-void err_handle(std::string message) {
+void err_handle(std::string err_msg) {
     MsgLogger logger(logger_name);
-    std::string err_msg = "JSON_Convert: ";
-    err_msg.append(message);
 
     logger.log_message(err_msg);
     std::cout << err_msg << std::endl;
@@ -149,7 +147,7 @@ int main(int argc, char* argv[]) {
         err_handle("Socket File Descriptor initialization failed");
     }
 
-    logger.log_message("JSON_Convert: Socket setup successful");
+    logger.log_message("Socket setup successful");
 
 
     bzero(&server_addr, sizeof(server_addr));
@@ -169,7 +167,7 @@ int main(int argc, char* argv[]) {
     
     while (1) {
         if (killed) {
-            logger.log_message("JSON_Convert: Unaliving process");
+            logger.log_message("Unaliving process");
             exit(0);
         }   
 
