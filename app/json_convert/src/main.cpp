@@ -28,11 +28,12 @@ bool killed = false;
 
 const int SIGNALS[NUM_SIGNALS] = {SIGINT, SIGTERM, SIGSEGV, SIGFPE, SIGABRT};
 
-void err_handle(std::string message, MsgLogger *logger) {
+void err_handle(std::string message) {
+    MsgLogger logger("json_convert");
     std::string err_msg = "JSON_Convert: ";
     err_msg.append(message);
 
-    logger->log_message(err_msg);
+    logger.log_message(err_msg);
     std::cout << err_msg << std::endl;
 
     exit(-1);
@@ -43,7 +44,8 @@ void sighandler(int) {
     tlm.sighandler();
 }
 
-std::string getJSONString(VCM *vcm, MsgLogger *logger, size_t max_size) {
+std::string getJSONString(VCM *vcm, size_t max_size) {
+    MsgLogger logger("json_convert");
     std::string jsonString = "{";
 
     tlm.update();
@@ -51,8 +53,9 @@ std::string getJSONString(VCM *vcm, MsgLogger *logger, size_t max_size) {
     for (std::string measurement : vcm->measurements) {
         measurement_info_t *meas_info = vcm->get_info(measurement);
         std::string *value = new std::string();
+
         if (FAILURE == tlm.get_str(meas_info, value)) {
-            logger->log_message("Failed to get telemetry data");
+            logger.log_message("Failed to get telemetry data");
             continue;
         }
 
@@ -109,8 +112,8 @@ int main(int argc, char* argv[]) {
         vcm = new VCM(config_file);
     }
 
-    if (FAILURE == vcm->init()) err_handle("VCM failed to initialize", &logger);
-    if (FAILURE == tlm.init()) err_handle("Telemetry Viewer failed to initialize", &logger);
+    if (FAILURE == vcm->init()) err_handle("VCM failed to initialize");
+    if (FAILURE == tlm.init()) err_handle("Telemetry Viewer failed to initialize");
 
     tlm.add_all();
     tlm.set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
@@ -142,7 +145,7 @@ int main(int argc, char* argv[]) {
     struct sockaddr_in client_addr;
     
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        err_handle("Socket File Descriptor initialization failed", &logger);
+        err_handle("Socket File Descriptor initialization failed");
     }
 
     logger.log_message("JSON_Convert: Socket setup successful");
@@ -161,7 +164,7 @@ int main(int argc, char* argv[]) {
     int optval = 1;
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const void *) &optval, sizeof(int));
 
-    if ((bind(sockfd, (struct sockaddr*) &server_addr, sizeof(server_addr))) < 0) err_handle("Failed to bind", &logger);
+    if ((bind(sockfd, (struct sockaddr*) &server_addr, sizeof(server_addr))) < 0) err_handle("Failed to bind");
     
     while (1) {
         if (killed) {
@@ -172,10 +175,10 @@ int main(int argc, char* argv[]) {
         // Receive data from client to know where to send
         socklen_t client_len = sizeof(client_addr);
         int bytes_received = recvfrom(sockfd, buffer, max_size, 0, (struct sockaddr*) &client_addr, &client_len);
-        if (bytes_received < 0) err_handle("Failed to receive data from client", &logger);
+        if (bytes_received < 0) err_handle("Failed to receive data from client");
         std::cout << "Received " << bytes_received << " bytes from client" << std::endl;
 
-        std::string jsonString = getJSONString(vcm, &logger, max_size);
+        std::string jsonString = getJSONString(vcm, max_size);
 
         // Send data to client
         int bytes_sent = sendto(sockfd, jsonString.c_str(), jsonString.length(), 0, (struct sockaddr*) &client_addr, client_len);
