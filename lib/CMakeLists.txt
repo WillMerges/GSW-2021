@@ -1,6 +1,3 @@
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I../include -Wall -Wextra -Wpedantic -fpic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I../include -Wall -Wextra -Wpedantic -fpic -ggdb")
-
 add_executable(clock clock/src/clock.cpp)
 target_link_directories(clock)
 
