@@ -27,7 +27,5 @@ add_library(${PROJECT_NAME} STATIC)
 
 add_subdirectory(lib)
 add_subdirectory(proc)
-LINK_DIRECTORIES(lib proc)
-
-#add_subdirectory(app)
+add_subdirectory(app)
 #add_subdirectory(sim)
