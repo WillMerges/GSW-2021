@@ -1,6 +1,6 @@
 add_library(clock SHARED STATIC clock/src/clock.cpp)
 add_library(convert SHARED STATIC convert/src/convert.cpp)
-add_library(sensors SHARED STATIC daq/src/sensors.cpp)
+add_library(daq SHARED STATIC daq/src/sensors.cpp)
 add_library(serial SHARED STATIC dev/serial/src/serial.c)
 add_library(xbee SHARED STATIC dev/xbee/src/xbee.c dev/xbee/src/net.c)
 add_library(dls SHARED STATIC dls/src/dl_shm.cpp dls/src/Logger.cpp dls/src/MsgLogger.cpp dls/src/PacketLogger.cpp)
