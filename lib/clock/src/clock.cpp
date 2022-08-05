@@ -11,7 +11,6 @@
 #include "lib/dls/dls.h"
 #include "common/time.h"
 #include <string.h>
-
 using namespace countdown_clock;
 using namespace dls;
 

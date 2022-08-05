@@ -18,13 +18,16 @@ file(GLOB_RECURSE
 
         )
 
+include_directories(include)
+
 add_library(${PROJECT_NAME} STATIC)
 
-include_directories(include PUBLIC ./include)
 #target_include_directories(${proj_name} ${CMAKE_CURRENT_SOURCE_DIR}/include/> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 #target_include_directories(include)
 
 add_subdirectory(lib)
-#add_subdirectory(proc)
+add_subdirectory(proc)
+LINK_DIRECTORIES(lib proc)
+
 #add_subdirectory(app)
 #add_subdirectory(sim)
