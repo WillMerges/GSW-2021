@@ -1,3 +1,1 @@
-target_sources(
-        ec_sim/src/ec_sim.cpp
-)
+add_executable(ec_sim ec_sim/src/ec_sim.cpp)
