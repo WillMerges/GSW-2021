@@ -25,7 +25,6 @@ set(SIM_DIR sim)
 include_directories(include)
 
 add_subdirectory(lib)
-
 add_subdirectory(proc)
 #add_subdirectory(app)
 #add_subdirectory(sim)

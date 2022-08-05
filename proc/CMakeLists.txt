@@ -26,8 +26,9 @@ target_link_libraries(vcm_test vcm dls shm rt)
 target_link_libraries(vlock_test vlock shm dls rt)
 
 
-
-
+target_link_libraries(log2csv vcm dls shm convert)
+target_link_libraries(log2influx vcm dls shm convert)
+target_link_libraries(log_ctrl dls shm rt)
 target_link_libraries(uplink dls nm vcm shm)
 
 
