@@ -8,7 +8,19 @@ set(APP_DIR app)
 set(PROC_DIR proc)
 set(SIM_DIR sim)
 
-include_directories(include)
+file(GLOB_RECURSE
+        ALL_CXX_SOURCE_FILES
+        ${CMAKE_SOURCE_DIR}/include/*.[ch]pp  ${CMAKE_SOURCE_DIR}/include/*.[CH]
+        ${CMAKE_SOURCE_DIR}/lib/*.[ch]pp      ${CMAKE_SOURCE_DIR}/lib/*.[CH]
+        ${CMAKE_SOURCE_DIR}/app/*.[ch]pp  ${CMAKE_SOURCE_DIR}/app/*.[CH]
+        ${CMAKE_SOURCE_DIR}/proc/*.[ch]pp  ${CMAKE_SOURCE_DIR}/proc/*.[CH]
+        ${CMAKE_SOURCE_DIR}/sim/*.[ch]pp  ${CMAKE_SOURCE_DIR}/sim/*.[CH]
+
+        )
+
+add_library(${PROJECT_NAME} STATIC)
+
+include_directories(include PUBLIC ./include)
 #target_include_directories(${proj_name} ${CMAKE_CURRENT_SOURCE_DIR}/include/> $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
 #target_include_directories(include)
 
@@ -16,4 +28,3 @@ add_subdirectory(lib)
 #add_subdirectory(proc)
 #add_subdirectory(app)
 #add_subdirectory(sim)
-
