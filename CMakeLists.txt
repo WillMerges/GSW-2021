@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 14)
 set(GSW_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(CMAKE_C_FLAGS "-I${GSW_DIR}/include -Wall -Wextra -Wpedantic -ggdb")
 set(CMAKE_CXX_FLAGS "-I${GSW_DIR}/include -Wall -Wextra -Wpedantic -ggdb")
-
+set(THREADS_PREFER_PTHREAD_FLAG ON)
 
 set(SOURCES)
 set(INC_DIR include)
