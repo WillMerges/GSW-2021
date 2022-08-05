@@ -1,5 +1,5 @@
 add_executable(decom decom/src/decom.cpp)
-target_link_libraries(telemetry nm vcm dls convert shm)
+target_link_libraries(decom telemetry nm vcm dls convert shm)
 
 add_executable(dlp dlp/src/dlp.cpp)
 add_executable(mmon mmon/src/main.cpp)
