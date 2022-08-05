@@ -15,8 +15,8 @@ add_executable(ec_cmd propulsion/ec_cmd/src/main.cpp)
 add_executable(ec_program propulsion/ec_program/src/main.cpp)
 add_executable(val_view val_view/src/main.cpp)
 add_executable(voice_report voice/src/voice_report.cpp)
-add_executable(darwin xbee/darwin/src/main.cpp)
-add_executable(xbee_bridge xbee/xbee_bridge/src/main.cpp)
+#add_executable(darwin xbee/darwin/src/main.cpp)
+#add_executable(xbee_bridge xbee/xbee_bridge/src/main.cpp)
 
 # TODO: Figure out what to do with py files
 target_link_libraries(clock_ctrl dls vcm telemetry convert clock shm)
@@ -30,6 +30,8 @@ target_link_libraries(ec_program dls telemetry nm convert vlock shm clock vcm)
 target_link_libraries(print_meas dls vcm telemetry shm convert)
 target_link_libraries(val_view dls vcm telemetry convert shm)
 target_link_libraries(voice_report dls vcm telemetry shm convert)
+#target_link_libraries(darwin dls shm vcm xbee serial)
+#target_link_libraries(xbee_bridge dls shm vcm xbee serial)
 
 #target_sources(
 #        clock_ctrl/src/main.cpp

@@ -122,7 +122,6 @@ void xb_rx_complete(xb_rx_request* req) {
     static uint8_t check = 0;
 
     uint8_t len_buff[2];
-
     size_t i = 0;
 
 
