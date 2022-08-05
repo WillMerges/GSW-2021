@@ -1,7 +1,6 @@
 find_package(Threads REQUIRED)
 find_library(LIBRT rt)
 
-
 add_library(clock SHARED clock/src/clock.cpp)
 add_library(convert SHARED convert/src/convert.cpp)
 add_library(daq SHARED daq/src/sensors.cpp)
@@ -13,8 +12,7 @@ add_library(nm SHARED nm/src/nm.cpp nm/src/NmShm.cpp)
 add_library(bindings SHARED python/bindings.cpp)
 add_library(shm SHARED shm/src/shm.cpp)
 add_library(telemetry SHARED telemetry/src/TelemetryShm.cpp telemetry/src/TelemetryViewer.cpp telemetry/src/TelemetryWriter.cpp)
-add_library(basic SHARED trigger/src/basic.cpp)
-add_library(trigger SHARED trigger/src/trigger.cpp)
+add_library(trigger SHARED trigger/src/trigger.cpp trigger/src/basic.cpp)
 add_library(vcm SHARED vcm/src/vcm.cpp)
 add_library(vlock SHARED vlock/src/vlock.cpp)
 
@@ -22,9 +20,6 @@ target_link_libraries(dls rt)
 target_link_libraries(ec rt)
 target_link_libraries(nm rt)
 target_link_libraries(shm Threads::Threads rt)
-
-set(SOURCES )
-
 
 #target_sources(${PROJECT_NAME} PRIVATE
 #        clock/src/clock.cpp
