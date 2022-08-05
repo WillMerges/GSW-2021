@@ -3,8 +3,8 @@ add_executable(dlp dlp/src/dlp.cpp)
 add_executable(mmon mmon/src/main.cpp)
 add_executable(shmctl shmctl/src/shmctl.cpp)
 add_executable(mqueue_test test/mqueue_test/src/test.cpp)
-add_executable(shmread test/shmtest/src/shmread.cpp)
-add_executable(shmwrite test/shmtest/src/shmwrite.cpp)
+add_executable(shm_read_test test/shmtest/src/shmread.cpp)
+add_executable(shm_write_test test/shmtest/src/shmwrite.cpp)
 add_executable(vcm_test test/vcm_test/src/test.cpp)
 add_executable(vlock_test test/vlock_test/src/main.cpp)
 add_executable(log2csv tool/log2csv/src/main.cpp)
@@ -17,6 +17,15 @@ target_link_libraries(decom telemetry nm vcm dls convert shm)
 target_link_libraries(dlp dls shm rt)
 target_link_libraries(mmon dls vcm telemetry trigger ec daq convert shm)
 target_link_libraries(shmctl dls vcm telemetry nm convert shm clock vlock)
+
+# TODO: Maybe make tests optionally compiled
+target_link_libraries(mqueue_test dls shm rt)
+target_link_libraries(shm_read_test vcm telemetry convert shm dls)
+target_link_libraries(shm_write_test vcm telemetry convert shm dls)
+target_link_libraries(vcm_test vcm dls shm rt)
+target_link_libraries(vlock_test vlock shm dls rt)
+
+
 
 
 target_link_libraries(uplink dls nm vcm shm)
