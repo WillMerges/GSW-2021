@@ -59,13 +59,13 @@ void setup_ncurses() {
     refresh();
 
     lv = listview_new();
-    listview_add_column(lv, "Measurement");
-    listview_add_column(lv, "Value");
-    listview_add_column(lv, "Type");
-    listview_add_column(lv, "Sign");
-    listview_add_column(lv, "Endianness");
-    listview_add_column(lv, "Hex");
-    listview_add_column(lv, "Last Update (ms)");
+    listview_add_column(lv, (char*) "Measurement");
+    listview_add_column(lv, (char*) "Value");
+    listview_add_column(lv, (char*) "Type");
+    listview_add_column(lv, (char*) "Sign");
+    listview_add_column(lv, (char*) "Endianness");
+    listview_add_column(lv, (char*) "Hex");
+    listview_add_column(lv, (char*) "Last Update (ms)");
 
     // for(size_t i = 0; i < veh->measurements.size(); i++) {
     for(size_t i = 0; i < 53; i++) {

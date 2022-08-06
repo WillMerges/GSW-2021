@@ -13,7 +13,7 @@ add_executable(clock_view clock_view/src/main.cpp)
 add_executable(fwd_influx db/fwd_influx/src/main.cpp)
 add_executable(log_view log_view/src/main.cpp)
 add_executable(mem_view mem_view/src/main.cpp)
-#add_executable(nview nview/src/main.cpp) # TODO: We dont even use this app anyways 😛
+#add_executable(nview nview/src/main.cpp nview/src/listview.cpp) # TODO: We dont even use this app anyways 😛
 add_executable(print_meas print_meas/src/main.cpp)
 add_executable(ec_cmd propulsion/ec_cmd/src/main.cpp)
 add_executable(ec_program propulsion/ec_program/src/main.cpp)
