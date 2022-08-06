@@ -1,8 +1,6 @@
 set(CMAKE_C_FLAGS "-I${GSW_DIR}/include -Wall -Wpedantic -fpic")
 set(CMAKE_CXX_FLAGS "-I${GSW_DIR}/include -Wall -Wpedantic -fpic -ggdb")
 
-find_package(Threads REQUIRED)
-find_library(LIBRT rt)
 
 add_library(clock SHARED clock/src/clock.cpp)
 add_library(convert SHARED convert/src/convert.cpp)
@@ -22,4 +20,4 @@ add_library(vlock SHARED vlock/src/vlock.cpp)
 target_link_libraries(dls rt)
 target_link_libraries(ec rt)
 target_link_libraries(nm rt)
-target_link_libraries(shm Threads::Threads rt)
+target_link_libraries(shm pthread rt)

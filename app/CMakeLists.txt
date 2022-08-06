@@ -1,12 +1,7 @@
 set(CMAKE_C_FLAGS "-I${GSW_DIR}/include -Wall -Wextra -Wpedantic")
 set(CMAKE_CXX_FLAGS "-I${GSW_DIR}/include -Wall -Wextra -Wpedantic -ggdb")
 
-find_package(Curses REQUIRED)
-include_directories(${CURSES_INCLUDE_DIR})
-SET(CURSES_USE_NCURSES TRUE)
-find_package(Threads REQUIRED)
-
-include_directories(${THREADS_INCLUDE_DIR}) # TODO: make this cleaner and global
+ # TODO: make this cleaner and global
 
 add_executable(clock_ctrl clock_ctrl/src/main.cpp)
 add_executable(clock_view clock_view/src/main.cpp)
@@ -25,10 +20,10 @@ add_executable(xbee_bridge xbee/xbee_bridge/src/main.cpp)
 # TODO: Figure out what to do with py files
 target_link_libraries(clock_ctrl dls vcm telemetry convert clock shm)
 target_link_libraries(clock_view dls vcm telemetry convert clock shm)
-target_link_libraries(fwd_influx dls vcm telemetry clock shm convert ${THREADS_INCLUDE_DIR})
+target_link_libraries(fwd_influx dls vcm telemetry clock shm convert pthread)
 target_link_libraries(log_view dls shm)
 target_link_libraries(mem_view dls telemetry convert shm vcm)
-#target_link_libraries(nview telemetry dls vcm convert shm ${THREADS_INCLUDE_DIR} ${CURSES_LIBRARIES}) # TODO: Cursing curses.
+#target_link_libraries(nview telemetry dls vcm convert shm pthread ${CURSES_LIBRARIES})
 target_link_libraries(ec_cmd dls telemetry nm convert vlock shm vcm)
 target_link_libraries(ec_program dls telemetry nm convert vlock shm clock vcm)
 target_link_libraries(print_meas dls vcm telemetry shm convert)
