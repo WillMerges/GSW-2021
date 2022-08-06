@@ -1,0 +1,59 @@
+#!/bin/bash
+
+set -e
+
+if ! [ -v GSW_HOME ]
+then
+    echo environment not set, must run '. setenv' first
+    exit
+fi
+
+cd ${GSW_HOME}/startup/default
+
+# create the pidlist file
+if ! [ -f pidlist ]
+then
+    touch pidlist
+else
+    echo "GSW is already running!"
+    exit
+fi
+
+# NOTE: PIDs are added to the begining of the file
+#       so they are shutdown in the reverse order they started up
+#       this keeps the data logger alive as long as possible
+
+# clean out old logs
+#${GSW_HOME}/log/clean.sh
+
+# start data logging process
+echo "starting data logging process"
+# this is a hack to redirect to a fifo pipe w/o blocking
+# ${GSW_HOME} /build/proc/dlp/dlp -v | tee > ${GSW_HOME}/log/system.fifo &
+${GSW_HOME}/build/proc/dlp &
+echo $! | cat - pidlist > temp && mv temp pidlist
+sleep 0.5
+
+# create shared memory
+${GSW_HOME}/build/proc/shmctl -on
+
+# start the decom process
+echo "starting decom process"
+${GSW_HOME}/build/proc/decom &
+echo $! | cat - pidlist > temp && mv temp pidlist
+sleep 1
+
+# start the mmon process
+echo "starting measurement monitor process"
+${GSW_HOME}/build/proc/mmon &
+echo $! | cat - pidlist > temp && mv temp pidlist
+sleep 1
+
+# start the uplink process
+echo "starting uplink process"
+${GSW_HOME}/build/proc/uplink &
+echo $! | cat - pidlist > temp && mv temp pidlist
+
+# start advertising ourselves over mDNS as "gs.local"
+echo "advertising over mDNS as 'gs.local'"
+${GSW_HOME} /build/proc/mdns_publish gs.local mdns_pids
