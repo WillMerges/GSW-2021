@@ -1,7 +1,6 @@
 set(CMAKE_C_FLAGS "-I${GSW_DIR}/include -Wall -Wpedantic -fpic")
 set(CMAKE_CXX_FLAGS "-I${GSW_DIR}/include -Wall -Wpedantic -fpic -ggdb")
 
-
 add_library(clock SHARED clock/src/clock.cpp)
 add_library(convert SHARED convert/src/convert.cpp)
 add_library(daq SHARED daq/src/sensors.cpp)

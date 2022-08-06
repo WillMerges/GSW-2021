@@ -18,10 +18,8 @@ set(APP_DIR app)
 set(PROC_DIR proc)
 set(SIM_DIR sim)
 
-
 include_directories(include)
 include_directories(${THREADS_INCLUDE_DIR})
-
 
 add_subdirectory(lib)
 add_subdirectory(proc)
