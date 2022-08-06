@@ -74,8 +74,8 @@ RetType vlock::destroy_shm() {
 
     // use shared libary location as part of shared memory key
     std::string key_filename = env;
-    key_filename += "/";
-    key_filename += "lib/bin/libvlock.so";
+    key_filename += "/build/";
+    key_filename += "lib/libvlock.so";
 
     Shm shm(key_filename.c_str(), key_id, sizeof(sem_t) * NUM_RESOURCES);
 
