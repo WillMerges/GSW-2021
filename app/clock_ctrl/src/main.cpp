@@ -29,8 +29,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
-#include "lib/dev/xbee/xbee.h"
-#include "lib/dev/serial/serial.h"
 
 using namespace countdown_clock;
 using namespace dls;
