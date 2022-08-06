@@ -6,8 +6,6 @@ include_directories(${CURSES_INCLUDE_DIR})
 SET(CURSES_USE_NCURSES TRUE)
 find_package(Threads REQUIRED)
 
-
-
 include_directories(${THREADS_INCLUDE_DIR}) # TODO: make this cleaner and global
 
 add_executable(clock_ctrl clock_ctrl/src/main.cpp)
@@ -36,30 +34,5 @@ target_link_libraries(ec_program dls telemetry nm convert vlock shm clock vcm)
 target_link_libraries(print_meas dls vcm telemetry shm convert)
 target_link_libraries(val_view dls vcm telemetry convert shm)
 target_link_libraries(voice_report dls vcm telemetry shm convert)
-target_link_libraries(darwin dls shm vcm xbee serial)
-target_link_libraries(xbee_bridge dls shm vcm xbee serial)
-
-#target_sources(
-#        clock_ctrl/src/main.cpp
-#        clock_view/src/main.cpp
-#
-#        db/fwd_influx/src/main.cpp
-#
-#        log_view/src/main.cpp
-#
-#        mem_view/src/main.cpp
-#
-#        nview/src/main.cpp
-#
-#        print_meas/src/main.cpp
-#
-#        propulsion/ec_cmd/src/main.cpp
-#        propulsion/ec_program/src/main.cpp
-#
-#        val_view/src/main.cpp
-#
-#        voice/src/voice_report.cpp
-#
-#        xbee/darwin/src/main.cpp
-#        xbee/xbee_bridge/src/main.cpp
-#)
+#target_link_libraries(darwin dls shm vcm xbee serial)
+#target_link_libraries(xbee_bridge dls shm vcm xbee serial)
