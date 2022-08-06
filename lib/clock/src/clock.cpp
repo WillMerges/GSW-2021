@@ -35,8 +35,8 @@ RetType CountdownClock::init() {
 
     // use shared libary location as part of shared memory key
     key_filename = env;
-    key_filename += "/";
-    key_filename += "lib/bin/libclock.so";
+    key_filename += "/build/";
+    key_filename += "lib/libclock.so";
 
     shm = new Shm(key_filename.c_str(), shm_key_id, sizeof(clock_shm_t));
 

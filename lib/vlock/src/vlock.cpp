@@ -35,10 +35,12 @@ RetType vlock::create_shm() {
         return FAILURE;
     }
 
-    // use shared libary location as part of shared memory key
+    // use shared library location as part of shared memory key
     std::string key_filename = env;
-    key_filename += "/";
-    key_filename += "lib/bin/libvlock.so";
+    key_filename += "/build/";
+    key_filename += "lib/libvlock.so";
+
+    std::cout << key_filename << std::endl;
 
     Shm shm(key_filename.c_str(), key_id, sizeof(sem_t) * NUM_RESOURCES);
 

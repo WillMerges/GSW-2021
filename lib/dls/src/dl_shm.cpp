@@ -46,8 +46,8 @@ RetType DlShm::init() {
 
     // use shared libary location as part of shared memory key
     key_filename = env;
-    key_filename += "/";
-    key_filename += "lib/bin/libdls.so";
+    key_filename += "/build/";
+    key_filename += "lib/libdls.so";
 
     shm = new Shm(key_filename.c_str(), key_id, sizeof(dl_shm_t));
 

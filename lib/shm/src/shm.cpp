@@ -42,8 +42,10 @@ RetType Shm::create() {
 
     // get id
     shmid = shmget(key, size, 0666|IPC_CREAT|IPC_EXCL);
+
     if(shmid == -1) {
         logger.log_message("shmget failure");
+        std::cout << "shmget error: " << errno << std::endl;
         return FAILURE;
     }
 

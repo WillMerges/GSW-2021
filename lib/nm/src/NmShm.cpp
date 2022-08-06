@@ -35,8 +35,8 @@ RetType NmShm::init(size_t num_devices) {
 
     // use shared libary location as part of shared memory key
     key_filename = env;
-    key_filename += "/";
-    key_filename += "lib/bin/libnm.so";
+    key_filename += "/build/";
+    key_filename += "lib/libnm.so";
 
     last_nonces = new uint32_t[num_devices];
     memset((void*)last_nonces, 0, sizeof(uint32_t) * num_devices);
