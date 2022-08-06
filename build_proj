@@ -1,0 +1,11 @@
+#!/bin/bash
+
+[ -d "build/" ] && echo "Build folder exists. Removing folder" && rm -rf build/
+
+mkdir build
+cd build || exit
+cmake ..
+make
+
+cd ..
+echo "Finished."
