@@ -31,6 +31,7 @@
 #define NUM_SIGNALS 5
 #define SERVER_IP "127.0.0.1"
 #define SERVER_PORT 5000
+#define CLIENT_PORT 5100
 
 
 using namespace dls;
@@ -154,14 +155,21 @@ int main(int argc, char* argv[]) {
 
     logger.log_message("Socket setup successful");
 
-    std::string config_port_const = "JSON_PORT";
-    std::string* port_str = vcm->get_const(config_port_const);
-    if (port_str == NULL && argc > 1) {
-        port_str = new std::string(argv[1]);
+    std::string config_server_port = "JSON_SERVER_PORT";
+    std::string* server_port_str = vcm->get_const(config_server_port);
+    if (server_port_str == NULL && argc > 1) {
+        server_port_str = new std::string(argv[1]);
     }
 
-    int server_port = port_str != NULL ? std::stoi(*port_str) : SERVER_PORT;
-    std::cout << server_port << std::endl;
+    std::string config_client_port = "JSON_PORT";
+    std::string* client_port_str = vcm->get_const(config_client_port);
+    if (client_port_str == NULL && argc > 2) {
+        client_port_str = new std::string(argv[2]);
+    }
+
+    int server_port = server_port_str != NULL ? std::stoi(*server_port_str) : SERVER_PORT;
+    int client_port = client_port_str != NULL ? std::stoi(*client_port_str) : CLIENT_PORT;
+    std::cout << "Server Port: " <<  server_port << " Client Port: " << client_port << std::endl;
 
     bzero(&server_addr, sizeof(server_addr));
     bzero(&client_addr, sizeof(client_addr));
@@ -172,7 +180,7 @@ int main(int argc, char* argv[]) {
 
     client_addr.sin_family = AF_INET;
     client_addr.sin_addr.s_addr = INADDR_ANY;
-    client_addr.sin_port = htons(server_port);
+    client_addr.sin_port = htons(client_port);
 
     int optval = 1;
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, (const void *) &optval, sizeof(int));
