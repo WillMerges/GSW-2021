@@ -68,7 +68,7 @@ void sighandler(int) {
  * Fetches data and converts it into a JSON string
  */
 std::string getJSONString(VCM *vcm, size_t max_size) {
-    tlm.update();
+//    tlm.update();
 
     MsgLogger logger(logger_name);
     std::string jsonString = "{";
@@ -83,14 +83,16 @@ std::string getJSONString(VCM *vcm, size_t max_size) {
             continue;
         }
 
-        char pair_str[max_size];  // TODO: Causes warning about variable length.
-                                  // Fix it?
-        sprintf(pair_str, "\"%s\":%s,", measurement.c_str(), value->c_str());
+        char pair_str[max_size];  // TODO: Causes warning about variable length. Fix it?
+
+        sprintf(pair_str, "\"%s\":%s,", measurement.c_str(), strcmp(value->c_str(), "") != 0 ? value->c_str() : "null");
 
         jsonString.append(pair_str);
+
+        delete value;
     }
 
-    jsonString.append("}");
+    jsonString.append("\b \b}");
 
     return jsonString;
 }
