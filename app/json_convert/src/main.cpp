@@ -71,7 +71,7 @@ std::string getJSONString(VCM *vcm, size_t max_size) {
 //    tlm.update();
 
     MsgLogger logger(logger_name);
-    std::string jsonString = "{";
+//    std::string jsonString = "{";
 
 
     for (std::string measurement : vcm->measurements) {
@@ -92,7 +92,7 @@ std::string getJSONString(VCM *vcm, size_t max_size) {
         delete value;
     }
 
-    jsonString.append("\b \b}");
+//    jsonString.append("\b \b}");
 
     return jsonString;
 }
