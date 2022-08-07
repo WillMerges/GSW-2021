@@ -5,7 +5,7 @@
  * 
  *  Author: Aaron Chan
  * 
- *  Usage: ./json_convert [PORT]
+ *  Usage: ./json_convert [SERVER_PORT] [CLIENT_PORT]
  *      - Port specification in CLI is optional
  *      - Port in config file takes priority
  *      - If no port is specified by either, default port will be set to 5000 
