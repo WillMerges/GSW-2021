@@ -174,6 +174,9 @@ int main(int argc, char* argv[]) {
     int client_port = client_port_str != NULL ? std::stoi(*client_port_str) : CLIENT_PORT;
     std::cout << "Server Port: " <<  server_port << " Client Port: " << client_port << std::endl;
 
+    delete server_port_str;
+    delete client_port_str;
+
     bzero(&server_addr, sizeof(server_addr));
     bzero(&client_addr, sizeof(client_addr));
 
@@ -193,6 +196,8 @@ int main(int argc, char* argv[]) {
     while (1) {
         if (killed) {
             logger.log_message("Unaliving process");
+
+            delete vcm;
             exit(0);
         }   
 
