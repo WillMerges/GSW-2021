@@ -13,6 +13,7 @@ all:
 	-$(MAKE) -C http_server all
 	-$(MAKE) -C print_meas all
 	-$(MAKE) -C xbee all
+	-$(MAKE) -C json_convert all
 
 clean:
 	-$(MAKE) -C log_view clean
@@ -27,3 +28,5 @@ clean:
 	-$(MAKE) -C http_server clean
 	-$(MAKE) -C print_meas clean
 	-$(MAKE) -C xbee clean 
+	-$(MAKE) -C json_convert clean
+	
