@@ -27,7 +27,7 @@ NetworkReceiver::~NetworkReceiver() {
 
     if(sockfd != -1) {
         if(0 != close(sockfd)) {
-            logger.log_message("unable to detach socket");
+            logger.log_message("unable to close socket");
         }
     }
 
@@ -215,13 +215,13 @@ NetworkTransmitter::~NetworkTransmitter() {
 
     if((mqd_t)-1 != mq) {
         if(0 != mq_unlink(mqueue_name.c_str())) {
-            logger.log_message("unable to detach mqueue");
+            logger.log_message("unable to close mqueue");
         }
     }
 
     if(-1 != sockfd) {
         if(0 != close(sockfd)) {
-            logger.log_message("unable to detach socket");
+            logger.log_message("unable to close socket");
         }
     }
 
@@ -260,7 +260,7 @@ RetType NetworkTransmitter::init(uint32_t device_id, VCM* vcm, uint16_t port) {
     // NOTE: we open it in blocking mode
     mq = mq_open(mqueue_name.c_str(), O_RDONLY|O_CREAT, 0644, &attr);
     if((mqd_t)-1 == mq) {
-        logger.log_message("unable to attach mqueue");
+        logger.log_message("unable to open mqueue");
         return FAILURE;
     }
 
@@ -383,7 +383,7 @@ NetworkInterface::~NetworkInterface() {
 
     if((mqd_t)-1 != mq) {
         if((mqd_t)-1 == mq_close(mq)) {
-            logger.log_message("failed to detach mqueue");
+            logger.log_message("failed to close mqueue");
         }
     }
 }
@@ -403,7 +403,7 @@ RetType NetworkInterface::init(uint32_t device_id) {
     // turned non blocking on so if the queue is full it won't be logged (could be a potential issue if messages are being dropped)
     mq = mq_open(mqueue_name.c_str(), O_WRONLY|O_NONBLOCK); // TODO consider adding O_CREAT here, or actually should it fail if the network transmitter doesnt exist?
     if((mqd_t)-1 == mq) {
-        logger.log_message("unable to attach mqueue");
+        logger.log_message("unable to open mqueue");
         return FAILURE;
     }
 
