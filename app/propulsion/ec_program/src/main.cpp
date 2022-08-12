@@ -337,8 +337,8 @@ int main(int argc, char* argv[]) {
     }
 
     if(FAILURE == cl.open()) {
-        logger.log_message("failed to attach countdown clock");
-        printf("failed to attach countdown clock\n");
+        logger.log_message("failed to open countdown clock");
+        printf("failed to open countdown clock\n");
 
         release_resources();
         return -1;

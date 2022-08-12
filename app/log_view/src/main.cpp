@@ -49,8 +49,8 @@ int main() {
         fd = open(path.c_str(), O_RDONLY | O_NONBLOCK);
 
         if(fd == -1) {
-            printf("failed to attach file: %s\n", path.c_str());
-            logger.log_message("failed to attach log file");
+            printf("failed to open file: %s\n", path.c_str());
+            logger.log_message("failed to open log file");
 
             // return -1;
             break;

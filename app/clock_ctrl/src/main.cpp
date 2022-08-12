@@ -46,8 +46,8 @@ int main(int argc, char* argv[]) {
     }
 
     if(FAILURE == cl.open()) {
-        logger.log_message("Failed to attach clock");
-        printf("Failed to attach clock\n");
+        logger.log_message("Failed to open clock");
+        printf("Failed to open clock\n");
 
         return -1;
     }
