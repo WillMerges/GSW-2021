@@ -131,7 +131,7 @@ void read_queue(const char* queue_name, const char* outfile_name, bool binary) {
         }
 
         if(!file.is_open()) {
-            printf("Failed to attach file: %s\n", outfile_name);
+            printf("Failed to open file: %s\n", outfile_name);
             exit(-1);
         }
 

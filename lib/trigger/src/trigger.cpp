@@ -32,7 +32,7 @@ RetType trigger::parse_trigger_file(VCM* veh, std::vector<trigger_t>* triggers) 
     // open the file
     std::ifstream* f = new std::ifstream(veh->trigger_file.c_str());
     if(!f) {
-        logger.log_message("Failed to attach file");
+        logger.log_message("Failed to open file");
         return FILENOTFOUND;
     }
 

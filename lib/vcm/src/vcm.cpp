@@ -142,12 +142,12 @@ RetType VCM::init() {
 
     f = new std::ifstream(config_file.c_str());
     if(!f) {
-        logger.log_message("Failed to attach config file: " + config_file);
+        logger.log_message("Failed to open config file: " + config_file);
         return FAILURE;
     }
 
     if(!f->is_open()) {
-        logger.log_message("Failed to attach config file: " + config_file);
+        logger.log_message("Failed to open config file: " + config_file);
         return FAILURE;
     }
 
@@ -457,7 +457,7 @@ RetType VCM::parse_consts() {
 
     std::ifstream ff(const_file.c_str());
     if(!ff.is_open()) {
-        logger.log_message("Failed to attach constants file: " + const_file);
+        logger.log_message("Failed to open constants file: " + const_file);
         return FAILURE;
     }
 
