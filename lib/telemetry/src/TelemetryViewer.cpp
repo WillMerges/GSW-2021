@@ -91,7 +91,7 @@ RetType TelemetryViewer::init(VCM* vcm, TelemetryShm* shm) {
             return FAILURE;
         }
 
-        if(this->shm->open() == FAILURE) {
+        if(this->shm->attach() == FAILURE) {
             logger.log_message("failed to attach to telemetry shared memory");
             return FAILURE;
         }

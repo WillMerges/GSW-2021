@@ -111,8 +111,8 @@ int main(int argc, char* argv[]) {
 
     NetworkInterface net;
     if(SUCCESS != net.init(*net_dev, veh)) {
-        logger.log_message("failed to open network interface");
-        printf("failed to open network interface\n");
+        logger.log_message("failed to attach network interface");
+        printf("failed to attach network interface\n");
 
         return -1;
     }

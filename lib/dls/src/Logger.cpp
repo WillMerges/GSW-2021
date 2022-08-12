@@ -38,7 +38,7 @@ RetType Logger::Close() {
     }
 
     if((mqd_t)-1 == mq_close(mq)) {
-        std::string err = "Failed to close mqueue: " + queue_name;
+        std::string err = "Failed to detach mqueue: " + queue_name;
         for(int i = 0; i<5; i++) { // try to send error msg 5 times
             if(0 == mq_send(mq, err.c_str(), err.size(), 0)) {
                 open = false;

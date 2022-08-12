@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
     size_t num_ofile = 0;
 
     if(!of.is_open()) {
-        printf("Failed to open output file: %s\n", of_name.c_str());
+        printf("Failed to attach output file: %s\n", of_name.c_str());
         return -1;
     }
 
@@ -174,7 +174,7 @@ int main(int argc, char** argv) {
                 of.open(of_name.c_str(), std::ios::out | std::ios::trunc);
 
                 if(!of.is_open()) {
-                    printf("Failed to open output file: %s\n", of_name.c_str());
+                    printf("Failed to attach output file: %s\n", of_name.c_str());
                     return -1;
                 }
 

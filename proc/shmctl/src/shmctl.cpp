@@ -139,7 +139,7 @@ int main(int argc, char* argv[]) {
         printf("destroying shared memory\n");
         logger.log_message("destroying shared memory");
 
-        if(FAILURE == tlm_shm.open()) {
+        if(FAILURE == tlm_shm.attach()) {
             printf("telemetry shared memory not created, nothing to destroy\n");
             logger.log_message("telemetry shared memory not created, nothing to destroy");
             ret = FAILURE;

@@ -79,8 +79,8 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    if(tshm.open() != SUCCESS) {
-        logger.log_message("failed to open telemetry shm");
+    if(tshm.attach() != SUCCESS) {
+        logger.log_message("failed to attach telemetry shm");
         return -1;
     }
 

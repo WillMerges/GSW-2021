@@ -58,12 +58,10 @@ public:
     RetType init();
 
     // open shared memory
-    // TODO refactor to attach (like it better)
-    RetType open();
+    RetType attach();
 
     // close shared memory
-    // TODO refactor to detach (like it better)
-    RetType close();
+    RetType detach();
 
     // create all shared memory for a vehicle
     // NOTE: does not attach!

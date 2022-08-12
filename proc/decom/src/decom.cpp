@@ -136,7 +136,7 @@ void execute(size_t packet_id, packet_info_t* packet) {
     }
 
     // attach to shared memory
-    if(shmem.open() == FAILURE) {
+    if(shmem.attach() == FAILURE) {
         logger.log_message("failed to attach to telemetry shared memory");
         delete net;
         return;

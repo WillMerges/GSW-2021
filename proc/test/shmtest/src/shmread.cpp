@@ -27,7 +27,7 @@ int main() {
         return -1;
     }
 
-    if(mem.open() == FAILURE) {
+    if(mem.attach() == FAILURE) {
         printf("failed to attach to shared memory");
         return -1;
     }
