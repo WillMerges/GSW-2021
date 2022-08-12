@@ -337,7 +337,7 @@ RetType TelemetryShm::write(uint32_t packet_id, uint8_t* data) {
 
     if(packet_blocks == NULL || info_blocks == NULL || master_block == NULL) {
         // not open
-        logger.log_message("object not attach");
+        logger.log_message("object not open");
         return FAILURE;
     }
 
@@ -404,7 +404,7 @@ RetType TelemetryShm::clear(uint32_t packet_id, uint8_t val) {
 
     if(packet_blocks == NULL || info_blocks == NULL || master_block == NULL) {
         // not open
-        logger.log_message("object not attach");
+        logger.log_message("object not open");
         return FAILURE;
     }
 
@@ -471,7 +471,7 @@ RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t t
 
     if(info_blocks == NULL || master_block == NULL) {
         // not open
-        logger.log_message("object not attach");
+        logger.log_message("object not open");
         return FAILURE;
     }
 
@@ -608,7 +608,7 @@ RetType TelemetryShm::read_lock(uint32_t timeout) {
 
     if(info_blocks == NULL || master_block == NULL) {
         // not open
-        logger.log_message("object not attach");
+        logger.log_message("object not open");
         return FAILURE;
     }
 
@@ -775,7 +775,7 @@ RetType TelemetryShm::read_unlock(bool force) {
 
     if(info_blocks == NULL || master_block == NULL) {
         // not open
-        logger.log_message("object not attach");
+        logger.log_message("object not open");
         return FAILURE;
     }
 
