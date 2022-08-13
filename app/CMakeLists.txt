@@ -1,8 +1,6 @@
 set(CMAKE_C_FLAGS "-I${GSW_DIR}/include -Wall -Wextra -Wpedantic")
 set(CMAKE_CXX_FLAGS "-I${GSW_DIR}/include -Wall -Wextra -Wpedantic -ggdb")
 
- # TODO: make this cleaner and global
-
 add_executable(clock_ctrl clock_ctrl/src/main.cpp)
 add_executable(clock_view clock_view/src/main.cpp)
 add_executable(fwd_influx db/fwd_influx/src/main.cpp)
