@@ -741,6 +741,8 @@ void TelemetryShm::sighandler() {
     shm_info_t* info = (shm_info_t*)master_block->data;
     void* futex_word = &(info->nonce);
 
+    // TODO is this bad? what if we hold a lock in the master block when we get the sighandler?
+    //      then we would never release the lock since we're detached
     if(FAILURE == master_block->detach()) {
         logger.log_message("Failed to detach from shm");
         // we shouldn't do anything else, trying to stop the process failed and we'll stay running

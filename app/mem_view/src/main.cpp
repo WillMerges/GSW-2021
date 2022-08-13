@@ -32,6 +32,13 @@ int signals[NUM_SIGNALS] = {
                             SIGABRT
                         };
 
+// TODO: known bug sighandler
+//       if SIGSEGV is caught, shared memory is detached but then the app will
+//       just segfault again without exiting
+//       in the future we can just treat SIGSEGV differently:
+//       we can assume any segfault should happen outside of the shared library code,
+//       (or else we have bigger problems)
+//       so as long as the user cleans up locks it should be fine
 void sighandler(int) {
     killed = true;
 
