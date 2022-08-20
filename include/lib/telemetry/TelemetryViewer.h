@@ -34,12 +34,12 @@ public:
     // initialize the telemetry viewer for vehicle specified by VCM
     // if 'shm' is not specified, creates a new TelemetryShm object
     // NOTE: if shm is not NULL, it should already be opened and initialized
-    RetType init(std::unique_ptr<VCM> vcm, std::unique_ptr<TelemetryShm> shm = nullptr);
+    RetType init(std::shared_ptr<VCM> vcm, std::shared_ptr<TelemetryShm> shm = nullptr);
 
     // init using use the default VCM
     // if 'shm' is not specified, creates a new TelemetryShm object
     // NOTE: if shm is not NULL, it should already be opened
-    RetType init(std::unique_ptr<TelemetryShm> shm = NULL);
+    RetType init(std::shared_ptr<TelemetryShm> shm = NULL);
 
     // remove all measurements currently viewable
     void remove_all();
@@ -103,10 +103,10 @@ public:
     bool updated(measurement_info_t* meas);
 
 private:
-    std::unique_ptr<TelemetryShm> shm;
+    std::shared_ptr<TelemetryShm> shm;
     bool rm_shm = false;
 
-    std::unique_ptr<VCM> vcm;
+    std::shared_ptr<VCM> vcm;
     bool rm_vcm = false;
 
     update_mode_t update_mode;
@@ -115,8 +115,8 @@ private:
     std::unique_ptr<unsigned int> packet_ids;
     size_t num_packets; // number of packets being tracked
 
-    uint8_t** packet_buffers;
-    size_t* packet_sizes;
+    std::unique_ptr<uint8_t[]> packet_buffers;
+    std::unique_ptr<size_t> packet_sizes;
 };
 
 #endif
