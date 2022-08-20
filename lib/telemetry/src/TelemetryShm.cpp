@@ -433,7 +433,7 @@ RetType TelemetryShm::clear(uint32_t packet_id, uint8_t val) {
     return SUCCESS;
 }
 
-RetType TelemetryShm::read_lock(unsigned int* packet_ids, size_t num, uint32_t timeout) {
+RetType TelemetryShm::read_lock(std::unique_ptr<uint32_t> packet_ids, size_t num, uint32_t timeout) {
     MsgLogger logger("TelemetryShm", "read_lock(2 args)");
 
     if(read_locked) {
