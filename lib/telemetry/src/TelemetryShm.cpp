@@ -93,35 +93,6 @@ TelemetryShm::~TelemetryShm() {
         read_unlock();
     }
 
-//    if(packet_blocks) {
-//        for(size_t i = 0; i < num_packets; i++) {
-//            delete packet_blocks[i];
-//        }
-//        delete[] packet_blocks;
-//    }
-//
-//    if(info_blocks) {
-//        for(size_t i = 0; i < num_packets; i++) {
-//            delete info_blocks[i];
-//        }
-//        delete[] info_blocks;
-//    }
-
-//    if(write_locks) {
-//        for(size_t i = 0; i < num_packets; i++) {
-//            delete write_locks[i];
-//        }
-//        delete[] write_locks;
-//    }
-
-//    if(locked_packets) {
-//        delete[] locked_packets;
-//    }
-
-//    if(master_block) {
-//        delete master_block;
-//    }
-
     if(last_nonces) {
         free(last_nonces);
     }
