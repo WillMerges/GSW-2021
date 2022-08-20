@@ -163,10 +163,10 @@ RetType TelemetryShm::init(VCM* vcm) {
         // for shmem id use (i+1)*2 for packets (always even) and (2*i)+1 for info blocks (always odd)
         // virtual locks use a shmid of -(i+1)*2 (always even and negative)
         // guarantees all blocks can use the same file but different ids to make a key
-        packet_blocks.get()[i] = new Shm(vcm->config_file.c_str(), 2*(i+1), packet->size);
+        packet_blocks.get()[i] = std::make_unique<Shm>(vcm->config_file.c_str(), 2*(i+1), packet->size);
 
-        info_blocks.get()[i] = new Shm(vcm->config_file.c_str(), (2*i)+1, sizeof(uint32_t)); // holds one nonce
-        write_locks.get()[i] = new Shm(vcm->config_file.c_str(), -2*(i+1), sizeof(sem_t)); // holds a single semaphore
+        info_blocks.get()[i] = std::make_unique<Shm>(vcm->config_file.c_str(), (2*i)+1, sizeof(uint32_t)); // holds one nonce
+        write_locks.get()[i] = std::make_unique<Shm>(vcm->config_file.c_str(), -2*(i+1), sizeof(sem_t)); // holds a single semaphore
 
         // we currently hold no locks
         locked_packets[i] = false;
