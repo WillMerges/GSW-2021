@@ -192,10 +192,10 @@ private:
     size_t num_packets; // number of packets
     uint32_t last_nonce; // last master nonce
     uint32_t* last_nonces; // list of previous nonces for all packets
-    std::unique_ptr<Shm**> write_locks; // locks used for locking individual writes to packets
-    bool* locked_packets; // which packets do we currently have locked
-    std::unique_ptr<Shm**> packet_blocks; // list of blocks holding raw telemetry data
-    std::unique_ptr<Shm**> info_blocks; // list of blocks holding uint32_t nonces TODO rename this to something better lol
+    std::unique_ptr<Shm*[]> write_locks; // locks used for locking individual writes to packets
+    std::unique_ptr<bool[]> locked_packets; // which packets do we currently have locked
+    std::unique_ptr<Shm*[]> packet_blocks; // list of blocks holding raw telemetry data
+    std::unique_ptr<Shm*[]> info_blocks; // list of blocks holding uint32_t nonces TODO rename this to something better lol
     std::unique_ptr<Shm> master_block; // holds a single shm_info_t for locking
 };
 

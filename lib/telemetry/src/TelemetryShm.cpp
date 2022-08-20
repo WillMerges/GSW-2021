@@ -114,9 +114,9 @@ TelemetryShm::~TelemetryShm() {
 //        delete[] write_locks;
 //    }
 
-    if(locked_packets) {
-        delete[] locked_packets;
-    }
+//    if(locked_packets) {
+//        delete[] locked_packets;
+//    }
 
 //    if(master_block) {
 //        delete master_block;
@@ -155,18 +155,18 @@ RetType TelemetryShm::init(VCM* vcm) {
     write_locks = std::make_unique<Shm*[]>(num_packets);
 
     // store which packets we currently have locked
-    locked_packets = new bool[num_packets];
+    locked_packets = std::make_unique<bool[]>(num_packets);
 
-    packet_info_t* packet;
-    size_t i;
-    for(i = 0; i < num_packets; i++) {
+    packet_info_t const* packet;
+    for(size_t i = 0; i < num_packets; i++) {
         packet = vcm->packets[i];
         // for shmem id use (i+1)*2 for packets (always even) and (2*i)+1 for info blocks (always odd)
         // virtual locks use a shmid of -(i+1)*2 (always even and negative)
         // guarantees all blocks can use the same file but different ids to make a key
-        packet_blocks[i] = new Shm(vcm->config_file.c_str(), 2*(i+1), packet->size);
-        info_blocks[i] = new Shm(vcm->config_file.c_str(), (2*i)+1, sizeof(uint32_t)); // holds one nonce
-        write_locks[i] = new Shm(vcm->config_file.c_str(), -2*(i+1), sizeof(sem_t)); // holds a single semaphore
+        packet_blocks.get()[i] = new Shm(vcm->config_file.c_str(), 2*(i+1), packet->size);
+
+        info_blocks.get()[i] = new Shm(vcm->config_file.c_str(), (2*i)+1, sizeof(uint32_t)); // holds one nonce
+        write_locks.get()[i] = new Shm(vcm->config_file.c_str(), -2*(i+1), sizeof(sem_t)); // holds a single semaphore
 
         // we currently hold no locks
         locked_packets[i] = false;
