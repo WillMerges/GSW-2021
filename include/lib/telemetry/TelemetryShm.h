@@ -195,7 +195,7 @@ private:
     bool* locked_packets; // which packets do we currently have locked
     Shm** packet_blocks; // list of blocks holding raw telemetry data
     Shm** info_blocks; // list of blocks holding uint32_t nonces TODO rename this to something better lol
-    Shm* master_block; // holds a single shm_info_t for locking
+    std::unique_ptr<Shm> master_block; // holds a single shm_info_t for locking
 };
 
 #endif

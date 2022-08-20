@@ -15,6 +15,7 @@
 #include <limits.h>
 #include <signal.h>
 #include <sys/mman.h>
+#include <memory>
 #include "lib/dls/dls.h"
 #include "lib/telemetry/TelemetryShm.h"
 
@@ -147,7 +148,7 @@ RetType TelemetryShm::init(VCM* vcm) {
 
     // create master Shm object
     // use an id guaranteed unused so we can use the same file name for all blocks
-    master_block = new Shm(vcm->config_file.c_str(), 0, sizeof(shm_info_t));
+    master_block = std::make_unique<Shm>(vcm->config_file.c_str(), 0, sizeof(shm_info_t));
 
     // create Shm objects for each telemetry packet
     packet_blocks = new Shm*[num_packets];
