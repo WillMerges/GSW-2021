@@ -65,7 +65,7 @@ TelemetryViewer::~TelemetryViewer() {
     }
 }
 
-RetType TelemetryViewer::init(TelemetryShm* shm) {
+RetType TelemetryViewer::init(std::unique_ptr<TelemetryShm> shm) {
     MsgLogger logger("TelemetryViewer", "init");
 
     vcm = std::make_unique<VCM>();
@@ -76,17 +76,17 @@ RetType TelemetryViewer::init(TelemetryShm* shm) {
         return FAILURE;
     }
 
-    return init(vcm.get(), shm);
+    return init(std::move(vcm), std::move(shm));
 }
 
-RetType TelemetryViewer::init(VCM* vcm, TelemetryShm* shm) {
+RetType TelemetryViewer::init(std::unique_ptr<VCM> vcm, std::unique_ptr<TelemetryShm> shm) {
     MsgLogger logger("TelemetryViewer", "init");
 
-    if(shm == NULL) {
-        this->shm = new TelemetryShm();
+    if(shm == nullptr) {
+        this->shm = std::make_unique<TelemetryShm>();
         rm_shm = true;
 
-        if(this->shm->init(vcm) == FAILURE) {
+        if(this->shm->init(std::move(vcm)) == FAILURE) {
             logger.log_message("failed to initialize telemetry shared memory");
             return FAILURE;
         }
@@ -96,10 +96,10 @@ RetType TelemetryViewer::init(VCM* vcm, TelemetryShm* shm) {
             return FAILURE;
         }
     } else {
-        this->shm = shm;
+        this->shm = std::move(shm);
     }
 
-    this->vcm = vcm;
+    this->vcm = std::move(vcm);
 
     packet_ids = new unsigned int[vcm->num_packets];
     packet_sizes = new size_t[vcm->num_packets];

@@ -34,12 +34,12 @@ public:
     // initialize the telemetry viewer for vehicle specified by VCM
     // if 'shm' is not specified, creates a new TelemetryShm object
     // NOTE: if shm is not NULL, it should already be opened and initialized
-    RetType init(VCM* vcm, TelemetryShm* shm = NULL);
+    RetType init(std::unique_ptr<VCM> vcm, std::unique_ptr<TelemetryShm> shm = nullptr);
 
     // init using use the default VCM
     // if 'shm' is not specified, creates a new TelemetryShm object
     // NOTE: if shm is not NULL, it should already be opened
-    RetType init(TelemetryShm* shm = NULL);
+    RetType init(std::unique_ptr<TelemetryShm> shm = NULL);
 
     // remove all measurements currently viewable
     void remove_all();
@@ -103,7 +103,7 @@ public:
     bool updated(measurement_info_t* meas);
 
 private:
-    TelemetryShm* shm;
+    std::unique_ptr<TelemetryShm> shm;
     bool rm_shm = false;
 
     std::unique_ptr<VCM> vcm;

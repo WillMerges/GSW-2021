@@ -53,7 +53,7 @@ public:
     virtual ~TelemetryShm();
 
     // initialize the object using 'vcm'
-    RetType init(VCM* vcm);
+    RetType init(std::unique_ptr<VCM> vcm);
 
     // initialize the object using the default vcm config file
     RetType init();
