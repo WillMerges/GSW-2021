@@ -106,7 +106,7 @@ private:
     TelemetryShm* shm;
     bool rm_shm = false;
 
-    VCM* vcm;
+    std::unique_ptr<VCM> vcm;
     bool rm_vcm = false;
 
     update_mode_t update_mode;

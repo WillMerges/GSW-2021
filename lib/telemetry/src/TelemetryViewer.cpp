@@ -68,7 +68,7 @@ TelemetryViewer::~TelemetryViewer() {
 RetType TelemetryViewer::init(TelemetryShm* shm) {
     MsgLogger logger("TelemetryViewer", "init");
 
-    VCM* vcm = new VCM();
+    vcm = std::make_unique<VCM>();
     rm_vcm = true;
 
     if(FAILURE == vcm->init()) {
@@ -76,7 +76,7 @@ RetType TelemetryViewer::init(TelemetryShm* shm) {
         return FAILURE;
     }
 
-    return init(vcm, shm);
+    return init(vcm.get(), shm);
 }
 
 RetType TelemetryViewer::init(VCM* vcm, TelemetryShm* shm) {
