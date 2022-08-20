@@ -12,6 +12,7 @@
 
 #include <unordered_map>
 #include <stdint.h>
+#include <memory>
 #include <semaphore.h>
 #include "lib/vcm/vcm.h"
 #include "lib/shm/shm.h"
@@ -191,10 +192,10 @@ private:
     size_t num_packets; // number of packets
     uint32_t last_nonce; // last master nonce
     uint32_t* last_nonces; // list of previous nonces for all packets
-    Shm** write_locks; // locks used for locking individual writes to packets
+    std::unique_ptr<Shm**> write_locks; // locks used for locking individual writes to packets
     bool* locked_packets; // which packets do we currently have locked
-    Shm** packet_blocks; // list of blocks holding raw telemetry data
-    Shm** info_blocks; // list of blocks holding uint32_t nonces TODO rename this to something better lol
+    std::unique_ptr<Shm**> packet_blocks; // list of blocks holding raw telemetry data
+    std::unique_ptr<Shm**> info_blocks; // list of blocks holding uint32_t nonces TODO rename this to something better lol
     std::unique_ptr<Shm> master_block; // holds a single shm_info_t for locking
 };
 

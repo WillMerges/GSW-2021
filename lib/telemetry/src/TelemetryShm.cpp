@@ -15,7 +15,6 @@
 #include <limits.h>
 #include <signal.h>
 #include <sys/mman.h>
-#include <memory>
 #include "lib/dls/dls.h"
 #include "lib/telemetry/TelemetryShm.h"
 
@@ -94,34 +93,34 @@ TelemetryShm::~TelemetryShm() {
         read_unlock();
     }
 
-    if(packet_blocks) {
-        for(size_t i = 0; i < num_packets; i++) {
-            delete packet_blocks[i];
-        }
-        delete[] packet_blocks;
-    }
+//    if(packet_blocks) {
+//        for(size_t i = 0; i < num_packets; i++) {
+//            delete packet_blocks[i];
+//        }
+//        delete[] packet_blocks;
+//    }
+//
+//    if(info_blocks) {
+//        for(size_t i = 0; i < num_packets; i++) {
+//            delete info_blocks[i];
+//        }
+//        delete[] info_blocks;
+//    }
 
-    if(info_blocks) {
-        for(size_t i = 0; i < num_packets; i++) {
-            delete info_blocks[i];
-        }
-        delete[] info_blocks;
-    }
-
-    if(write_locks) {
-        for(size_t i = 0; i < num_packets; i++) {
-            delete write_locks[i];
-        }
-        delete[] write_locks;
-    }
+//    if(write_locks) {
+//        for(size_t i = 0; i < num_packets; i++) {
+//            delete write_locks[i];
+//        }
+//        delete[] write_locks;
+//    }
 
     if(locked_packets) {
         delete[] locked_packets;
     }
 
-    if(master_block) {
-        delete master_block;
-    }
+//    if(master_block) {
+//        delete master_block;
+//    }
 
     if(last_nonces) {
         free(last_nonces);
@@ -151,9 +150,9 @@ RetType TelemetryShm::init(VCM* vcm) {
     master_block = std::make_unique<Shm>(vcm->config_file.c_str(), 0, sizeof(shm_info_t));
 
     // create Shm objects for each telemetry packet
-    packet_blocks = new Shm*[num_packets];
-    info_blocks = new Shm*[num_packets];
-    write_locks = new Shm*[num_packets];
+    packet_blocks = std::make_unique<Shm*[]>(num_packets);
+    info_blocks = std::make_unique<Shm*[]>(num_packets);
+    write_locks = std::make_unique<Shm*[]>(num_packets);
 
     // store which packets we currently have locked
     locked_packets = new bool[num_packets];
