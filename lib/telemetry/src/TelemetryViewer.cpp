@@ -291,7 +291,7 @@ RetType TelemetryViewer::get_str(measurement_info_t* meas, std::string* val) {
         return FAILURE;
     }
 
-    if(convert_to(vcm, meas, data, val) == FAILURE) {
+    if(convert_to(vcm.get(), meas, data, val) == FAILURE) {
         logger.log_message("failed to convert measurement to string");
         return FAILURE;
     }
@@ -308,7 +308,7 @@ RetType TelemetryViewer::get_float(measurement_info_t* meas, float* val) {
         return FAILURE;
     }
 
-    if(convert_to(vcm, meas, data, val) == FAILURE) {
+    if(convert_to(vcm.get(), meas, data, val) == FAILURE) {
         logger.log_message("failed to convert measurement to float");
         return FAILURE;
     }
@@ -325,7 +325,7 @@ RetType TelemetryViewer::get_double(measurement_info_t* meas, double* val) {
         return FAILURE;
     }
 
-    if(convert_to(vcm, meas, data, val) == FAILURE) {
+    if(convert_to(vcm.get(), meas, data, val) == FAILURE) {
         logger.log_message("failed to convert measurement to double");
         return FAILURE;
     }
@@ -342,7 +342,7 @@ RetType TelemetryViewer::get_int(measurement_info_t* meas, int* val) {
         return FAILURE;
     }
 
-    if(convert_to(vcm, meas, data, val) == FAILURE) {
+    if(convert_to(vcm.get(), meas, data, val) == FAILURE) {
         logger.log_message("failed to convert measurement to int");
         return FAILURE;
     }
@@ -359,7 +359,7 @@ RetType TelemetryViewer::get_uint(measurement_info_t* meas, unsigned int* val) {
         return FAILURE;
     }
 
-    if(convert_to(vcm, meas, data, val) == FAILURE) {
+    if(convert_to(vcm.get(), meas, data, val) == FAILURE) {
         logger.log_message("failed to convert measurement to uint");
         return FAILURE;
     }
