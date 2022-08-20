@@ -104,7 +104,7 @@ RetType TelemetryViewer::init(std::shared_ptr<VCM> vcm, std::shared_ptr<Telemetr
     packet_ids = std::make_unique<unsigned int>(vcm->num_packets);
     packet_sizes = std::make_unique<size_t>(vcm->num_packets);
     packet_buffers = std::make_unique<uint8_t[]>(vcm->num_packets);
-    memset(packet_buffers, 0, sizeof(uint8_t*) * vcm->num_packets);
+    memset(packet_buffers.get(), 0, sizeof(uint8_t*) * vcm->num_packets);
 
     return SUCCESS;
 }
