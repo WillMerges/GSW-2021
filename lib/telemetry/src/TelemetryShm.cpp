@@ -314,7 +314,7 @@ RetType TelemetryShm::write(uint32_t packet_id, uint8_t* data) {
     }
 
     // packet_id is an index
-    Shm* packet = packet_blocks[packet_id];
+    Shm* packet = packet_blocks[packet_id].get();
     uint32_t* packet_nonce = (uint32_t*)info_blocks[packet_id]->data;
     shm_info_t* info = (shm_info_t*)master_block->data;
 
@@ -381,7 +381,7 @@ RetType TelemetryShm::clear(uint32_t packet_id, uint8_t val) {
     }
 
     // packet_id is an index
-    Shm* packet = packet_blocks[packet_id];
+    Shm* packet = packet_blocks[packet_id].get();
     uint32_t* packet_nonce = (uint32_t*)info_blocks[packet_id]->data;
     shm_info_t* info = (shm_info_t*)master_block->data;
 
@@ -789,7 +789,7 @@ RetType TelemetryShm::write_lock(uint32_t packet_id) {
     // NOTE: we assume that we can obtain this lock fast
     // we don't check if we caught a signal before blocking
 
-    Shm* lock = write_locks[packet_id];
+    Shm* lock = write_locks[packet_id].get();
     P(*((sem_t*)(lock->data)));
     locked_packets[packet_id] = true;
 
@@ -809,7 +809,7 @@ RetType TelemetryShm::write_unlock(uint32_t packet_id) {
         return FAILURE;
     }
 
-    Shm* lock = write_locks[packet_id];
+    Shm* lock = write_locks[packet_id].get();
     V(*((sem_t*)(lock->data)));
     locked_packets[packet_id] = false;
 
