@@ -164,8 +164,9 @@ RetType TelemetryViewer::add(uint32_t packet_id) {
 
         packet_ids.get()[num_packets] = packet_id;
         packet_sizes.get()[packet_id] = vcm->packets[packet_id]->size;
-        packet_buffers.get()[packet_id] = new uint8_t[packet_sizes[packet_id]];
-        memset(packet_buffers[packet_id], 0, packet_sizes[packet_id]); // zero buffer
+        packet_buffers.get()[packet_id] = std::make_unique<uint8_t[]>(packet_sizes.get()[packet_id]);
+
+        memset(packet_buffers->get()[packet_id], 0, packet_sizes.get()[packet_id]); // zero buffer
         num_packets++;
 
         return SUCCESS;
