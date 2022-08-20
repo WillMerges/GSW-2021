@@ -42,9 +42,9 @@ TelemetryViewer::~TelemetryViewer() {
 //        }
     }
 
-    if(packet_ids != NULL) {
-        delete[] packet_ids;
-    }
+//    if(packet_ids != NULL) {
+//        delete[] packet_ids;
+//    }
 
     if(packet_buffers != NULL) {
         for(size_t i = 0; i < num_packets; i++) {
@@ -101,7 +101,7 @@ RetType TelemetryViewer::init(std::unique_ptr<VCM> vcm, std::unique_ptr<Telemetr
 
     this->vcm = std::move(vcm);
 
-    packet_ids = new unsigned int[vcm->num_packets];
+    packet_ids = std::make_unique<unsigned int>(std::move(vcm)->num_packets);
     packet_sizes = new size_t[vcm->num_packets];
     packet_buffers = new uint8_t*[vcm->num_packets];
     memset(packet_buffers, 0, sizeof(uint8_t*) * vcm->num_packets);
@@ -156,13 +156,13 @@ RetType TelemetryViewer::add(std::string& measurement) {
 RetType TelemetryViewer::add(uint32_t packet_id) {
     if(packet_id < vcm->num_packets) {
         for(size_t i = 0; i < num_packets; i++) {
-            if(packet_ids[i] == packet_id) {
+            if(packet_ids.get()[i] == packet_id) {
                 // packet is already being tracked
                 return SUCCESS;
             }
         }
 
-        packet_ids[num_packets] = packet_id;
+        packet_ids.get()[num_packets] = packet_id;
         packet_sizes[packet_id] = vcm->packets[packet_id]->size;
         packet_buffers[packet_id] = new uint8_t[packet_sizes[packet_id]];
         memset(packet_buffers[packet_id], 0, packet_sizes[packet_id]); // zero buffer
@@ -205,7 +205,7 @@ RetType TelemetryViewer::update(uint32_t timeout) {
             return status; // could be BLOCKED or FAILURE or TIMEOUT
         }
     } else {
-        status = shm->read_lock(packet_ids, num_packets, timeout);
+        status = shm->read_lock(std::move(packet_ids), num_packets, timeout);
         if(status != SUCCESS) {
             return status; // could be BLOCKED or FAILURE or TIMEOUT
         }
@@ -214,7 +214,7 @@ RetType TelemetryViewer::update(uint32_t timeout) {
     // copy in packets we're tracking from shared memory
     unsigned int id;
     for(size_t i = 0; i < num_packets; i++) {
-        id = packet_ids[i];
+        id = packet_ids.get()[i];
         if(shm->updated[id]) {
             memcpy(packet_buffers[id], shm->get_buffer(id), packet_sizes[id]);
         } // if the packet didn't update, save ourself the copy

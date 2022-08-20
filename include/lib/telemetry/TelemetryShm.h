@@ -98,7 +98,7 @@ public:
     // if read mode is set to NONBLOCKING_READ, returns BLOCKED if the data has not changed since the last read
     // returns FAILURE if already locked
     // if force waked, returns FAILURE
-    RetType read_lock(uint32_t* packet_ids, size_t num, uint32_t timeout = 0);
+    RetType read_lock(std::unique_ptr<uint32_t> packet_ids, size_t num, uint32_t timeout = 0);
 
     // lock all shared memory for all packets
     // functionally no different from other read_lock for STANDARD_READ mode

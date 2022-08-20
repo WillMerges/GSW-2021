@@ -112,7 +112,7 @@ private:
     update_mode_t update_mode;
     bool check_all; // if we're tracking all measurements
 
-    unsigned int* packet_ids;
+    std::unique_ptr<unsigned int> packet_ids;
     size_t num_packets; // number of packets being tracked
 
     uint8_t** packet_buffers;
