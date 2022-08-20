@@ -102,7 +102,7 @@ TelemetryShm::~TelemetryShm() {
     }
 }
 
-RetType TelemetryShm::init(std::unique_ptr<VCM> vcm) {
+RetType TelemetryShm::init(VCM* vcm) {
     num_packets = vcm->num_packets;
 
     // create and set last_nonces

@@ -37,9 +37,9 @@ TelemetryViewer::~TelemetryViewer() {
             shm->read_unlock();
         }
 
-        if(rm_shm) {
-            delete shm;
-        }
+//        if(rm_shm) {
+//            delete shm;
+//        }
     }
 
     if(packet_ids != NULL) {
@@ -60,9 +60,9 @@ TelemetryViewer::~TelemetryViewer() {
         delete[] packet_sizes;
     }
 
-    if(vcm && rm_vcm) {
-        delete vcm;
-    }
+//    if(vcm && rm_vcm) {
+//        delete vcm;
+//    }
 }
 
 RetType TelemetryViewer::init(std::unique_ptr<TelemetryShm> shm) {
@@ -86,7 +86,7 @@ RetType TelemetryViewer::init(std::unique_ptr<VCM> vcm, std::unique_ptr<Telemetr
         this->shm = std::make_unique<TelemetryShm>();
         rm_shm = true;
 
-        if(this->shm->init(std::move(vcm)) == FAILURE) {
+        if(this->shm->init(vcm.get()) == FAILURE) {
             logger.log_message("failed to initialize telemetry shared memory");
             return FAILURE;
         }
