@@ -121,9 +121,9 @@ RetType TelemetryShm::init(VCM* vcm) {
     master_block = std::make_unique<Shm>(vcm->config_file.c_str(), 0, sizeof(shm_info_t));
 
     // create Shm objects for each telemetry packet
-    packet_blocks = std::make_unique<Shm*[]>(num_packets);
-    info_blocks = std::make_unique<Shm*[]>(num_packets);
-    write_locks = std::make_unique<Shm*[]>(num_packets);
+    packet_blocks = std::make_unique<std::unique_ptr<Shm>[]>(num_packets);
+    info_blocks = std::make_unique<std::unique_ptr<Shm>[]>(num_packets);
+    write_locks = std::make_unique<std::unique_ptr<Shm>[]>(num_packets);
 
     // store which packets we currently have locked
     locked_packets = std::make_unique<bool[]>(num_packets);
