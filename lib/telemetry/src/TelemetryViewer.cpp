@@ -46,19 +46,19 @@ TelemetryViewer::~TelemetryViewer() {
 //        delete[] packet_ids;
 //    }
 
-    if(packet_buffers != NULL) {
-        for(size_t i = 0; i < num_packets; i++) {
-            if(packet_buffers[i] != NULL) {
-                delete[] packet_buffers[i];
-            }
-        }
-
-        delete[] packet_buffers;
-    }
-
-    if(packet_sizes != NULL) {
-        delete[] packet_sizes;
-    }
+//    if(packet_buffers != NULL) {
+//        for(size_t i = 0; i < num_packets; i++) {
+//            if(packet_buffers[i] != NULL) {
+//                delete[] packet_buffers[i];
+//            }
+//        }
+//
+//        delete[] packet_buffers;
+//    }
+//
+//    if(packet_sizes != NULL) {
+//        delete[] packet_sizes;
+//    }
 
 //    if(vcm && rm_vcm) {
 //        delete vcm;

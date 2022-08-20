@@ -513,7 +513,7 @@ RetType TelemetryShm::read_lock(std::unique_ptr<uint32_t> packet_ids, size_t num
         for(size_t i = 0; i < num; i++) {
             bitset |= (1 << i);
 
-            id = packet_ids[i];
+            id = packet_ids.get()[i];
 
             nonce = (uint32_t*)(info_blocks[id]->data);
             if(*nonce != last_nonces[id]) {
