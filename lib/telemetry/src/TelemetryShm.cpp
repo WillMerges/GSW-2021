@@ -118,7 +118,7 @@ RetType TelemetryShm::init(VCM* vcm) {
 
     // create master Shm object
     // use an id guaranteed unused so we can use the same file name for all blocks
-    master_block = std::make_unique<Shm>(vcm->config_file.c_str(), 0, sizeof(shm_info_t));
+    master_block = boost::interprocess::offset_ptr<Shm>(new Shm(vcm->config_file.c_str(), 0, sizeof(shm_info_t)));
 
     // create Shm objects for each telemetry packet
     packet_blocks = std::make_unique<boost::interprocess::offset_ptr<Shm>[]>(num_packets);

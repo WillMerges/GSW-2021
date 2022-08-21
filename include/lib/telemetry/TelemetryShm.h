@@ -197,7 +197,7 @@ private:
     std::unique_ptr<bool[]> locked_packets; // which packets do we currently have locked
     std::unique_ptr<boost::interprocess::offset_ptr<Shm>[]> packet_blocks; // list of blocks holding raw telemetry data
     std::unique_ptr<boost::interprocess::offset_ptr<Shm>[]> info_blocks; // list of blocks holding uint32_t nonces TODO rename this to something better lol
-    std::unique_ptr<Shm> master_block; // holds a single shm_info_t for locking
+    boost::interprocess::offset_ptr<Shm> master_block; // holds a single shm_info_t for locking
 };
 
 #endif

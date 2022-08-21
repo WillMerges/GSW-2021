@@ -36,7 +36,7 @@ public:
     // NOTE: if shm is not NULL, it should already be opened and initialized
     RetType init(std::shared_ptr<VCM> vcm, boost::interprocess::offset_ptr<TelemetryShm> shm = nullptr);
 
-    // init using use the default VCM
+    // init use the default VCM
     // if 'shm' is not specified, creates a new TelemetryShm object
     // NOTE: if shm is not NULL, it should already be opened
     RetType init(boost::interprocess::offset_ptr<TelemetryShm> shm = nullptr);
@@ -103,7 +103,7 @@ public:
     bool updated(measurement_info_t* meas);
 
 private:
-    std::shared_ptr<TelemetryShm> shm;
+    boost::interprocess::offset_ptr<TelemetryShm> shm;
     bool rm_shm = false;
 
     std::shared_ptr<VCM> vcm;
