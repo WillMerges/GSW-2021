@@ -39,7 +39,7 @@ public:
     // init using use the default VCM
     // if 'shm' is not specified, creates a new TelemetryShm object
     // NOTE: if shm is not NULL, it should already be opened
-    RetType init(std::shared_ptr<TelemetryShm> shm = NULL);
+    RetType init(std::shared_ptr<TelemetryShm> shm = nullptr);
 
     // remove all measurements currently viewable
     void remove_all();

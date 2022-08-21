@@ -14,8 +14,8 @@
 using namespace vcm;
 
 extern "C" {
-    TelemetryViewer* TelemetryViewer_new() {
-        return new TelemetryViewer();
+    std::unique_ptr<TelemetryViewer> TelemetryViewer_new() {
+        return std::make_unique<TelemetryViewer>();
     }
 
     RetType TelemetryViewer_init0(TelemetryViewer* tv) {
@@ -27,7 +27,7 @@ extern "C" {
 
         // leave this to be cleaned up on the stack
         // TODO this doesn't work as of now, TelemetryViewer saves the pointer not a copy
-        VCM* vcm = new VCM(config_file_str);
+        auto vcm = std::make_shared<VCM>(config_file);
         if(FAILURE == vcm->init()) {
             return FAILURE;
         }
