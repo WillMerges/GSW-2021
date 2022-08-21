@@ -31,15 +31,15 @@ TelemetryWriter::TelemetryWriter() {
 
 // destructor
 TelemetryWriter::~TelemetryWriter() {
-    if(packet_buffers) {
-        for(size_t i = 0; i < num_packets; i++) {
-            if(packet_buffers[i]) {
-                delete packet_buffers[i];
-            }
-        }
-
-        delete packet_buffers;
-    }
+//    if(packet_buffers) {
+//        for(size_t i = 0; i < num_packets; i++) {
+//            if(packet_buffers[i]) {
+//                delete packet_buffers[i];
+//            }
+//        }
+//
+//        delete packet_buffers;
+//    }
 
 //    if(vcm && rm_vcm) {
 //        delete vcm;
@@ -59,9 +59,9 @@ TelemetryWriter::~TelemetryWriter() {
         delete loggers;
     }
 
-    if(packet_sizes) {
-        delete packet_sizes;
-    }
+//    if(packet_sizes) {
+//        delete packet_sizes;
+//    }
 }
 
 RetType TelemetryWriter::init(std::shared_ptr<TelemetryShm> shm) {
@@ -81,7 +81,7 @@ RetType TelemetryWriter::init(std::shared_ptr<TelemetryShm> shm) {
 RetType TelemetryWriter::init(std::shared_ptr<VCM> vcm, std::shared_ptr<TelemetryShm> shm) {
     MsgLogger logger("TelemetryWriter", "init (2 args)");
 
-    if(shm == NULL) {
+    if(shm == nullptr) {
         this->shm = std::make_unique<TelemetryShm>();
         rm_shm = true;
 
@@ -102,8 +102,8 @@ RetType TelemetryWriter::init(std::shared_ptr<VCM> vcm, std::shared_ptr<Telemetr
 
     // create buffers for each virtual packet
     num_packets = vcm->num_packets;
-    packet_buffers = new uint8_t*[num_packets];
-    packet_sizes = new size_t[num_packets];
+    packet_sizes = std::make_unique<size_t>(num_packets);
+    packet_buffers = std::make_unique<uint8_t*[]>(num_packets);
     updated = new bool[num_packets];
     loggers = new PacketLogger*[num_packets];
 
@@ -112,11 +112,11 @@ RetType TelemetryWriter::init(std::shared_ptr<VCM> vcm, std::shared_ptr<Telemetr
             packet_buffers[i] = new uint8_t[vcm->packets[i]->size];
             // zero out the buffer
             memset(packet_buffers[i], 0x0, vcm->packets[i]->size);
-            packet_sizes[i] = vcm->packets[i]->size;
+            packet_sizes.get()[i] = vcm->packets[i]->size;
             loggers[i] = new PacketLogger(vcm->device + "(" + std::to_string(i) + ")");
         } else {
             packet_buffers[i] = NULL;
-            packet_sizes[i] = 0;
+            packet_sizes.get()[i] = 0;
             loggers[i] = nullptr;
         }
 
@@ -203,7 +203,7 @@ RetType TelemetryWriter::flush() {
     for(size_t i = 0; i < num_packets; i++) {
         if(updated[i]) {
             // write to logger
-            ret |= loggers[i]->log_packet(packet_buffers[i], packet_sizes[i]);
+            ret |= loggers[i]->log_packet(packet_buffers[i], packet_sizes.get()[i]);
 
             // write to shared mem
             // TODO it would be faster if each call to 'write' updated the underlying shm buffer (since it's locked, we can do that)
@@ -220,7 +220,7 @@ RetType TelemetryWriter::lock(bool check_for_updates) {
     // TODO it may be better to have a list of all the virtual packets
     // see same complaint in 'flush'
     for(size_t i = 0; i < num_packets; i++) {
-        if(packet_sizes[i]) { // if we have a packet size, it's a virtual packet
+        if(packet_sizes.get()[i]) { // if we have a packet size, it's a virtual packet
             if(SUCCESS != shm->write_lock(i)) {
                 return FAILURE;
             }
@@ -233,7 +233,7 @@ RetType TelemetryWriter::lock(bool check_for_updates) {
             //      need to know if we changed it, or someone else did
             //      ^^^ keep track of the nonce from our last flush and see if it matches the current nonce
             if(check_for_updates || shm->updated[i]) {
-                memcpy(packet_buffers[i], (void*)(shm->get_buffer(i)), packet_sizes[i]);
+                memcpy(packet_buffers[i], (void*)(shm->get_buffer(i)), packet_sizes.get()[i]);
             }
         }
     }
@@ -245,7 +245,7 @@ RetType TelemetryWriter::unlock() {
     // TODO it may be better to have a list of all the virtual packets
     // see same complaint in 'flush' and 'lock_all'
     for(size_t i = 0; i < num_packets; i++) {
-        if(packet_sizes[i]) { // if we have a packet size, it's a virtual packet
+        if(packet_sizes.get()[i]) { // if we have a packet size, it's a virtual packet
             if(SUCCESS != shm->write_unlock(i)) {
                 return FAILURE;
             }

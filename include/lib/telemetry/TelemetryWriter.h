@@ -72,8 +72,8 @@ private:
     bool rm_vcm = false;
 
     size_t num_packets;
-    uint8_t** packet_buffers;
-    size_t* packet_sizes;
+    std::unique_ptr<uint8_t*[]> packet_buffers;
+    std::unique_ptr<size_t> packet_sizes;
 
     bool* updated;
 
