@@ -39,7 +39,7 @@ TelemetryViewer::~TelemetryViewer() {
     }
 }
 
-RetType TelemetryViewer::init(std::shared_ptr<TelemetryShm> shm) {
+RetType TelemetryViewer::init(boost::interprocess::offset_ptr<TelemetryShm> shm) {
     MsgLogger logger("TelemetryViewer", "init");
 
     vcm = std::make_unique<VCM>();
@@ -50,10 +50,10 @@ RetType TelemetryViewer::init(std::shared_ptr<TelemetryShm> shm) {
         return FAILURE;
     }
 
-    return init(vcm, std::move(shm));
+    return init(vcm, shm);
 }
 
-RetType TelemetryViewer::init(std::shared_ptr<VCM> vcm, std::shared_ptr<TelemetryShm> shm) {
+RetType TelemetryViewer::init(std::shared_ptr<VCM> vcm, boost::interprocess::offset_ptr<TelemetryShm> shm) {
     MsgLogger logger("TelemetryViewer", "init");
 
     if(shm == nullptr) {
