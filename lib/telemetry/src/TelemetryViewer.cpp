@@ -29,13 +29,14 @@ TelemetryViewer::TelemetryViewer() {
 
 TelemetryViewer::~TelemetryViewer() {
     if(shm != NULL) {
-        if(shm->read_locked) {
+        if (shm->read_locked) {
             // if we currently hold a lock we need to release it before exiting so we don't block everyone
             // most processes will catch signals so this should not happen
             // most processes ignore immediate kills and unlock before exiting
             // if they are stuck blocking in read_lock they call 'sighandler' to release them and then they exit, so the lock is not held
             shm->read_unlock();
         }
+    }
 }
 
 RetType TelemetryViewer::init(std::shared_ptr<TelemetryShm> shm) {
