@@ -75,12 +75,13 @@ private:
     std::unique_ptr<uint8_t*[]> packet_buffers;
     std::unique_ptr<size_t> packet_sizes;
 
-    bool* updated;
+    std::unique_ptr<bool[]> updated;
 
     std::shared_ptr<TelemetryShm> shm;
     bool rm_shm = false;
 
-    PacketLogger** loggers;
+//    PacketLogger** loggers;
+    std::unique_ptr<PacketLogger*[]> loggers;
 
     void telemetry_copy(measurement_info_t* meas, uint8_t* dst, const uint8_t* src, size_t len);
 };

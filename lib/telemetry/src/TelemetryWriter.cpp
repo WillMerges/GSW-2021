@@ -31,37 +31,6 @@ TelemetryWriter::TelemetryWriter() {
 
 // destructor
 TelemetryWriter::~TelemetryWriter() {
-//    if(packet_buffers) {
-//        for(size_t i = 0; i < num_packets; i++) {
-//            if(packet_buffers[i]) {
-//                delete packet_buffers[i];
-//            }
-//        }
-//
-//        delete packet_buffers;
-//    }
-
-//    if(vcm && rm_vcm) {
-//        delete vcm;
-//    }
-//
-//    if(shm && rm_shm) {
-//        delete shm;
-//    }
-
-    if(loggers) {
-        for(size_t i = 0; i < num_packets; i++) {
-            if(loggers[i]) {
-                delete loggers[i];
-            }
-        }
-
-        delete loggers;
-    }
-
-//    if(packet_sizes) {
-//        delete packet_sizes;
-//    }
 }
 
 RetType TelemetryWriter::init(std::shared_ptr<TelemetryShm> shm) {
@@ -104,8 +73,8 @@ RetType TelemetryWriter::init(std::shared_ptr<VCM> vcm, std::shared_ptr<Telemetr
     num_packets = vcm->num_packets;
     packet_sizes = std::make_unique<size_t>(num_packets);
     packet_buffers = std::make_unique<uint8_t*[]>(num_packets);
-    updated = new bool[num_packets];
-    loggers = new PacketLogger*[num_packets];
+    updated = std::make_unique<bool[]>(num_packets);
+    loggers = std::make_unique<PacketLogger*[]>(num_packets);
 
     for(size_t i = 0; i < num_packets; i++) {
         if(vcm->packets[i]->is_virtual) {
