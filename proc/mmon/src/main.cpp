@@ -27,10 +27,10 @@ using namespace dls;
 using namespace vcm;
 using namespace trigger;
 
-std::shared_ptr<VCM> veh;
-TelemetryShm* tshm;
-TelemetryViewer* tv;
-TelemetryWriter* tw;
+const boost::interprocess::offset_ptr<TelemetryShm> tshm = boost::interprocess::offset_ptr<TelemetryShm>(new TelemetryShm);
+const boost::interprocess::offset_ptr<TelemetryViewer> tv = boost::interprocess::offset_ptr<TelemetryViewer>(new TelemetryViewer);
+const boost::interprocess::offset_ptr<TelemetryWriter> tw = boost::interprocess::offset_ptr<TelemetryWriter>(new TelemetryWriter);
+
 
 bool killed = false;
 
@@ -58,7 +58,8 @@ int main(int argc, char** argv) {
         config_file = argv[1];
     }
 
-    if(config_file == "") {
+    std::shared_ptr<VCM> veh;
+    if(config_file.empty()) {
         veh = std::make_shared<VCM>(); // use default config file
     } else {
         veh = std::make_shared<VCM>(config_file); // use specified config file
@@ -70,14 +71,10 @@ int main(int argc, char** argv) {
         return -1;
     }
 
-    if(veh->trigger_file == "") {
+    if(veh->trigger_file.empty()) {
         logger.log_message("no trigger file specified");
         return 1;
     }
-
-    tshm = new TelemetryShm();
-    tv = new TelemetryViewer();
-    tw = new TelemetryWriter();
 
     // setup telemetry shm
     if(tshm->init(veh.get()) != SUCCESS) {
@@ -166,7 +163,7 @@ int main(int argc, char** argv) {
                 // this packet updated, process it's triggers
 
                 for(trigger_t t : packet_map[packet_id]) {
-                    if(SUCCESS == t.func(tv, tw, &(t.args))) {
+                    if(SUCCESS == t.func(tv.get(), tw.get(), &(t.args))) {
                         flush = 1;
                     }
                 }
