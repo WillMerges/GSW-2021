@@ -10,6 +10,8 @@
 #include "lib/telemetry/TelemetryViewer.h"
 #include "lib/dls/dls.h"
 #include "common/types.h"
+#include <boost/interprocess/offset_ptr.hpp>
+
 
 // view telemetry memory live
 // run as mem_view [-f path_to_config_file]
@@ -18,8 +20,7 @@ using namespace vcm;
 using namespace shm;
 using namespace dls;
 
-
-TelemetryViewer tlm;
+const std::shared_ptr<TelemetryViewer> tlm = std::make_shared<TelemetryViewer>();
 
 bool killed = false;
 
@@ -42,7 +43,7 @@ int signals[NUM_SIGNALS] = {
 void sighandler(int) {
     killed = true;
 
-    tlm.sighandler();
+    tlm->sighandler();
 }
 
 
@@ -89,14 +90,14 @@ int main(int argc, char* argv[]) {
         exit(-1);
     }
 
-    if(FAILURE == tlm.init(vcm)) {
+    if(FAILURE == tlm->init(vcm)) {
         logger.log_message("failed to initialize telemetry viewer");
         printf("failed to initialize telemetry viewer\n");
         exit(-1);
     }
 
-    tlm.add_all();
-    tlm.set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
+    tlm->add_all();
+    tlm->set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
 
     unsigned int max_length = 0;
     size_t max_size = 0;
@@ -132,7 +133,7 @@ int main(int argc, char* argv[]) {
                 printf(" ");
             }
 
-            if(FAILURE == tlm.get_raw(m_info, (uint8_t*)buff)) {
+            if(FAILURE == tlm->get_raw(m_info, (uint8_t*)buff)) {
                 logger.log_message("failed to get raw telemetry value");
                 printf("failed to get raw telemetry value\n");
                 continue; // keep on going
@@ -146,7 +147,7 @@ int main(int argc, char* argv[]) {
         }
 
         // update telemetry
-        if(FAILURE == tlm.update()) {
+        if(FAILURE == tlm->update()) {
             logger.log_message("failed to update telemetry");
             printf("failed to update telemetry\n");
             // ignore and continue

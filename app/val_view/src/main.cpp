@@ -10,6 +10,8 @@
 #include "lib/telemetry/TelemetryViewer.h"
 #include "lib/dls/dls.h"
 #include "common/types.h"
+#include <boost/interprocess/offset_ptr.hpp>
+
 
 // view telemetry values live
 // run as val_view [-f path_to_config_file]

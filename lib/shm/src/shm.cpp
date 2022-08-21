@@ -13,6 +13,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <boost/interprocess/offset_ptr.hpp>
 
 #include <sys/mman.h>
 #include "lib/shm/shm.h"

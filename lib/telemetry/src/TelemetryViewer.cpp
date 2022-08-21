@@ -56,8 +56,8 @@ RetType TelemetryViewer::init(boost::interprocess::offset_ptr<TelemetryShm> shm)
 RetType TelemetryViewer::init(std::shared_ptr<VCM> vcm, boost::interprocess::offset_ptr<TelemetryShm> shm) {
     MsgLogger logger("TelemetryViewer", "init");
 
-    if(shm == nullptr) {
-        this->shm = boost::interprocess::offset_ptr<TelemetryShm>();
+    if(shm.get_offset() == 1) {
+        this->shm = boost::interprocess::offset_ptr<TelemetryShm>(new TelemetryShm());
         rm_shm = true;
 
         if(this->shm->init(vcm.get()) == FAILURE) {
