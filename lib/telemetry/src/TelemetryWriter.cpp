@@ -78,11 +78,11 @@ RetType TelemetryWriter::init(std::shared_ptr<VCM> vcm, std::shared_ptr<Telemetr
 
     for(size_t i = 0; i < num_packets; i++) {
         if(vcm->packets[i]->is_virtual) {
-            packet_buffers[i] = new uint8_t[vcm->packets[i]->size];
+            packet_buffers[i] = (std::make_unique<uint8_t[]>(vcm->packets[i]->size)).get();
             // zero out the buffer
             memset(packet_buffers[i], 0x0, vcm->packets[i]->size);
             packet_sizes.get()[i] = vcm->packets[i]->size;
-            loggers[i] = new PacketLogger(vcm->device + "(" + std::to_string(i) + ")");
+            loggers[i] = (std::make_unique<PacketLogger>(vcm->device + "(" + std::to_string(i) + ")")).get();
         } else {
             packet_buffers[i] = NULL;
             packet_sizes.get()[i] = 0;
