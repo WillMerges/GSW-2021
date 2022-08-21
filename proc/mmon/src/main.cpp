@@ -28,7 +28,7 @@ using namespace vcm;
 using namespace trigger;
 
 std::shared_ptr<VCM> veh;
-boost::interprocess::offset_ptr<TelemetryShm> tshm;
+TelemetryShm* tshm;
 std::shared_ptr<TelemetryViewer> tv;
 std::shared_ptr<TelemetryWriter> tw;
 
@@ -74,6 +74,8 @@ int main(int argc, char** argv) {
         logger.log_message("no trigger file specified");
         return 1;
     }
+
+    tshm = new TelemetryShm();
 
     // setup telemetry shm
     if(tshm->init(veh.get()) != SUCCESS) {

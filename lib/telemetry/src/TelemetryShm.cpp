@@ -69,11 +69,11 @@ using namespace dls;
 
 
 TelemetryShm::TelemetryShm() {
-    packet_blocks = NULL;
-    info_blocks = NULL;
-    master_block = NULL;
+    packet_blocks = nullptr;
+    info_blocks = nullptr;
+    master_block = nullptr;
     num_packets = 0;
-    last_nonces = NULL;
+    last_nonces = nullptr;
     last_nonce = 1; // NOTE: cannot be 0, 0 indicates a signal was received
     read_mode = STANDARD_READ;
     read_locked = false;
