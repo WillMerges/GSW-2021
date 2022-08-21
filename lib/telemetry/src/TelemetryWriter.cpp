@@ -117,7 +117,7 @@ RetType TelemetryWriter::init(VCM* vcm, TelemetryShm* shm) {
         } else {
             packet_buffers[i] = NULL;
             packet_sizes[i] = 0;
-            loggers[i] = NULL;
+            loggers[i] = nullptr;
         }
 
         updated[i] = false;

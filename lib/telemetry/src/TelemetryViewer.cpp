@@ -103,7 +103,8 @@ RetType TelemetryViewer::init(std::shared_ptr<VCM> vcm, std::shared_ptr<Telemetr
 
     packet_ids = std::make_unique<unsigned int>(vcm->num_packets);
     packet_sizes = std::make_unique<size_t>(vcm->num_packets);
-    packet_buffers = std::make_unique<uint8_t[]>(vcm->num_packets);
+    packet_buffers = std::make_unique<uint8_t*[]>(vcm->num_packets);
+
     memset(packet_buffers.get(), 0, sizeof(uint8_t*) * vcm->num_packets);
 
     return SUCCESS;
@@ -164,9 +165,9 @@ RetType TelemetryViewer::add(uint32_t packet_id) {
 
         packet_ids.get()[num_packets] = packet_id;
         packet_sizes.get()[packet_id] = vcm->packets[packet_id]->size;
-        packet_buffers.get()[packet_id] = std::make_unique<uint8_t[]>(packet_sizes.get()[packet_id]);
-
-        memset(packet_buffers->get(), 0, packet_sizes.get()[packet_id]); // zero buffer
+        packet_buffers.get()[packet_id] = new uint8_t[packet_sizes.get()[packet_id]];
+        // Shouldnt need if unique ptrs already do this?
+//        memset(packet_buffers.get()[packet_id], 0, packet_sizes.get()[packet_id]); // zero buffer
         num_packets++;
 
         return SUCCESS;
@@ -217,7 +218,7 @@ RetType TelemetryViewer::update(uint32_t timeout) {
     for(size_t i = 0; i < num_packets; i++) {
         id = packet_ids.get()[i];
         if(shm->updated[id]) {
-            memcpy(packet_buffers[id], shm->get_buffer(id), packet_sizes[id]);
+            memcpy(packet_buffers.get()[id], shm->get_buffer(id), packet_sizes.get()[id]);
         } // if the packet didn't update, save ourself the copy
     }
 
@@ -260,7 +261,7 @@ RetType TelemetryViewer::latest_data(measurement_info_t* meas, uint8_t** data) {
     }
 
     // guaranteed loc is not NULL since we found some location
-    *data = packet_buffers[best_loc->packet_index] + best_loc->offset;
+    *data = packet_buffers.get()[best_loc->packet_index] + best_loc->offset;
 
     return SUCCESS;
 }

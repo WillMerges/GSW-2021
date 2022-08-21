@@ -115,7 +115,7 @@ private:
     std::unique_ptr<unsigned int> packet_ids;
     size_t num_packets; // number of packets being tracked
 
-    std::unique_ptr<std::unique_ptr<uint8_t[]>> packet_buffers;
+    std::unique_ptr<uint8_t*[]> packet_buffers;
     std::unique_ptr<size_t> packet_sizes;
 };
 
