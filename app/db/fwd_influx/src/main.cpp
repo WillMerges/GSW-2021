@@ -51,7 +51,7 @@ struct sockaddr_in servaddr;
 unsigned char sock_open = 0;
 bool killed = false;
 TelemetryViewer tlm;
-VCM* veh;
+std::shared_ptr<VCM> veh;
 
 // signal handler
 void sighandler(int) {
@@ -164,10 +164,11 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    if(config_file == "") {
-        veh = new VCM(); // use default config file
+
+    if(config_file.empty()) {
+        veh = std::make_shared<VCM>(); // use default config file
     } else {
-        veh = new VCM(config_file); // use specified config file
+        veh = std::make_shared<VCM>(config_file); // use specified config file
     }
 
     if(FAILURE == veh->init()) {
