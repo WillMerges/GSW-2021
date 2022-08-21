@@ -25,15 +25,15 @@ using namespace dls;
 using namespace vcm;
 using namespace trigger;
 
-VCM* veh;
-TelemetryShm tshm;
-TelemetryViewer tv;
-TelemetryWriter tw;
+std::shared_ptr<VCM> veh;
+std::shared_ptr<TelemetryShm> tshm;
+std::shared_ptr<TelemetryViewer> tv;
+std::shared_ptr<TelemetryWriter> tw;
 
 bool killed = false;
 
 void sighandler(int) {
-    tv.sighandler();
+    tv->sighandler();
     killed = true;
 }
 
@@ -57,9 +57,9 @@ int main(int argc, char** argv) {
     }
 
     if(config_file == "") {
-        veh = new VCM(); // use default config file
+        veh = std::make_shared<VCM>(); // use default config file
     } else {
-        veh = new VCM(config_file); // use specified config file
+        veh = std::make_shared<VCM>(config_file); // use specified config file
     }
 
     // init VCM
@@ -74,33 +74,33 @@ int main(int argc, char** argv) {
     }
 
     // setup telemetry shm
-    if(tshm.init(veh) != SUCCESS) {
+    if(tshm->init(veh.get()) != SUCCESS) {
         logger.log_message("failed to init telemetry shm");
         return -1;
     }
 
-    if(tshm.open() != SUCCESS) {
+    if(tshm->open() != SUCCESS) {
         logger.log_message("failed to open telemetry shm");
         return -1;
     }
 
     // setup telemetry viewer
-    if(tv.init(veh, &tshm)) {
+    if(tv->init(veh, tshm)) {
         logger.log_message("failed to init telemetry viewer");
         return -1;
     }
 
     // setup telemetry viewer
-    if(tw.init(veh, &tshm)) {
+    if(tw->init(veh, tshm)) {
         logger.log_message("failed to init telemetry viewer");
         return -1;
     }
 
-    tv.set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
+    tv->set_update_mode(TelemetryViewer::BLOCKING_UPDATE);
 
     // parse the trigger file
     std::vector<trigger_t> triggers;
-    if(SUCCESS != parse_trigger_file(veh, &triggers)) {
+    if(SUCCESS != parse_trigger_file(veh.get(), &triggers)) {
         logger.log_message("failed to parse trigger file");
         return -1;
     }
@@ -135,32 +135,32 @@ int main(int argc, char** argv) {
 
     // TODO add measurement that are triggers AND are arguments (we need to read them presumably)
     // TODO or should this be all so each function has access to every measurement?
-    tv.add_all();
+    tv->add_all();
 
     // whether we should flush to shared memory
     uint8_t flush = 0;
 
     // main logic
     while(!killed) {
-        if(SUCCESS != tv.update()) {
+        if(SUCCESS != tv->update()) {
             // move on
             continue;
         }
 
         // lock packets for writing
         // don't want anyone writing to our virtual packets at the same time
-        if(SUCCESS != tw.lock(false)) {
+        if(SUCCESS != tw->lock(false)) {
             continue;
         }
 
         // TODO can we parallelize some of this?
         // is the overhead worth it?
         for(uint32_t packet_id : trigger_packets) {
-            if(tshm.updated[packet_id]) {
+            if(tshm->updated[packet_id]) {
                 // this packet updated, process it's triggers
 
                 for(trigger_t t : packet_map[packet_id]) {
-                    if(SUCCESS == t.func(&tv, &tw, &(t.args))) {
+                    if(SUCCESS == t.func(tv.get(), tw.get(), &(t.args))) {
                         flush = 1;
                     }
                 }
@@ -169,14 +169,14 @@ int main(int argc, char** argv) {
 
         // flush any updates
         if(flush) {
-            tw.flush();
+            tw->flush();
             flush = 0;
         }
 
         // unlock packets so others waiting can write to virtual packets
         // don't check return, continues anyways
         // TODO something bad probably happens if this errors, since we increment semaphore again
-        tw.unlock();
+        tw->unlock();
     }
 
     return 1;
