@@ -118,11 +118,11 @@ int main(int argc, char* argv[]) {
     }
 
     // create VCM
-    VCM* vcm;
-    if(config_file == "") {
-        vcm = new VCM(); // use default config file
+    std::shared_ptr<VCM> vcm;
+    if(config_file.empty()) {
+        vcm = std::make_shared<VCM>(); // use default config file
     } else {
-        vcm = new VCM(config_file); // use specified config file
+        vcm = std::make_shared<VCM>(config_file); // use specified config file
     }
 
     // init VCM

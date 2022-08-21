@@ -344,11 +344,11 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    VCM* veh;
-    if(config_file == "") {
-        veh = new VCM(); // use default config file
+    std::shared_ptr<VCM> veh;
+    if(config_file.empty()) {
+        veh = std::make_shared<VCM>(); // use default config file
     } else {
-        veh = new VCM(config_file); // use specified config file
+        veh = std::make_shared<VCM>(config_file); // use specified config file
     }
 
     // init VCM
@@ -382,7 +382,7 @@ int main(int argc, char* argv[]) {
     }
 
     NetworkInterface net;
-    if(SUCCESS != net.init(*net_dev, veh)) {
+    if(SUCCESS != net.init(*net_dev, veh.get())) {
         logger.log_message("failed to open network interface");
         printf("failed to open network interface\n");
 
