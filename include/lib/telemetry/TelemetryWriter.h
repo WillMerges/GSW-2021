@@ -34,12 +34,12 @@ public:
     // initialize the telemetry writer for vehicle specified by VCM
     // if 'shm' is not specified, creates a new TelemetryShm object
     // NOTE: if shm is not NULL, it should already be opened
-    RetType init(VCM* vcm, TelemetryShm* shm = NULL);
+    RetType init(std::shared_ptr<VCM> vcm, std::shared_ptr<TelemetryShm> shm = nullptr);
 
     // init using use the default VCM
     // if 'shm' is not specified, creates a new TelemetryShm object
     // NOTE: if shm is not NULL, it should already be opened
-    RetType init(TelemetryShm* shm = NULL);
+    RetType init(std::shared_ptr<TelemetryShm> shm = nullptr);
 
     // write a measurement
     // NOTE: not committed to shared memory until 'flush' is called
@@ -68,7 +68,7 @@ public:
     RetType unlock();
 
 private:
-    VCM* vcm;
+    std::shared_ptr<VCM> vcm;
     bool rm_vcm = false;
 
     size_t num_packets;
@@ -77,7 +77,7 @@ private:
 
     bool* updated;
 
-    TelemetryShm* shm;
+    std::shared_ptr<TelemetryShm> shm;
     bool rm_shm = false;
 
     PacketLogger** loggers;

@@ -41,13 +41,13 @@ TelemetryWriter::~TelemetryWriter() {
         delete packet_buffers;
     }
 
-    if(vcm && rm_vcm) {
-        delete vcm;
-    }
-
-    if(shm && rm_shm) {
-        delete shm;
-    }
+//    if(vcm && rm_vcm) {
+//        delete vcm;
+//    }
+//
+//    if(shm && rm_shm) {
+//        delete shm;
+//    }
 
     if(loggers) {
         for(size_t i = 0; i < num_packets; i++) {
@@ -64,10 +64,10 @@ TelemetryWriter::~TelemetryWriter() {
     }
 }
 
-RetType TelemetryWriter::init(TelemetryShm* shm) {
+RetType TelemetryWriter::init(std::shared_ptr<TelemetryShm> shm) {
     MsgLogger logger("TelemetryWriter", "init (1 arg)");
 
-    VCM* vcm = new VCM();
+    auto vcm = std::make_shared<VCM>();
     rm_vcm = true;
 
     if(SUCCESS != vcm->init()) {
@@ -75,17 +75,17 @@ RetType TelemetryWriter::init(TelemetryShm* shm) {
         return FAILURE;
     }
 
-    return init(vcm, shm);
+    return init(std::move(vcm), std::move(shm));
 }
 
-RetType TelemetryWriter::init(VCM* vcm, TelemetryShm* shm) {
+RetType TelemetryWriter::init(std::shared_ptr<VCM> vcm, std::shared_ptr<TelemetryShm> shm) {
     MsgLogger logger("TelemetryWriter", "init (2 args)");
 
     if(shm == NULL) {
-        this->shm = new TelemetryShm();
+        this->shm = std::make_unique<TelemetryShm>();
         rm_shm = true;
 
-        if(this->shm->init(vcm) == FAILURE) {
+        if(this->shm->init(vcm.get()) == FAILURE) {
             logger.log_message("failed to initialize telemetry shared memory");
             return FAILURE;
         }
