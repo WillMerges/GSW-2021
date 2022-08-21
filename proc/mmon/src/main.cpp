@@ -29,8 +29,8 @@ using namespace trigger;
 
 std::shared_ptr<VCM> veh;
 TelemetryShm* tshm;
-std::shared_ptr<TelemetryViewer> tv;
-std::shared_ptr<TelemetryWriter> tw;
+TelemetryViewer* tv;
+TelemetryWriter* tw;
 
 bool killed = false;
 
@@ -76,6 +76,8 @@ int main(int argc, char** argv) {
     }
 
     tshm = new TelemetryShm();
+    tv = new TelemetryViewer();
+    tw = new TelemetryWriter();
 
     // setup telemetry shm
     if(tshm->init(veh.get()) != SUCCESS) {
@@ -164,7 +166,7 @@ int main(int argc, char** argv) {
                 // this packet updated, process it's triggers
 
                 for(trigger_t t : packet_map[packet_id]) {
-                    if(SUCCESS == t.func(tv.get(), tw.get(), &(t.args))) {
+                    if(SUCCESS == t.func(tv, tw, &(t.args))) {
                         flush = 1;
                     }
                 }
