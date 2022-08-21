@@ -38,3 +38,6 @@ sudo bash app/db/run_influx/install.sh
 sudo apt install avahi-daemon
 sudo apt install avahi-utils
 sudo systemctl enable avahi-daemon
+
+# Install boost libraries
+sudo apt -y install libboost-all-dev
