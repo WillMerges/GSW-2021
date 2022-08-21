@@ -152,11 +152,11 @@ int main(int argc, char* argv[]) {
     }
     gsw_home = env;
 
-    VCM* vcm;
-    if(config_file == "") {
-        vcm = new VCM(); // use default config file
+    std::shared_ptr<VCM> vcm;
+    if(config_file.empty()) {
+        vcm = std::make_shared<VCM>(); // use default config file
     } else {
-        vcm = new VCM(gsw_home + "/" + config_file); // use specified config file
+        vcm = std::make_shared<VCM>(config_file); // use specified config file
     }
 
     if(FAILURE == vcm->init()) {
