@@ -36,33 +36,6 @@ TelemetryViewer::~TelemetryViewer() {
             // if they are stuck blocking in read_lock they call 'sighandler' to release them and then they exit, so the lock is not held
             shm->read_unlock();
         }
-
-//        if(rm_shm) {
-//            delete shm;
-//        }
-    }
-
-//    if(packet_ids != NULL) {
-//        delete[] packet_ids;
-//    }
-
-//    if(packet_buffers != NULL) {
-//        for(size_t i = 0; i < num_packets; i++) {
-//            if(packet_buffers[i] != NULL) {
-//                delete[] packet_buffers[i];
-//            }
-//        }
-//
-//        delete[] packet_buffers;
-//    }
-//
-//    if(packet_sizes != NULL) {
-//        delete[] packet_sizes;
-//    }
-
-//    if(vcm && rm_vcm) {
-//        delete vcm;
-//    }
 }
 
 RetType TelemetryViewer::init(std::shared_ptr<TelemetryShm> shm) {
