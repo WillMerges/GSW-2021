@@ -73,11 +73,11 @@ int main(int argc, char* argv[]) {
         config_file = argv[3];
     }
 
-    VCM* veh;
+    std::shared_ptr<VCM> veh;
     if(config_file == "") {
-        veh = new VCM(); // use default config file
+        veh = std::make_shared<VCM>(); // use default config file
     } else {
-        veh = new VCM(config_file); // use specified config file
+        veh = std::make_shared<VCM>(config_file); // use specified config file
     }
 
     // init VCM
@@ -104,13 +104,13 @@ int main(int argc, char* argv[]) {
     // initialize network interface
     std::string CONST_DEVICE_STR = CONST_DEVICE;
     std::string* net_dev = veh->get_const(CONST_DEVICE_STR);
-    if(NULL == net_dev) {
+    if(nullptr == net_dev) {
         logger.log_message("missing constant: " + CONST_DEVICE_STR);
         return -1;
     }
 
     NetworkInterface net;
-    if(SUCCESS != net.init(*net_dev, veh)) {
+    if(SUCCESS != net.init(*net_dev, veh.get())) {
         logger.log_message("failed to open network interface");
         printf("failed to open network interface\n");
 
@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
     // add sequence number measurement
     std::string CONST_SEQUENCE_STR = CONST_SEQUENCE;
     std::string* m = veh->get_const(CONST_SEQUENCE_STR);
-    if(NULL == m) {
+    if(nullptr == m) {
         logger.log_message("missing constant: " + CONST_SEQUENCE_STR);
         return -1;
     }
