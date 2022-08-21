@@ -11,6 +11,7 @@
 #define TELVIEW_H
 
 #include <stdint.h>
+#include <boost/interprocess/offset_ptr.hpp>
 #include "lib/telemetry/TelemetryShm.h"
 #include "lib/vcm/vcm.h"
 #include "common/types.h"

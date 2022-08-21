@@ -33,7 +33,7 @@ TelemetryWriter::TelemetryWriter() {
 TelemetryWriter::~TelemetryWriter() {
 }
 
-RetType TelemetryWriter::init(std::shared_ptr<TelemetryShm> shm) {
+RetType TelemetryWriter::init(boost::interprocess::offset_ptr<TelemetryShm> shm) {
     MsgLogger logger("TelemetryWriter", "init (1 arg)");
 
     auto vcm = std::make_shared<VCM>();
@@ -44,14 +44,14 @@ RetType TelemetryWriter::init(std::shared_ptr<TelemetryShm> shm) {
         return FAILURE;
     }
 
-    return init(std::move(vcm), std::move(shm));
+    return init(std::move(vcm), shm);
 }
 
-RetType TelemetryWriter::init(std::shared_ptr<VCM> vcm, std::shared_ptr<TelemetryShm> shm) {
+RetType TelemetryWriter::init(std::shared_ptr<VCM> vcm, boost::interprocess::offset_ptr<TelemetryShm> shm) {
     MsgLogger logger("TelemetryWriter", "init (2 args)");
 
     if(shm == nullptr) {
-        this->shm = std::make_unique<TelemetryShm>();
+        this->shm = boost::interprocess::offset_ptr<TelemetryShm>();
         rm_shm = true;
 
         if(this->shm->init(vcm.get()) == FAILURE) {

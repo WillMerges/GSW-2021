@@ -34,12 +34,12 @@ public:
     // initialize the telemetry writer for vehicle specified by VCM
     // if 'shm' is not specified, creates a new TelemetryShm object
     // NOTE: if shm is not NULL, it should already be opened
-    RetType init(std::shared_ptr<VCM> vcm, std::shared_ptr<TelemetryShm> shm = nullptr);
+    RetType init(std::shared_ptr<VCM> vcm, boost::interprocess::offset_ptr<TelemetryShm> shm = nullptr);
 
     // init using use the default VCM
     // if 'shm' is not specified, creates a new TelemetryShm object
     // NOTE: if shm is not NULL, it should already be opened
-    RetType init(std::shared_ptr<TelemetryShm> shm = nullptr);
+    RetType init(boost::interprocess::offset_ptr<TelemetryShm> shm = nullptr);
 
     // write a measurement
     // NOTE: not committed to shared memory until 'flush' is called
@@ -77,7 +77,7 @@ private:
 
     std::unique_ptr<bool[]> updated;
 
-    std::shared_ptr<TelemetryShm> shm;
+    boost::interprocess::offset_ptr<TelemetryShm> shm;
     bool rm_shm = false;
 
 //    PacketLogger** loggers;

@@ -20,13 +20,15 @@
 #include <signal.h>
 #include <vector>
 #include <unordered_set>
+#include <boost/interprocess/offset_ptr.hpp>
+
 
 using namespace dls;
 using namespace vcm;
 using namespace trigger;
 
 std::shared_ptr<VCM> veh;
-std::shared_ptr<TelemetryShm> tshm;
+boost::interprocess::offset_ptr<TelemetryShm> tshm;
 std::shared_ptr<TelemetryViewer> tv;
 std::shared_ptr<TelemetryWriter> tw;
 
