@@ -37,4 +37,5 @@ sudo bash app/db/run_influx/install.sh
 # install mDNS tools (usually stock with Ubuntu)
 sudo apt install avahi-daemon
 sudo apt install avahi-utils
+sudo apt install python3.10 python3.10-dev numpy-stl    
 sudo systemctl enable avahi-daemon
