@@ -68,7 +68,7 @@ void sighandler(int) {
  * Fetches data and converts it into a JSON string
  */
 std::string getJSONString(VCM *vcm, size_t max_size) {
-//    tlm.update();
+    tlm.update();
 
     MsgLogger logger(logger_name);
 //    std::string jsonString = "{";
