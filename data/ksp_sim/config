@@ -1,0 +1,51 @@
+# Kerbal Space Program Simulation
+
+protocol = udp
+port = 8080
+name = ksp
+#triggers = triggers
+multicast = 224.0.0.1
+
+
+## measurements ##
+
+# physical telemetry
+MISSION_ELAPSED_TIME 8 float big
+MASS                 4 float big
+THRUST               4 float big
+CREW                 25 string
+G_FORCE              4 float big
+ALTITUDE             4 float big
+ELEVATION            4 float big
+LATITUDE             8 float big
+LONGITUDE            8 float big
+SPEED                8 float big
+PITCH                4 float big
+HEADING              4 float big
+ROLL                 4 float big
+AIR_TEMP             4 float big
+
+
+## telemetry packets ##
+
+# vessel information
+8000 {
+MISSION_ELAPSED_TIME
+MASS
+THRUST
+CREW
+}
+
+# flight information
+8001 {
+G_FORCE
+ALTITUDE
+ELEVATION
+LATITUDE
+LONGITUDE
+SPEED
+PITCH
+HEADING
+ROLL
+AIR_TEMP
+}
