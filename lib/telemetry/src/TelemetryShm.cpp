@@ -89,6 +89,10 @@ TelemetryShm::~TelemetryShm() {
     }
 
     // if we're read locked, unlock now
+    // NOTE: it's possible we hold (some or all) locks but read_locked is false
+    //       this is why signal handlers should be used and this line should really never be executed
+    //       locks are acquired and THEN read_locked is set to true, so if we get a signal in the middle
+    //       of locking or after locking but before updating read_locked, they will stay locked for good
     if(read_locked) {
         read_unlock();
     }
